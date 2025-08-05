@@ -8,8 +8,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/BUB
-    username: ${POSTGRESQL_USERNAME}
-    password: ${POSTGRESQL_PASSWORD}
+    username: ${DEV_POSTGRESQL_USERNAME}
+    password: ${DEV_POSTGRESQL_PASSWORD}
 
   # jpa 설정
   jpa:
