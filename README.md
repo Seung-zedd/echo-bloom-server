@@ -1,10 +1,11 @@
+
 # Code convention
 1. 브랜치 기능 구현이 완료되면 codeRabbit한테 코드 리뷰를 받기 위해 base branch는 dev으로 해서 PR을 생성한다.
 2. 피드백을 바탕으로 코드 리팩토링이 완료되면 다시 한번 PR을 생성해서 최종적으로 리뷰를 받는다.
 3. 모든 리뷰가 통과가 되면 최종적으로 dev에 merge PR request를 한다.
 
 ## 🔧프로젝트 기술 스택
-Spring Boot 3.x, Java 21, JPA, MySQL
+Spring Boot 3.x, Java 21, JPA, PostgreSQL
 
 ## 🚀 팀의 Git 워크플로우 (My Team Git Workflow)
 
