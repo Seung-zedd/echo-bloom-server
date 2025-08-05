@@ -34,14 +34,14 @@
 
 ```txt
 # 레포지토리 클론
-$ git clone [https://github.com/Organization이름/레포지토리이름.git](https://github.com/Organization이름/레포지토리이름.git)
+$ git clone https://github.com/checkmate-BUB/bub-server.git
 
 # 프로젝트 디렉토리로 이동
-$ cd 레포지토리이름
+$ cd bub-server
 
 # 빌드
 $ ./gradlew build
 
 # 실행
-$ java -jar build/libs/프로젝트-
+$ java -jar build/libs/bub-server-0.0.1-SNAPSHOT.jar
 ```
