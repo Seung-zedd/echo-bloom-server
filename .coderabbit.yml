@@ -1,11 +1,15 @@
-# .coderabbit.yml
+# 언어 설정
+language: 'ko'
 
 # CoderabbitAI의 리뷰 관련 설정을 정의합니다.
 reviews:
   # Pull Request가 어떤 브랜치를 향할 때 리뷰를 트리거할지 지정합니다.
   # 이 설정은 오직 'dev' 브랜치로 향하는 PR만 리뷰하도록 합니다.
-  base_branches:
+  auto_review:
+    base_branches:
     - "dev"
+
+
 
 # 아래는 추가적으로 사용할 수 있는 유용한 설정 예시입니다. (MVP에서는 필수는 아님)
 # 특정 경로의 파일 변경은 리뷰에서 제외할 수 있습니다.
