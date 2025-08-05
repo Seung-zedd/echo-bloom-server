@@ -52,7 +52,7 @@ PR을 생성하면 CodeRabbit 같은 자동 코드 리뷰 도구가 피드백을
 
 🔃이 과정은 최종 승인(Approve)을 받을 때까지 반복됩니다.
 
-병합 및 뒷정리 (Merge & Clean up): 코드 리뷰가 끝나고 PR이 최종 승인되면, GitHub에서 Merge 버튼을 눌러 feature/새로운-기능 브랜치를 develop 브랜치에 합칩니다.
+병합 및 뒷정리 (Merge & Clean up): 코드 리뷰가 끝나고 PR이 최종 승인되면, GitHub에서 Merge 버튼을 눌러 feature/새로운-기능 브랜치를 dev 브랜치에 합칩니다.
 병합이 완료되면, 제 역할을 다한 기능 브랜치는 깔끔하게 삭제합니다.
 
 ```txt
@@ -79,7 +79,7 @@ git checkout main
 # 2. main 브랜치를 최신 상태로 업데이트합니다.
 git pull origin main
 
-# 3. develop 브랜치의 모든 내용을 main 브랜치로 병합합니다.
+# 3. dev 브랜치의 모든 내용을 main 브랜치로 병합합니다.
 git merge dev
 
 # 4. main 브랜치에 병합된 내용을 원격 저장소에 푸시합니다.
