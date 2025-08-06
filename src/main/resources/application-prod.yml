@@ -11,7 +11,7 @@ spring:
     username: ${PROD_POSTGRESQL_USERNAME}
     password: ${PROD_POSTGRESQL_PASSWORD}
 
-    # jpa 설정
+  # jpa 설정
   jpa:
     hibernate:
       # (매우 중요) 운영 환경에서는 절대로 JPA가 스키마를 건드리지 않도록 'none'으로 설정합니다.
@@ -19,6 +19,33 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  # 카카오 로그인 설정
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: <YOUR_KAKAO_REST_API_KEY>
+            client-secret: <YOUR_KAKAO_CLIENT_SECRET>
+            redirect-uri: <YOUR_KAKAO_REDIRECT_URI>
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            scope:
+                - profile_nickname
+                - profile_image
+                - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+# jwt 설정
+jwt:
+  secret: <YOUR_JWT_SECRET_KEY> # 32바이트 이상의 매우 긴 무작위 문자열
+  access-token-expiration-in-seconds: 3600 # 1시간 (보안을 위해 짧게 설정)
+  refresh-token-expiration-in-seconds: 604800 # 7일 (사용자 편의를 위해 길게 설정)
 
 # 운영 환경에서는 일반적으로 불필요한 SQL 로그를 남기지 않도록 설정합니다.
 # common.yml의 설정을 덮어쓰고 싶다면 아래와 같이 명시적으로 레벨을 지정할 수 있습니다.

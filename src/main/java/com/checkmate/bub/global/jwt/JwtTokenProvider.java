@@ -23,12 +23,15 @@ public class JwtTokenProvider {
 
     private final SecretKey key;
     private final long accessTokenValidityInMilliseconds;
+    private final long refreshTokenValidityInMilliseconds;
 
     // application.yml에 정의된 시크릿 키와 만료 시간을 주입받습니다.
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-                            @Value("${jwt.expiration-in-seconds}") long expirationInSeconds) {
+                            @Value("${jwt.access-token-expiration-in-seconds}") long accessTokenExpiration,
+                            @Value("${jwt.refresh-token-expiration-in-seconds}") long refreshTokenExpiration) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
-        this.accessTokenValidityInMilliseconds = expirationInSeconds * 1000;
+        this.accessTokenValidityInMilliseconds = accessTokenExpiration * 1000;
+        this.refreshTokenValidityInMilliseconds = refreshTokenExpiration * 1000;
     }
 
     /**
@@ -45,6 +48,18 @@ public class JwtTokenProvider {
                 .setIssuedAt(now) // 토큰 발급 시간
                 .setExpiration(validity) // 토큰 만료 시간
                 .signWith(key, SignatureAlgorithm.HS256) // 시크릿 키로 서명
+                .compact();
+    }
+
+    public String createRefreshToken(Long userId) {
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + refreshTokenValidityInMilliseconds);
+
+        return Jwts.builder()
+                .setSubject(userId.toString())
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
