@@ -1,9 +1,6 @@
 package com.checkmate.bub.user.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -20,14 +17,19 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private Long kakaoId;
+
+    @Column(nullable = false)
     private String nickname; // 앱에서 사용할 별칭
-    private String profile_image_url;
+
+    @Column(length = 500)
+    private String profileImageUrl;
     private String email;
     private String name; // 사용자 ID
     private LocalDate dateOfBirth; // 생년월일
     private String gender; // 성
     private String interest; // 관심사
-    private String job_group; // 직군
+    private String jobGroup; // 직군
 
 }

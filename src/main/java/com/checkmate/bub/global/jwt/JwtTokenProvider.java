@@ -7,11 +7,13 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
@@ -53,7 +55,7 @@ public class JwtTokenProvider {
      */
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             // 토큰이 만료되었거나, 서명이 잘못되었거나 등등...
@@ -67,12 +69,15 @@ public class JwtTokenProvider {
      * @return Spring Security가 사용할 인증 정보
      */
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody();
         String userId = claims.getSubject();
+
+        //todo: 사용자 역할 정보 조회 로직 추가
+        Collection<? extends GrantedAuthority> authorities = Collections.emptyList();
 
         // UserDetails 객체를 만들어 Authentication으로 반환합니다.
         // 이 UserDetails는 Spring Security가 내부적으로 사용자를 식별하는 데 사용됩니다.
-        UserDetails principal = new User(userId, "", Collections.emptyList());
-        return new UsernamePasswordAuthenticationToken(principal, "", Collections.emptyList());
+        UserDetails principal = new User(userId, "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 }
