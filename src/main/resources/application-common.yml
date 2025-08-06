@@ -15,4 +15,4 @@ spring:
 
     hibernate:
       naming:
-        physical-strategy: com.checkmate.bub.config.CamelCaseToSnakeAndUpperCaseStrategy
+        physical-strategy: com.checkmate.bub.global.config.CamelCaseToSnakeAndUpperCaseStrategy

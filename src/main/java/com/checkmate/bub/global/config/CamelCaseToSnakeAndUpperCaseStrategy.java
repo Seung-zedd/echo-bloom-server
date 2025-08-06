@@ -1,4 +1,4 @@
-package com.checkmate.bub.config;
+package com.checkmate.bub.global.config;
 
 import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.boot.model.naming.Identifier;
