@@ -14,7 +14,6 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
 @AllArgsConstructor
-@Builder
 public class User {
 
     @Id
