@@ -24,6 +24,11 @@ repositories {
 }
 
 dependencies {
+    // JWT 라이브러리 의존성을 추가
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
     // p6spy 디펜던시 (쿼리 파라미터 출력)
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
