@@ -15,9 +15,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
   # 카카오 로그인 설정
   security:
     oauth2:
@@ -32,6 +29,7 @@ spring:
             scope:
               - profile_nickname
               - profile_image
+              - account_email
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
