@@ -34,10 +34,10 @@
 
 ```txt
 # 레포지토리 클론
-$ git clone https://github.com/checkmate-BUB/bub-server.git
+$ git clone https://github.com/checkmate-BUB/echo-bloom-server.git
 
 # 프로젝트 디렉토리로 이동
-$ cd bub-server
+$ cd echo-bloom-server
 
 # 빌드
 $ ./gradlew build
