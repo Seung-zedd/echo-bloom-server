@@ -63,10 +63,8 @@ public class AuthService {
 
             // 4. 우리 서비스의 자체 JWT를 생성하여 반환합니다.
             String accessToken = jwtTokenProvider.createAccessToken(user.getId());
-            log.info("AccessToken: {}", accessToken);
             String refreshToken = jwtTokenProvider.createRefreshToken(user.getId()); // 필요 시 리프레시 토큰도 생성
-            log.info("RefreshToken: {}", refreshToken);
-
+            log.debug("JWT tokens created successfully for user: {}", user.getId());
 
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
@@ -122,11 +120,14 @@ public class AuthService {
 
     // 신규 회원 등록 (MapStruct를 사용하도록 수정)
     private User registerNewUser(KakaoUserInfoResponseDto userInfo) {
+        KakaoUserInfoResponseDto.KakaoAccount kakaoAccount = userInfo.getKakaoAccount();
+        KakaoUserInfoResponseDto.Profile profile = kakaoAccount != null ? kakaoAccount.getProfile() : null;
+
         User newUser = User.builder()
                 .kakaoId(userInfo.getId())
-                .nickname(userInfo.getKakaoAccount().getProfile().getNickname())
-                .profileImageUrl(userInfo.getKakaoAccount().getProfile().getProfileImageUrl())
-                .email(userInfo.getKakaoAccount().getEmail())
+                .nickname(profile != null ? profile.getNickname() : "Unknown")
+                .profileImageUrl(profile != null ? profile.getProfileImageUrl() : null)
+                .email(kakaoAccount != null ? kakaoAccount.getEmail() : null)
                 .build();
         return userRepository.save(newUser);
     }

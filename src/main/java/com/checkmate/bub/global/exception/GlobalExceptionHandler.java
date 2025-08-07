@@ -1,20 +1,30 @@
 package com.checkmate.bub.global.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
+@Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final Environment environment;
 
     // 엔티티를 찾을 수 없을 때 (사용자가 존재하지 않는 경우 등)
     @ExceptionHandler(EntityNotFoundException.class)
@@ -34,10 +44,12 @@ public class GlobalExceptionHandler {
         return createErrorResponse(HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다.", e.getMessage());
     }
 
-    // 카카오 API 호출 실패 시
-    @ExceptionHandler(HttpClientErrorException.class)
-    public ResponseEntity<Map<String, Object>> handleHttpClientError(HttpClientErrorException e) {
-        return createErrorResponse(HttpStatus.BAD_REQUEST, "외부 API 호출에 실패했습니다.", e.getMessage());
+    // 외부 API 호출 실패 시
+    @ExceptionHandler({HttpClientErrorException.class, WebClientResponseException.class,
+            AuthenticationServiceException.class})
+    public ResponseEntity<Map<String, Object>> handleExternalApiError(Exception e) {
+        log.error("External API call failed", e);
+        return createErrorResponse(HttpStatus.BAD_REQUEST, "외부 API 호출에 실패했습니다.", "서비스 연결에 문제가 발생했습니다.");
     }
 
     // IllegalArgumentException 처리
@@ -49,6 +61,7 @@ public class GlobalExceptionHandler {
     // 기타 모든 예외 처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception e) {
+        log.error("Unexpected error occurred", e);
         return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", e.getMessage());
     }
 
@@ -59,8 +72,16 @@ public class GlobalExceptionHandler {
         errorResponse.put("status", status.value());
         errorResponse.put("error", status.getReasonPhrase());
         errorResponse.put("message", message);
-        errorResponse.put("details", details);
+        //! 운영 환경에서는 상세 정보 노출 방지
+        if (isDevEnvironment()) {
+            errorResponse.put("details", details);
+        }
 
         return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    private boolean isDevEnvironment() {
+        // 환경 체크 로직 구현
+        return Arrays.asList(environment.getActiveProfiles()).contains("dev");
     }
 }
