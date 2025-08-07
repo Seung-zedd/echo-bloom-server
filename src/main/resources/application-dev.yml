@@ -15,6 +15,29 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+  # 카카오 로그인 설정
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${DEV_KAKAO_REST_API_KEY}
+            client-secret: ${DEV_KAKAO_CLIENT_SECRET}
+            redirect-uri: http://localhost:8080/auth/kakao/callback
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+# jwt 설정
+jwt:
+  secret: ${DEV_JWT_SECRET} # 32바이트 이상의 매우 긴 무작위 문자열
+  access-token-expiration-in-seconds: 3600 # 1시간 (보안을 위해 짧게 설정)
+  refresh-token-expiration-in-seconds: 604800 # 7일 (사용자 편의를 위해 길게 설정)

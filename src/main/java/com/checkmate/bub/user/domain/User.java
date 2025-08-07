@@ -9,8 +9,10 @@ import java.time.LocalDate;
 @Getter
 //* 1. JPA를 위해 기본 생성자는 필요하지만, 외부에서 함부로 쓰지 못하게 protected로 제한합니다.
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString
 @AllArgsConstructor
+@Builder
+@ToString
+@Table(name = "users")
 public class User {
 
     @Id

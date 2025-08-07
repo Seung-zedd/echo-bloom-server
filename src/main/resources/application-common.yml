@@ -3,6 +3,9 @@ spring:
   config:
     activate:
       on-profile: common
+  application:
+    name: echo-bloom-server
+
   # H2 콘솔을 기본적으로 비활성화
   h2:
     console:
