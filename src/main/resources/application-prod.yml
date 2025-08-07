@@ -25,8 +25,8 @@ spring:
       client:
         registration:
           kakao:
-            client-id: <YOUR_KAKAO_REST_API_KEY>
-            client-secret: <YOUR_KAKAO_CLIENT_SECRET>
+            client-id: ${KAKAO_REST_API_KEY}
+            client-secret: ${KAKAO_CLIENT_SECRET}
             redirect-uri: <YOUR_KAKAO_REDIRECT_URI>
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
@@ -43,7 +43,7 @@ spring:
 
 # jwt 설정
 jwt:
-  secret: <YOUR_JWT_SECRET_KEY> # 32바이트 이상의 매우 긴 무작위 문자열
+  secret: ${JWT_SECRET} # 32바이트 이상의 매우 긴 무작위 문자열
   access-token-expiration-in-seconds: 3600 # 1시간 (보안을 위해 짧게 설정)
   refresh-token-expiration-in-seconds: 604800 # 7일 (사용자 편의를 위해 길게 설정)
 

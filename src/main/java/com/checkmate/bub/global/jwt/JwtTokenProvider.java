@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -29,7 +30,14 @@ public class JwtTokenProvider {
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
                             @Value("${jwt.access-token-expiration-in-seconds}") long accessTokenExpiration,
                             @Value("${jwt.refresh-token-expiration-in-seconds}") long refreshTokenExpiration) {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        if (secretKey.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalArgumentException("JWT secret key must be at least 256 bits");
+        }
+        if (accessTokenExpiration <= 0 || refreshTokenExpiration <= 0) {
+            throw new IllegalArgumentException("Token expiration time must be positive");
+        }
+
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.accessTokenValidityInMilliseconds = accessTokenExpiration * 1000;
         this.refreshTokenValidityInMilliseconds = refreshTokenExpiration * 1000;
     }
