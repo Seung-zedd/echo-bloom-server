@@ -112,8 +112,8 @@ public class AuthService {
                 .bodyToMono(KakaoUserInfoResponseDto.class)
                 .timeout(Duration.ofSeconds(5))
                 .onErrorMap(Exception.class, e -> {
-                    log.error("Falied to get Kakao token", e);
-                    return new AuthenticationServiceException("카카오 토큰 획득 실패");
+                    log.error("Failed to get Kakao user info", e);
+                    return new AuthenticationServiceException("카카오 사용자 정보 획득 실패");
                 })
                 .block();
     }
