@@ -30,8 +30,6 @@
 ## 🚀 시작하기
 프로젝트를 로컬 환경에서 실행하는 방법입니다.
 
-
-
 ```txt
 # 레포지토리 클론
 $ git clone https://github.com/checkmate-BUB/echo-bloom-server.git
@@ -43,5 +41,5 @@ $ cd echo-bloom-server
 $ ./gradlew build
 
 # 실행
-$ java -jar build/libs/bub-server-0.0.1-SNAPSHOT.jar
+$ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 ```
