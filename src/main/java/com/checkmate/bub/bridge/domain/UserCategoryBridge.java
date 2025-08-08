@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) //? 추가로, JPA 리플렉션 때문에 기본 생성자를 자동으로 생성해준다고 함
 // 다대다 관계를 단순하게 매핑해주는 브릿지 엔티티는 빌더 패턴을 사용할 필요가 없음
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "category_id"})
+)
 public class UserCategoryBridge {
 
     @Id

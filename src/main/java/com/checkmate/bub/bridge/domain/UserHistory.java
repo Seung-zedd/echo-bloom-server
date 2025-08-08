@@ -22,7 +22,7 @@ public class UserHistory {
     private Long id;
 
     // UserHistory → User로 향하는 단방향 관계(∵ 사용자 확언 기록 테이블에 사용자를 외래키로 접근만 하면 됨)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 

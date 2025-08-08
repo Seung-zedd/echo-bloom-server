@@ -17,7 +17,7 @@ public class Affirmation extends BaseEntity {
     @Column(name = "affirmation_id")
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content; // 클로바 모델로 만든 확언 문구
 
     //? createdAt 필드는 이미 Audit 기능인 BaseEntity를 상속했으므로 제외했습니다.

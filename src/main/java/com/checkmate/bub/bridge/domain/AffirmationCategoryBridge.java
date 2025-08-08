@@ -8,6 +8,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+// 중복 매핑 방지 및 무결성 강화: 유니크 제약·NOT NULL 적용
+@Table(
+        name = "affirmation_category_bridge",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_affirmation_category",
+                        columnNames = {"affirmation_id", "category_id"}
+                )
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AffirmationCategoryBridge {
@@ -16,11 +26,11 @@ public class AffirmationCategoryBridge {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "affirmation_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "affirmation_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Affirmation affirmation;
 
-    @JoinColumn(name = "category_id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Category category;
 }

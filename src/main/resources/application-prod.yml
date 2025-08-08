@@ -3,6 +3,13 @@ spring:
   config:
     activate:
       on-profile: prod
+  # Swagger 설정(운영 환경에서는 비활성화)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 
   datasource:
     driver-class-name: org.postgresql.Driver
