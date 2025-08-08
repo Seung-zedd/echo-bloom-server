@@ -12,15 +12,25 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private static final String[] SWAGGER_WHITELIST = {
+            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        List<String> whitelist = new ArrayList<>(Arrays.asList(SWAGGER_WHITELIST));
+
         http
                 // 1. REST API 이므로, CSRF 보안 기능 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
@@ -39,6 +49,10 @@ public class SecurityConfig {
 
                 // 4. HTTP 요청에 대한 접근 권한 설정
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // (수정) Swagger UI 관련 경로들을 인증 없이 모두 허용합니다.
+                        .requestMatchers(whitelist.toArray(new String[0])).permitAll()
+
                         // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
                         .requestMatchers("/auth/kakao/**").permitAll()
 
