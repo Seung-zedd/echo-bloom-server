@@ -19,6 +19,8 @@
 
 **Data Access**: Spring Data JPA, QueryDSL
 
+**API Documentation**: Swagger
+
 **AI**: Naver CLOVA Studio (HyperCLOVA X), CLOVA Speech
 
 **Authentication**: JWT, OAuth 2.0
