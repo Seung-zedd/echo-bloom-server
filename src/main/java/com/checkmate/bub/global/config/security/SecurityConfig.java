@@ -39,6 +39,11 @@ public class SecurityConfig {
 
                 // 4. HTTP 요청에 대한 접근 권한 설정
                 .authorizeHttpRequests(authorize -> authorize
+
+                        // (수정) Swagger UI 관련 경로들을 인증 없이 모두 허용합니다.
+                        .requestMatchers("/swagger-ui.html", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                        .requestMatchers("/test/test-login.html").permitAll() // 우리가 만든 테스트 페이지도 허용
+
                         // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
                         .requestMatchers("/auth/kakao/**").permitAll()
 
