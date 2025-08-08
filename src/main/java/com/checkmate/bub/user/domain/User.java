@@ -1,5 +1,6 @@
 package com.checkmate.bub.user.domain;
 
+import com.checkmate.bub.global.config.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,12 +12,12 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@ToString
 @Table(name = "users")
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false, unique = true)
