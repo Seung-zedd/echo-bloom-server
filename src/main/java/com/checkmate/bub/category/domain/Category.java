@@ -22,5 +22,9 @@ public class Category extends BaseEntity {
     private String type;
     private String name; // 태그 이름
 
-
+    // 더티체킹을 위한 업데이트 메서드
+    public void update(String type, String name) {
+        this.type = type;
+        this.name = name;
+    }
 }

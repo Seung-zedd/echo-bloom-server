@@ -3,9 +3,10 @@ package com.checkmate.bub.global.config.security;
 import com.checkmate.bub.global.jwt.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -16,8 +17,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@Profile("!prod")
 public class SecurityConfig {
+
+    @Value("${springdoc.api-docs.enabled:true}")
+    private boolean openApiEnabled;
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private static final String[] SWAGGER_WHITELIST = {
@@ -43,22 +46,24 @@ public class SecurityConfig {
 
 
                 // 4. HTTP 요청에 대한 접근 권한 설정
-                .authorizeHttpRequests(authorize -> authorize
+                .authorizeHttpRequests(authorize -> {
+                    // springdoc.api-docs.enabled가 true일 때만 Swagger 경로를 허용합니다.
+                    if (openApiEnabled) {
+                        authorize.requestMatchers(SWAGGER_WHITELIST).permitAll();
+                    }
 
-                        // (수정) Swagger UI 관련 경로들을 인증 없이 모두 허용합니다.
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll()
+                    authorize
+                            // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
+                            .requestMatchers("/auth/kakao/**").permitAll()
+                            // 비회원용 확언 체험 API 경로는 인증 없이 모두 허용
+                            .requestMatchers("/api/affirmations/guest").permitAll()
+                            // 카테고리 생성 API는 인증된 사용자만 접근 가능
+                            .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").authenticated()
+                            // 위에서 지정한 경로 외의 모든 요청은 반드시 인증(로그인) 필요
+                            .anyRequest().authenticated();
+                })
 
-                        // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
-                        .requestMatchers("/auth/kakao/**").permitAll()
-
-                        // 비회원용 확언 체험 API 경로는 인증 없이 모두 허용
-                        .requestMatchers("/api/affirmations/guest").permitAll()
-
-                        // 위에서 지정한 경로 외의 모든 요청은 반드시 인증(로그인) 필요
-                        .anyRequest().authenticated()
-                )
-
-                // 4. (중요) 우리가 직접 만든 JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
+                // 5. (중요) 우리가 직접 만든 JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
