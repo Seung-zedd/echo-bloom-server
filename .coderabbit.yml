@@ -1,6 +1,9 @@
 # 언어 설정
 language: 'ko'
 
+# 리뷰 프로필을 CHILL로 설정하여 속도를 높이고 핵심 문제에 집중합니다.
+profile: "CHILL"
+
 # CoderabbitAI의 리뷰 관련 설정을 정의합니다.
 reviews:
   # Pull Request가 어떤 브랜치를 향할 때 리뷰를 트리거할지 지정합니다.
