@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         return createErrorResponse(HttpStatus.BAD_REQUEST, "필수 파라미터가 누락되었습니다.", e.getMessage());
     }
 
-    // 유효성 검증 실패 시
+    // @Valid 어노테이션이 붙은 @RequestBody DTO의 유효성 검증이 실패했을 때만 발생
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException e) {
         return createErrorResponse(HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다.", e.getMessage());
@@ -88,8 +88,14 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException e) {
-        log.warn("Data integrity violation: {}", e.getMessage());
-        return createErrorResponse(HttpStatus.CONFLICT, "해당 리소스를 삭제할 수 없습니다.", "다른 곳에서 사용 중인 데이터입니다.");
+        log.warn("Data integrity violation", e);
+        return createErrorResponse(HttpStatus.CONFLICT, "데이터 무결성 제약으로 인해 요청을 수행할 수 없습니다.", "무결성 제약 조건을 위반했습니다.");
+    }
+
+    // 그 외 모든 파라미터 입력 검증 실패
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(jakarta.validation.ConstraintViolationException e) {
+        return createErrorResponse(HttpStatus.BAD_REQUEST, "입력값이 유효하지 않습니다.", "검증 제약을 위반했습니다.");
     }
 
     private boolean isDevEnvironment() {
