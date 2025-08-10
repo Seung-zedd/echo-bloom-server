@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -78,6 +79,17 @@ public class GlobalExceptionHandler {
         }
 
         return ResponseEntity.status(status).body(errorResponse);
+    }
+
+    /**
+     * 데이터 무결성 제약 조건 위반 시 (예: 사용 중인 카테고리 삭제 시도)
+     * @param e DataIntegrityViolationException
+     * @return 409 Conflict 응답
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        log.warn("Data integrity violation: {}", e.getMessage());
+        return createErrorResponse(HttpStatus.CONFLICT, "해당 리소스를 삭제할 수 없습니다.", "다른 곳에서 사용 중인 데이터입니다.");
     }
 
     private boolean isDevEnvironment() {

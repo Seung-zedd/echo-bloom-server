@@ -7,6 +7,7 @@ import com.checkmate.bub.category.mapper.CategoryMapper;
 import com.checkmate.bub.category.repository.CategoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.List;
 //? 데이터를 변경할 필요가 없다고 판단하여, JPA는 스냅샷을 만들거나 변경을 감지하는 등의 불필요한 내부 동작을 생략합니다. 이 덕분에 조회 성능이 눈에 띄게 향상됩니다.
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
@@ -32,9 +34,17 @@ public class CategoryService {
         return categoryMapper.from(category);
     }
 
+
+
     @Transactional
     public CategoryResponseDto create(CategoryRequestDto categoryRequestDto) {
+        if (categoryRepository.existsByTypeAndName(categoryRequestDto.getType(), categoryRequestDto.getName())) {
+            log.error("type: {}, name: {}", categoryRequestDto.getType(), categoryRequestDto.getName());
+            throw new IllegalStateException("이미 존재하는 카테고리입니다.");
+        }
+
         Category category = categoryMapper.to(categoryRequestDto);
+        categoryRepository.existsByTypeAndName(categoryRequestDto.getType(), categoryRequestDto.getName());
         Category savedCategory = categoryRepository.save(category);
         return categoryMapper.from(savedCategory);
     }
@@ -43,6 +53,11 @@ public class CategoryService {
     public CategoryResponseDto update(Long categoryId, CategoryRequestDto categoryRequestDto) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("ID " + categoryId + "에 해당하는 카테고리를 찾을 수 없습니다."));
+        if (categoryRepository.existsByTypeAndNameAndIdNot(categoryRequestDto.getType(), categoryRequestDto.getName(), categoryId)) {
+            log.error("type: {}, name: {}", categoryRequestDto.getType(), categoryRequestDto.getName());
+            throw new IllegalStateException("이미 존재하는 카테고리입니다.");
+        }
+
         category.update(categoryRequestDto.getType(), categoryRequestDto.getName());
 
         return categoryMapper.from(category);
@@ -53,6 +68,8 @@ public class CategoryService {
         // ID로 엔티티가 존재하는지 먼저 확인 후 삭제하는 것이 더 안전합니다.
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("ID " + categoryId + "에 해당하는 카테고리를 찾을 수 없습니다."));
+
+
         categoryRepository.delete(category);
     }
 }
