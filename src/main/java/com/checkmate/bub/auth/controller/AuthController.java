@@ -2,17 +2,24 @@ package com.checkmate.bub.auth.controller;
 
 import com.checkmate.bub.auth.dto.AuthResponseDto;
 import com.checkmate.bub.auth.service.AuthService;
+import com.checkmate.bub.util.EnvironmentUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+import java.time.Duration;
 
 @Tag(name = "Auth", description = "인증/인가 관련 API")
 @RestController
@@ -21,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final EnvironmentUtil envUtil;
 
     @Operation(summary = "카카오 소셜 로그인", description = "카카오 인가 코드를 사용하여 로그인 처리 후 JWT를 발급합니다.")
     @ApiResponses(value = {
@@ -29,8 +37,43 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @GetMapping("/callback")
-    public ResponseEntity<AuthResponseDto> kakaoCallback(@Parameter(name = "code", description = "카카오로부터 발급받은 1회용 인가 코드", required = true, example = "ABCDEFG...") @RequestParam("code") String code) {
+    public ResponseEntity<AuthResponseDto> kakaoCallback(@Parameter(name = "code", description = "카카오로부터 발급받은 1회용 인가 코드", required = true, example = "ABCDEFG...") @RequestParam("code") String code, HttpServletResponse response) {
         AuthResponseDto authResponse = authService.loginWithKakao(code);
-        return ResponseEntity.ok(authResponse);
+
+        // 유틸로 환경 체크
+        boolean isDev = envUtil.isDevEnvironment();
+        boolean cookieSecure = !isDev;  // dev: false, prod: true
+
+        // 액세스 토큰 쿠키 (ResponseCookie 사용)
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", authResponse.getAccessToken())
+                .httpOnly(true)          // JS 접근 불가
+                .secure(cookieSecure)    // dev: false, prod: true
+                .sameSite("Strict")      // CSRF 방지 (여기서 설정 가능!)
+                .path("/")               // 전체 경로
+                .maxAge(Duration.ofSeconds(3600))  // 1시간
+                .build();
+        response.addHeader("Set-Cookie", accessCookie.toString());  // 헤더로 추가
+
+        // 리프레시 토큰 쿠키 (유사)
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authResponse.getRefreshToken())
+                .httpOnly(true)
+                .secure(cookieSecure)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofSeconds(604800))  // 7일
+                .build();
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        // /home으로 리다이렉트
+        //todo: 리다이렉트 엔드포인트가 수정되면 변경할 것
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("http://localhost:8080/home"))
+                .build();
+    }
+
+    // JS에서 HttpOnly 쿠키 직접 접근 불가하니, 백엔드 API (e.g., /api/check-auth)를 호출 – 쿠키가 자동으로 헤더에 포함되어 서버가 검증.
+    @GetMapping("/api/check-auth")
+    public ResponseEntity<String> checkAuth() {
+        return ResponseEntity.ok("Authenticated");
     }
 }

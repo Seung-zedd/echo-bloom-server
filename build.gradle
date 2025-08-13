@@ -25,6 +25,9 @@ repositories {
 
 dependencies {
 
+    // FeignClient(해커톤 끝나고 나중에 WebClient로 migrate할 예정)
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0'
+
     // Springdoc OpenAPI (Swagger UI)
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
     // Spring WebFlux for WebClient (비동기 HTTP 클라이언트)

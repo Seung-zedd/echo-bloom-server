@@ -36,8 +36,15 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
 # jwt 설정
 jwt:
   secret: ${DEV_JWT_SECRET} # 32바이트 이상의 매우 긴 무작위 문자열
   access-token-expiration-in-seconds: 3600 # 1시간 (보안을 위해 짧게 설정)
   refresh-token-expiration-in-seconds: 604800 # 7일 (사용자 편의를 위해 길게 설정)
+
+# clova 설정
+clova:
+  api-key: ${DEV_CLOVA_API_KEY}
+
+

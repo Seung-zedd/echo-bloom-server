@@ -3,14 +3,8 @@ spring:
   config:
     activate:
       on-profile: prod
-  # Swagger 설정(운영 환경에서는 비활성화)
-springdoc:
-  api-docs:
-    enabled: false
-  swagger-ui:
-    enabled: false
 
-
+  # postgreSQL 설정
   datasource:
     driver-class-name: org.postgresql.Driver
     # NCP Cloud DB for PostgreSQL의 연결 정보를 입력하세요.
@@ -57,3 +51,10 @@ logging:
   level:
     org.hibernate.SQL: info
     org.hibernate.type.descriptor.sql: info
+
+# Swagger 설정(운영 환경에서는 비활성화)
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

@@ -1,9 +1,9 @@
 package com.checkmate.bub.global.exception;
 
+import com.checkmate.bub.util.EnvironmentUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    private final Environment environment;
+    private final EnvironmentUtil envUtil;
 
     // 엔티티를 찾을 수 없을 때 (사용자가 존재하지 않는 경우 등)
     @ExceptionHandler(EntityNotFoundException.class)
@@ -74,7 +73,7 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", status.getReasonPhrase());
         errorResponse.put("message", message);
         //! 운영 환경에서는 상세 정보 노출 방지
-        if (isDevEnvironment()) {
+        if (envUtil.isDevEnvironment()) {
             errorResponse.put("details", details);
         }
 
@@ -98,8 +97,4 @@ public class GlobalExceptionHandler {
         return createErrorResponse(HttpStatus.BAD_REQUEST, "입력값이 유효하지 않습니다.", "검증 제약을 위반했습니다.");
     }
 
-    private boolean isDevEnvironment() {
-        // 환경 체크 로직 구현
-        return Arrays.asList(environment.getActiveProfiles()).contains("dev");
-    }
 }

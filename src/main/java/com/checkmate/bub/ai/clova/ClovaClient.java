@@ -1,0 +1,24 @@
+package com.checkmate.bub.ai.clova;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+
+import java.util.Map;
+
+
+//todo: 모델 바뀌면 url 바꿀 것
+@FeignClient(name = "clova", url = "https://clovastudio.stream.ntruss.com/v3/chat-completions/HCX-DASH-002")
+public interface ClovaClient {
+
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = "text/event-stream")
+    String callApi(
+            @RequestBody Map<String, Object> body,  // 요청 바디 (JSON Map으로 전달)
+            @RequestHeader("Authorization") String authorization,  // Bearer 토큰 동적 전달
+            @RequestHeader("X-NCP-CLOVASTUDIO-REQUEST-ID") String requestId,
+            @RequestHeader("Content-Type") String contentType,  // "application/json"
+            @RequestHeader("Accept") String accept  // "text/event-stream"
+    );
+}
