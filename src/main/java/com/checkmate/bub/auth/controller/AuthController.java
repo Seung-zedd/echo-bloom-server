@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.time.Duration;
 
-@Tag(name = "Auth", description = "인증/인가 관련 API")
+@Tag(name = "Auth", description = "인증/인가 관련 API (카카오 소셜 로그인 및 인증 확인)")
 @RestController
 @RequestMapping("/auth/kakao")
 @RequiredArgsConstructor
@@ -32,11 +32,11 @@ public class AuthController {
     private final AuthService authService;
     private final EnvironmentUtil envUtil;
 
-    @Operation(summary = "카카오 소셜 로그인", description = "카카오 인가 코드를 사용하여 로그인 처리 후 JWT를 발급합니다.")
+    @Operation(summary = "카카오 소셜 로그인 콜백", description = "카카오 인가 코드를 받아 로그인 처리하고 JWT 토큰을 쿠키에 설정한 후 홈 페이지로 리다이렉트합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "로그인 성공 및 JWT 발급"),
+            @ApiResponse(responseCode = "302", description = "로그인 성공 및 리다이렉트"),
             @ApiResponse(responseCode = "400", description = "유효하지 않은 인가 코드"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류 (e.g., 토큰 생성 실패)")
     })
     @GetMapping("/callback")
     public ResponseEntity<Void> kakaoCallback(@Parameter(name = "code", description = "카카오로부터 발급받은 1회용 인가 코드", required = true, example = "ABCDEFG...") @RequestParam("code") String code, HttpServletResponse response) {
@@ -76,7 +76,12 @@ public class AuthController {
                 .build();
     }
 
-    // JS에서 HttpOnly 쿠키 직접 접근 불가하니, 백엔드 API (e.g., /api/check-auth)를 호출 – 쿠키가 자동으로 헤더에 포함되어 서버가 검증.
+    @Operation(summary = "인증 상태 확인", description = "현재 사용자의 JWT 토큰을 확인하여 인증 상태를 반환합니다. 쿠키가 포함된 요청으로 서버가 토큰을 검증합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "인증 성공 (Authenticated)"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음 또는 만료)"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
     @GetMapping("/api/check-auth")
     public ResponseEntity<String> checkAuth() {
         return ResponseEntity.ok("Authenticated");
