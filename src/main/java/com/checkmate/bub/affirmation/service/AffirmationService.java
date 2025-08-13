@@ -35,6 +35,7 @@ public class AffirmationService {
         String prompt = createPromptForToneExamples(problemCategory.getName());
 
         // 요청 바디 구성 (curl 기반)
+        //todo: 하이퍼 파라미터 변경한다면 반영해서 코드 수정할 것
         Map<String, Object> body = new HashMap<>();
         body.put("messages", List.of(Map.of("role", "system", "content", prompt)));
         body.put("topP", 0.8);
@@ -58,16 +59,37 @@ public class AffirmationService {
                 "text/event-stream"
         );
 
-        // 응답 파싱 (3줄 가정)
-        String[] tones = clovaResponse.split("\n");
-        if (tones.length != 3) {
-            throw new RuntimeException("Invalid Clova response format");
+        // 응답 검증 (문서의 실패 예시: code "50000" 등[1])
+        if (clovaResponse.contains("\"code\": \"50000\"")) {
+            log.error("Clova API Internal Server Error");
+            throw new RuntimeException("Clova API 서버 오류");
         }
 
+        // SSE 형식 처리: "data:" 줄만 추출하고 content 합치기
+        StringBuilder contentBuilder = new StringBuilder();
+        String[] lines = clovaResponse.split("\n");
+        for (String line : lines) {
+            if (line.startsWith("data:")) {
+                String data = line.substring(5).trim();
+                if (data.contains("\"content\":")) {
+                    String token = data.split("\"content\":\"")[1].split("\"")[0];
+                    contentBuilder.append(token);
+                }
+            }
+        }
+
+        String fullContent = contentBuilder.toString().trim().replaceAll("\\*\\*|#|:", "");  // 마크다운/콜론 제거
+        String[] tones = fullContent.split("\\n");
+        if (tones.length != 3) {
+            log.error("Expected 3 tones: {}", fullContent);
+            throw new RuntimeException("Invalid format");
+        }
+
+// DTO 빌드 (추가 정제: 만약 마크다운 남아 있으면 제거)
         return ToneExampleResponseDto.builder()
-                .tone1(tones[0])
-                .tone2(tones[1])
-                .tone3(tones[2])
+                .tone1(tones[0].trim())
+                .tone2(tones[1].trim())
+                .tone3(tones[2].trim())
                 .build();
 
     }
@@ -76,10 +98,10 @@ public class AffirmationService {
         return String.format(
                 """
                         문제: "%s"
-                        이 문제에 대해 3가지 다른 톤의 짧은 확언 문장을 생성해.
-                        1줄: 진지한 톤 (20자 이내).
-                        2줄: 친근한 톤 (20자 이내).
-                        3줄: 유머러스한 톤 (20자 이내).
-                        오직 3줄 문장만 출력.""", problemText);
+                    이 문제에 대해 3가지 다른 톤의 짧은 확언 문장을 생성해.
+                    - 1줄: 진지한 톤 (20자 이내, 예: "스트레스를 이겨내라.").
+                    - 2줄: 친근한 톤 (20자 이내, 예: "함께 이겨보자!").
+                    - 3줄: 유머러스한 톤 (20자 이내, 예: "스트레스, 안녕!").
+                    출력 형식: 정확히 3줄의 순수 텍스트 문장만. 마크다운(**, # 등), 이모지, 톤 이름, 추가 설명 없이 오직 문장만. 각 줄은 newline으로 구분. 예시처럼 마침표로 끝내기.""", problemText);
     }
 }

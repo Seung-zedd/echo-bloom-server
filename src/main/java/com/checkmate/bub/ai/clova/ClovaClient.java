@@ -15,8 +15,8 @@ public interface ClovaClient {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = "text/event-stream")
     String callApi(
-            @RequestBody Map<String, Object> body,  // 요청 바디 (JSON Map으로 전달)
-            @RequestHeader("Authorization") String authorization,  // Bearer 토큰 동적 전달
+            @RequestBody Map<String, Object> body,
+            @RequestHeader("Authorization") String authorization,  // "Bearer " + apiKey 형태로 전달
             @RequestHeader("X-NCP-CLOVASTUDIO-REQUEST-ID") String requestId,
             @RequestHeader("Content-Type") String contentType,  // "application/json"
             @RequestHeader("Accept") String accept  // "text/event-stream"
