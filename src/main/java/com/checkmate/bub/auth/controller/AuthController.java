@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.time.Duration;
 @RestController
 @RequestMapping("/auth/kakao")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -37,7 +39,9 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
     @GetMapping("/callback")
-    public ResponseEntity<AuthResponseDto> kakaoCallback(@Parameter(name = "code", description = "카카오로부터 발급받은 1회용 인가 코드", required = true, example = "ABCDEFG...") @RequestParam("code") String code, HttpServletResponse response) {
+    public ResponseEntity<Void> kakaoCallback(@Parameter(name = "code", description = "카카오로부터 발급받은 1회용 인가 코드", required = true, example = "ABCDEFG...") @RequestParam("code") String code, HttpServletResponse response) {
+
+        log.info("Callback called with code: {}", code);
         AuthResponseDto authResponse = authService.loginWithKakao(code);
 
         // 유틸로 환경 체크
@@ -66,8 +70,9 @@ public class AuthController {
 
         // /home으로 리다이렉트
         //todo: 리다이렉트 엔드포인트가 수정되면 변경할 것
+        log.info("Redirecting to /home.html");
         return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create("http://localhost:8080/home"))
+                .location(URI.create("http://localhost:8080/home.html"))
                 .build();
     }
 

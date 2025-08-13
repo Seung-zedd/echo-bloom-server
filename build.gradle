@@ -43,39 +43,49 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-    // 개발 환경에서만 적용(운영 환경에 배포되는 jar,war 파일에는 포함 x)
+
+    // 개발 환경에서만 적용(developmentOnly로 이미 운영 환경에 배포되는 jar,war 파일에 포함 x)
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
-	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // QueryDSL
-    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta' // ✅ :jakarta 분류자(classifier)가 핵심!
+    //! 나중에 사용할 때 mapstruct와 build 경로가 꼬이기 때문에 추가 설정할 것
+    /*implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta' // ✅ :jakarta 분류자(classifier)가 핵심!
     annotationProcessor "com.querydsl:querydsl-apt:5.1.0:jakarta" // ✅ 여기도 마찬가지
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
-    // MapStruct 사용
-    //! lombok보다 뒤에 dependency 선언이 되어야 함
-    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-    // (핵심) Lombok과 MapStruct를 함께 사용하기 위한 설정
-    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-    //test 롬복 사용
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"*/
+
+    // Lombok (must come before MapStruct)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    // Lombok-MapStruct Binding (ensures compatibility)
+    implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+    // MapStruct (must come after Lombok)
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
 }
 
-// querydsl generated 경로 설정
+/*// querydsl generated 경로 설정
 def querydslDir = file("build/generated/querydsl")
+// mapper generated 경로 설적
+def mapstructDir = file("build/generated/mapstruct")
 
 // sourceSets 블록을 사용하여 생성된 Q클래스 경로를 소스 코드로 인식시킴
 sourceSets {
     main {
         java {
             srcDirs += [querydslDir]
+            srcDirs += 'build/generated/sources/annotationProcessor/java/main' // For MapStruct (default path)
         }
     }
 }
@@ -84,12 +94,15 @@ sourceSets {
 //    Q클래스 생성 경로를 지정하도록 범위를 좁힙니다.
 tasks.named('compileJava') {
     options.getGeneratedSourceOutputDirectory().set(querydslDir)
+
 }
 
 // clean 작업 시 생성된 Q클래스 폴더를 삭제
 clean.doLast {
     delete(querydslDir)
-}
+    // Clean the default annotation processor directory
+    delete('build/generated/sources/annotationProcessor')
+}*/
 
 tasks.named('test') {
 	useJUnitPlatform()

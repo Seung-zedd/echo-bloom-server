@@ -3,6 +3,11 @@ spring:
   config:
     activate:
       on-profile: dev
+  # 소셜 로그인 로직 테스트용이니까 통과되면 지울 것
+  web:
+    resources:
+      static-locations: classpath:/static/
+      add-mappings: true  # static 매핑 활성화 (default true지만 명시)
 
   # 데이터베이스 설정
   datasource:

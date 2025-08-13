@@ -4,6 +4,7 @@ import com.checkmate.bub.category.domain.Category;
 import com.checkmate.bub.category.dto.CategoryRequestDto;
 import com.checkmate.bub.category.dto.CategoryResponseDto;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
@@ -12,7 +13,12 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CategoryMapper {
 
+
+    @Mapping(target = "name", source = "name")
     Category to(CategoryRequestDto categoryRequestDto);
+
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
     CategoryResponseDto from(Category category);
     List<CategoryResponseDto> fromList(List<Category> categoryList);
 }

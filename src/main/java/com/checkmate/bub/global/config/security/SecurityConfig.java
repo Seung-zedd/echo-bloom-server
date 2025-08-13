@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -59,18 +60,18 @@ public class SecurityConfig {
                     authorize
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
                             .requestMatchers("/auth/kakao/**", "/favicon.ico").permitAll()  // /favicon.ico 허용 유지 (필요 시)
-                            
+
                             // 비회원용 확언 체험 API 경로는 인증 없이 모두 허용
                             .requestMatchers("/api/affirmations/guest").permitAll()
                             // 카테고리 생성 API는 인증된 사용자만 접근 가능(@PreAuthorize 대용)
                             .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").authenticated()
 
                             // /home과 .well-known 경로 허용 추가 (에러 방지)
-                            .requestMatchers("/home", "/.well-known/**").permitAll()
-
-                            .requestMatchers("/home").authenticated()  // /home 인증 필요
+                            .requestMatchers("/home.html", "/.well-known/**").permitAll()
+                            .requestMatchers("/home").authenticated()  // 리다이렉트 경로 인증
                             // 위에서 지정한 경로 외의 모든 요청은 반드시 인증(로그인) 필요
                             .anyRequest().authenticated();
+
                 })
 
                 //* 5. (중요) 우리가 직접 만든 JwtAuthenticationFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
@@ -91,6 +92,12 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);  // 모든 경로에 적용
         return source;
+    }
+
+    // .well-known 완전 무시 (옵션, Security 우회)
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers("/.well-known/**");
     }
 
 }
