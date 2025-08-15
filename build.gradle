@@ -92,26 +92,6 @@ dependencies {
 
 }
 
-// MapStruct generated source 경로 설정
-def mapstructGeneratedDir = file('build/generated/sources/annotationProcessor/java/main')
-
-sourceSets {
-    main {
-        java {
-            srcDirs += mapstructGeneratedDir
-        }
-    }
-}
-
-tasks.named('compileJava') {
-    options.generatedSourceOutputDirectory = mapstructGeneratedDir
-}
-
-clean {
-    delete mapstructGeneratedDir
-}
-
-
 
 /*// querydsl generated 경로 설정
 def querydslDir = file("build/generated/querydsl")

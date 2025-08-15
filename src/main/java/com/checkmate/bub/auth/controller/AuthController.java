@@ -58,9 +58,9 @@ public class AuthController {
 
         // /home으로 리다이렉트
         //todo: 리다이렉트 엔드포인트가 수정되면 변경할 것
-        log.info("Redirecting to /home.html");
+        log.info("Redirecting to /home-jwt.html");
         return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create("http://localhost:8080/home.html"))
+                .location(URI.create("http://localhost:8080/home-jwt.html"))
                 .build();
     }
 

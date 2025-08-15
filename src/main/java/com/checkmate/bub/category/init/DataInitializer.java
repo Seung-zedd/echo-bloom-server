@@ -24,7 +24,16 @@ public class DataInitializer implements CommandLineRunner {
             var seeds = List.of(
                     Category.builder().type(CategoryType.PROBLEM).name("일상에 활력이 없어요").build(),
                     Category.builder().type(CategoryType.PROBLEM).name("과거를 후회해요").build(),
-                    Category.builder().type(CategoryType.PROBLEM).name("외롭고 소속감을 느끼기 힘들어요").build()
+                    Category.builder().type(CategoryType.PROBLEM).name("외롭고 소속감을 느끼기 힘들어요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("자신감이 부족해요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("미래가 불안해요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("완벽주의 때문에 힘들어요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("스트레스를 많이 받아요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("번아웃이 왔어요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("부정적인 생각이 많아요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("변화를 두려워해요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("타인의 시선이 신경 써요").build(),
+                    Category.builder().type(CategoryType.PROBLEM).name("목표 달성이 어려워요").build()
             );
             var toSave = seeds.stream()
                     .filter(c -> !categoryRepository.existsByTypeAndName(c.getType(), c.getName()))
