@@ -23,10 +23,20 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+    set('springCloudVersion', '2025.0.0') // Spring Cloud 2025.0.x (Northfields) 최신 GA
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
 dependencies {
 
     // FeignClient(해커톤 끝나고 나중에 WebClient로 migrate할 예정)
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:4.3.0'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     // github-action으로 Apidog 자동화
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
@@ -81,6 +91,27 @@ dependencies {
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 }
+
+// MapStruct generated source 경로 설정
+def mapstructGeneratedDir = file('build/generated/sources/annotationProcessor/java/main')
+
+sourceSets {
+    main {
+        java {
+            srcDirs += mapstructGeneratedDir
+        }
+    }
+}
+
+tasks.named('compileJava') {
+    options.generatedSourceOutputDirectory = mapstructGeneratedDir
+}
+
+clean {
+    delete mapstructGeneratedDir
+}
+
+
 
 /*// querydsl generated 경로 설정
 def querydslDir = file("build/generated/querydsl")

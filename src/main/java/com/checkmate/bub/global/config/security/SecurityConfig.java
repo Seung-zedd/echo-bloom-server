@@ -72,7 +72,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
-                            .requestMatchers("/auth/kakao/**", "/favicon.ico").permitAll()  // /favicon.ico 허용 유지 (필요 시)
+                            .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll()  // /favicon.ico 허용 유지 (필요 시)
 
                             .requestMatchers("/api/v1/affirmations/tone-examples").authenticated()
 

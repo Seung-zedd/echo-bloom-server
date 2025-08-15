@@ -29,7 +29,7 @@ public class AuthController {
     @GetMapping("/callback")
     public ResponseEntity<Void> kakaoCallback(@RequestParam("code") String code, HttpServletResponse response) {
 
-        log.info("Callback called with code: {}", code);
+        log.info("Kakao callback invoked");
         AuthResponseDto authResponse = authService.loginWithKakao(code);
 
         // 유틸로 환경 체크
