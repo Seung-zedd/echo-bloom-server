@@ -63,7 +63,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> {
                     if ("dev".equals(activeProfile)) {
                         authorize
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll();
+                                .requestMatchers("/v3/api-docs", "/swagger-ui/**").permitAll();
                     }
 
 
@@ -80,6 +80,9 @@ public class SecurityConfig {
                             .requestMatchers("/api/affirmations/guest").permitAll()
                             // 카테고리 생성 API는 인증된 사용자만 접근 가능(@PreAuthorize 대용)
                             .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").authenticated()
+
+                            // 변경 후 (통합)
+                            .requestMatchers("/static/**").permitAll()
 
                             // /home과 .well-known 경로 허용 추가 (에러 방지)
                             .requestMatchers("/home.html", "/.well-known/**").permitAll()
