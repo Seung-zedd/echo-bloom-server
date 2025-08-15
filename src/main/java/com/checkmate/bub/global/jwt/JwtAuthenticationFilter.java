@@ -2,6 +2,7 @@ package com.checkmate.bub.global.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 // 모든 API 요청이 들어올 때마다 헤더의 JWT를 검사하는 필터입니다.
 @Component
@@ -23,7 +25,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = resolveToken(request);
+        // 쿠키에서 토큰 추출 (기존 헤더 방식 + 쿠키 지원 추가)
+        String token = resolveTokenFromCookieOrHeader(request);
 
         // 1. 헤더에서 토큰을 성공적으로 추출했고, 토큰이 유효하다면
         if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
@@ -37,8 +40,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // 요청 헤더에서 "Authorization" 헤더를 찾아 Bearer 토큰을 추출합니다.
-    private String resolveToken(HttpServletRequest request) {
+    // 쿠키 우선으로 토큰 추출 (없으면 헤더 확인)
+    private String resolveTokenFromCookieOrHeader(HttpServletRequest request) {
+        // 쿠키에서 "accessToken" 추출
+        if (request.getCookies() != null) {
+            String cookieToken = Arrays.stream(request.getCookies())
+                    .filter(cookie -> "accessToken".equals(cookie.getName()))
+                    .map(Cookie::getValue)
+                    .findFirst()
+                    .orElse(null);
+            if (StringUtils.hasText(cookieToken)) {
+                return cookieToken;
+            }
+        }
+
+        // 쿠키 없으면 기존 헤더 방식 (Authorization: Bearer)
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);

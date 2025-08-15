@@ -85,9 +85,11 @@ public class AuthService {
         formData.add("grant_type", "authorization_code");
         formData.add("client_id", clientId);
         formData.add("client_secret", clientSecret);
+        log.info("client_secret: {}", clientSecret);
         formData.add("redirect_uri", redirectUri);
         formData.add("code", code);
 
+        // 백엔드 서버가 클라이언트가 되서 카카오 서버로 사용자로부터 발급받은 1회용 코드를 POST 방식으로 전달해서 엑세스 토큰을 받아옴
         return webClient.post()
                 .uri(tokenUri)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)

@@ -1,4 +1,4 @@
-package com.checkmate.bub.global.config;
+package com.checkmate.bub.global.config.web;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
