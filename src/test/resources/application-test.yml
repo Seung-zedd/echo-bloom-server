@@ -37,6 +37,9 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+      resourceserver:
+        jwt:
+          issuer-uri: ""  # test에서 issuer-uri 제공 – 자동 JwtDecoder 생성[3]
 
 # JWT 설정 (당신 제공 값 유지 – 더미 secret)
 jwt:

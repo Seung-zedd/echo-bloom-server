@@ -40,7 +40,14 @@ dependencies {
     // p6spy 디펜던시 (쿼리 파라미터 출력)
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // spring-security 관련
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+    // JwtAuthenticationConverter를 위한 추가 의존성
+    implementation 'org.springframework.security:spring-security-oauth2-resource-server:6.3.0'
+    // JWT 디코딩/클레임 지원 필수
+    implementation 'org.springframework.security:spring-security-oauth2-jose:6.3.0'
+
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 

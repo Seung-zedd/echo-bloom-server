@@ -12,11 +12,21 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.*;  // 이 import 추가![1]
+import org.springframework.beans.factory.config.*;  // ObjectPostProcessor import
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -58,8 +68,13 @@ public class SecurityConfig {
                     }
 
                     authorize
+                            // OPTIONS 메서드 (CORS preflight) 전체 허용 – 401 에러 방지
+                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
                             .requestMatchers("/auth/kakao/**", "/favicon.ico").permitAll()  // /favicon.ico 허용 유지 (필요 시)
+
+                            .requestMatchers("/api/v1/affirmations/tone-examples").authenticated()
 
                             // 비회원용 확언 체험 API 경로는 인증 없이 모두 허용
                             .requestMatchers("/api/affirmations/guest").permitAll()
@@ -84,10 +99,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:*");  // 로컬 개발 서버 허용 (포트 wildcard, 필요 시 구체적 URL 추가)
-        configuration.addAllowedMethod("*");  // GET, POST, OPTIONS 등 모든 메서드 허용
-        configuration.addAllowedHeader("*");  // 모든 헤더 허용
-        configuration.setAllowCredentials(true);  // 쿠키/credentials 허용 (중요 – preflight 관련)
+        configuration.setAllowedOrigins(List.of("http://localhost:*", "http://localhost:3000", "http://localhost:8080"));  // dev 환경 localhost 포트 wildcard + 구체적 추가
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));  // OPTIONS 명시 허용 (preflight)
+        configuration.setAllowedHeaders(List.of("*"));  // 모든 헤더 허용
+        configuration.setAllowCredentials(true);  // 쿠키/credentials 허용
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));  // 노출 헤더 추가 (필요 시)
+        configuration.setMaxAge(3600L);  // preflight 캐시 시간 (1시간)
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);  // 모든 경로에 적용
@@ -98,6 +115,43 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring().requestMatchers("/.well-known/**");
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            // getClaim 메서드 사용 – Object로 가져와 안전 캐스팅
+            Object scopeClaim = jwt.getClaim("scope");  // "scope" 클레임 가져오기 (Kakao 토큰 맞춤)
+            List<String> scopes = new ArrayList<>();
+
+            if (scopeClaim instanceof List<?> list) {
+                scopes = list.stream()
+                        .filter(item -> item instanceof String)
+                        .map(item -> (String) item)
+                        .collect(Collectors.toList());
+            } else if (scopeClaim instanceof String str) {
+                scopes = List.of(str.split(" "));  // 문자열 split (e.g., "scope1 scope2")
+            }  // else: 빈 리스트 (클레임 없음 – 에러 방지)
+
+            // scopes를 GrantedAuthority로 변환
+            return scopes.stream()
+                    .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))  // prefix 커스텀 (필요 시 "ROLE_")
+                    .collect(Collectors.toList());
+        });
+
+        return converter;
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        // issuer-uri 기반 자동 디코더 (application.yml에서 issuer-uri 읽음)
+        return JwtDecoders.fromIssuerLocation("https://kauth.kakao.com");  // Kakao issuer 직접 지정[4]
+
+        // 또는 수동 NimbusJwtDecoder (공개 키 세트 URI 직접 설정 – Kakao JWKS URI)
+        // String jwkSetUri = "https://kauth.kakao.com/.well-known/jwks.json";
+        // return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).jwtProcessorCustomizer(customizer -> {}).build();
     }
 
 }

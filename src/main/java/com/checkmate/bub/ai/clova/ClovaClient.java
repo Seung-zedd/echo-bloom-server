@@ -10,7 +10,7 @@ import java.util.Map;
 
 
 //todo: 모델 바뀌면 url 바꿀 것
-@FeignClient(name = "clova", url = "https://clovastudio.stream.ntruss.com/v3/chat-completions/HCX-DASH-002")
+@FeignClient(name = "clova", url = "https://clovastudio.stream.ntruss.com/v3/chat-completions/HCX-005")
 public interface ClovaClient {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = "text/event-stream")

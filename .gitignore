@@ -8,6 +8,12 @@ build/
 ### Static asset directories ###
 **/static/
 
+### 더미 데이터 파일 무시 (SQL 스크립트 등)
+/src/main/resources/data.sql
+
+### shell script 파일 ###
+*.sh
+
 ### STS ###
 .apt_generated
 .classpath

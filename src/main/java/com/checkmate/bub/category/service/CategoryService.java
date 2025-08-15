@@ -1,5 +1,6 @@
 package com.checkmate.bub.category.service;
 
+import com.checkmate.bub.category.constant.CategoryType;
 import com.checkmate.bub.category.domain.Category;
 import com.checkmate.bub.category.dto.CategoryRequestDto;
 import com.checkmate.bub.category.dto.CategoryResponseDto;
@@ -23,7 +24,6 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
 
-    // 조회 메소드: 클래스 설정을 상속받아 readOnly = true로 동작
     public List<CategoryResponseDto> findAll() {
         List<Category> categoryList = categoryRepository.findAll();
         return categoryMapper.fromList(categoryList);
@@ -34,17 +34,24 @@ public class CategoryService {
         return categoryMapper.from(category);
     }
 
-
-
     @Transactional
     public CategoryResponseDto create(CategoryRequestDto categoryRequestDto) {
-        if (categoryRepository.existsByTypeAndName(categoryRequestDto.getType(), categoryRequestDto.getName())) {
-            log.error("type: {}, name: {}", categoryRequestDto.getType(), categoryRequestDto.getName());
+        // String to enum 캐스팅
+        CategoryType type;
+        try {
+            type = CategoryType.valueOf(categoryRequestDto.getType().toUpperCase());  // 대문자 변환으로 유연성 ↑
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid type: {}", categoryRequestDto.getType());
+            throw new IllegalArgumentException("유효하지 않은 타입입니다: " + categoryRequestDto.getType());
+        }
+
+        if (categoryRepository.existsByTypeAndName(type, categoryRequestDto.getName())) {
+            log.error("type: {}, name: {}", type, categoryRequestDto.getName());
             throw new IllegalStateException("이미 존재하는 카테고리입니다.");
         }
 
         Category category = categoryMapper.to(categoryRequestDto);
-        categoryRepository.existsByTypeAndName(categoryRequestDto.getType(), categoryRequestDto.getName());
+        category.update(type, categoryRequestDto.getName());  // enum으로 업데이트 (엔티티 메서드 가정)
         Category savedCategory = categoryRepository.save(category);
         return categoryMapper.from(savedCategory);
     }
@@ -53,23 +60,30 @@ public class CategoryService {
     public CategoryResponseDto update(Long categoryId, CategoryRequestDto categoryRequestDto) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("ID " + categoryId + "에 해당하는 카테고리를 찾을 수 없습니다."));
-        if (categoryRepository.existsByTypeAndNameAndIdNot(categoryRequestDto.getType(), categoryRequestDto.getName(), categoryId)) {
-            log.error("type: {}, name: {}", categoryRequestDto.getType(), categoryRequestDto.getName());
+
+        // String to enum 캐스팅
+        CategoryType type;
+        try {
+            type = CategoryType.valueOf(categoryRequestDto.getType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid type: {}", categoryRequestDto.getType());
+            throw new IllegalArgumentException("유효하지 않은 타입입니다: " + categoryRequestDto.getType());
+        }
+
+        if (categoryRepository.existsByTypeAndNameAndIdNot(type, categoryRequestDto.getName(), categoryId)) {
+            log.error("type: {}, name: {}", type, categoryRequestDto.getName());
             throw new IllegalStateException("이미 존재하는 카테고리입니다.");
         }
 
-        category.update(categoryRequestDto.getType(), categoryRequestDto.getName());
+        category.update(type, categoryRequestDto.getName());
 
         return categoryMapper.from(category);
     }
 
     @Transactional
     public void delete(Long categoryId) {
-        // ID로 엔티티가 존재하는지 먼저 확인 후 삭제하는 것이 더 안전합니다.
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("ID " + categoryId + "에 해당하는 카테고리를 찾을 수 없습니다."));
-
-
         categoryRepository.delete(category);
     }
 }
