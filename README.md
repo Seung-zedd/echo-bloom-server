@@ -19,7 +19,7 @@
 
 **Data Access**: Spring Data JPA, QueryDSL
 
-**API Documentation**: Swagger
+**API Documentation**: Apidog(Swagger에서 이전)
 
 **AI**: Naver CLOVA Studio (HyperCLOVA X), CLOVA Speech
 
