@@ -9,6 +9,9 @@
 ## 🔧프로젝트 기술 스택
 Spring Boot 3.x, Java 21, JPA, PostgreSQL
 
+## 📚API 문서화 규칙
+http://localhost:8080/v3/api-docs 에서 json 파일을 직접 복사해서 txt파일로 저장하고, Apidog로 직접 업로드합니다.(github-action으로 해결하려고 했으나 계속 실패해서 그냥 지웠음.)
+
 ## 🚀 팀의 Git 워크플로우 (My Team Git Workflow)
 
 이 프로젝트는 main 브랜치와 dev 브랜치를 중심으로, '기능 기반 브랜치 전략(Feature Branch Strategy)'을 사용합니다.
