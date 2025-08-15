@@ -20,8 +20,24 @@ jobs:
         run: ./gradlew build
       - name: Run Spring Boot app in background
         run: |
-          nohup java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar &  
-          sleep 30
+          JAR_PATH=$(ls build/libs/*.jar | head -n 1)
+          if [ -z "$JAR_PATH" ]; then
+            echo "No JAR found under build/libs"; exit 1
+          fi
+          nohup java -jar "$JAR_PATH" --spring.profiles.active=dev >/dev/null 2>&1 &
+          echo $! > app.pid
+          # Wait until app is ready (max ~120s)
+          for i in {1..24}; do
+            if curl -fsS http://localhost:8080/v3/api-docs >/dev/null 2>&1 || \
+               curl -fsS http://localhost:8080/actuator/health >/dev/null 2>&1; then
+              echo "App is up"
+              break
+            fi
+            sleep 5
+            if [ $i -eq 24 ]; then
+              echo "App failed to start within timeout"; exit 1
+            fi
+          done
       - name: Generate OpenAPI spec
         run: curl http://localhost:8080/v3/api-docs -o openapi.json
       - name: Upload to Apidog
