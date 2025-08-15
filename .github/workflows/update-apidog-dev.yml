@@ -1,0 +1,35 @@
+name: Update Apidog Docs (Dev)
+
+on:
+  push:
+    branches:
+      - dev  # dev 브랜치 푸시 시 실행
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4  # 최신 버전 사용
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Build project with Gradle
+        run: ./gradlew build
+      - name: Run Spring Boot app in background
+        run: |
+          nohup java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar &  
+          sleep 30
+      - name: Generate OpenAPI spec
+        run: curl http://localhost:8080/v3/api-docs -o openapi.json
+      - name: Upload to Apidog
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.APIDOG_API_KEY }}" \
+            -F "file=@openapi.json" \
+            "https://api.apidog.com/project/1038145/import"
+      - name: Stop server (cleanup)
+        if: always()
+        run: pkill -f 'java -jar'

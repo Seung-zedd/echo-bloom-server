@@ -52,4 +52,10 @@ jwt:
 clova:
   api-key: ${DEV_CLOVA_API_KEY}
 
+# Swagger 설정
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
 

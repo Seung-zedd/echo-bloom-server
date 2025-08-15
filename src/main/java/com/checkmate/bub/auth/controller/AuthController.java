@@ -3,11 +3,6 @@ package com.checkmate.bub.auth.controller;
 import com.checkmate.bub.auth.dto.AuthResponseDto;
 import com.checkmate.bub.auth.service.AuthService;
 import com.checkmate.bub.util.EnvironmentUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.time.Duration;
 
-@Tag(name = "Auth", description = "인증/인가 관련 API (카카오 소셜 로그인 및 인증 확인)")
 @RestController
 @RequestMapping("/auth/kakao")
 @RequiredArgsConstructor
@@ -32,14 +26,8 @@ public class AuthController {
     private final AuthService authService;
     private final EnvironmentUtil envUtil;
 
-    @Operation(summary = "카카오 소셜 로그인 콜백", description = "카카오 인가 코드를 받아 로그인 처리하고 JWT 토큰을 쿠키에 설정한 후 홈 페이지로 리다이렉트합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "302", description = "로그인 성공 및 리다이렉트"),
-            @ApiResponse(responseCode = "400", description = "유효하지 않은 인가 코드"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류 (e.g., 토큰 생성 실패)")
-    })
     @GetMapping("/callback")
-    public ResponseEntity<Void> kakaoCallback(@Parameter(name = "code", description = "카카오로부터 발급받은 1회용 인가 코드", required = true, example = "ABCDEFG...") @RequestParam("code") String code, HttpServletResponse response) {
+    public ResponseEntity<Void> kakaoCallback(@RequestParam("code") String code, HttpServletResponse response) {
 
         log.info("Callback called with code: {}", code);
         AuthResponseDto authResponse = authService.loginWithKakao(code);
@@ -76,12 +64,6 @@ public class AuthController {
                 .build();
     }
 
-    @Operation(summary = "인증 상태 확인", description = "현재 사용자의 JWT 토큰을 확인하여 인증 상태를 반환합니다. 쿠키가 포함된 요청으로 서버가 토큰을 검증합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "인증 성공 (Authenticated)"),
-            @ApiResponse(responseCode = "401", description = "인증 실패 (토큰 없음 또는 만료)"),
-            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
-    })
     @GetMapping("/api/check-auth")
     public ResponseEntity<String> checkAuth() {
         return ResponseEntity.ok("Authenticated");

@@ -33,19 +33,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Value("${springdoc.api-docs.enabled:true}")
-    private boolean openApiEnabled;
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private static final String[] SWAGGER_WHITELIST = {
-            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
-    };
+
+    @Value("${spring.profiles.active:dev}")  // 기본 dev
+    private String activeProfile;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 // 1. REST API 이므로, CSRF 보안 기능 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
+
                 // CORS 설정 (프론트엔드 연동 시 필요)
                 // CORS 설정 활성화 (preflight 허용 – 당신의 질문에 따라 수정)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // disable 대신 이걸로 교체
@@ -62,13 +61,14 @@ public class SecurityConfig {
 
                 // 4. HTTP 요청에 대한 접근 권한 설정
                 .authorizeHttpRequests(authorize -> {
-                    // springdoc.api-docs.enabled가 true일 때만 Swagger 경로를 허용합니다.
-                    if (openApiEnabled) {
-                        authorize.requestMatchers(SWAGGER_WHITELIST).permitAll();
+                    if ("dev".equals(activeProfile)) {
+                        authorize
+                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll();
                     }
 
-                    authorize
+
                             // OPTIONS 메서드 (CORS preflight) 전체 허용 – 401 에러 방지
+                    authorize
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
