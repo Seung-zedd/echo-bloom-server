@@ -1,7 +1,10 @@
 package com.checkmate.bub.affirmation.service;
 
+import com.checkmate.bub.affirmation.dto.MainAffirmationResponseDto;
 import com.checkmate.bub.affirmation.dto.ToneExampleResponseDto;
 import com.checkmate.bub.ai.clova.ClovaClient;
+import com.checkmate.bub.bridge.domain.UserCategoryBridge;
+import com.checkmate.bub.bridge.repository.UserCategoryBridgeRepository;
 import com.checkmate.bub.category.constant.CategoryType;
 import com.checkmate.bub.category.domain.Category;
 import com.checkmate.bub.category.repository.CategoryRepository;
@@ -23,6 +26,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class AffirmationService {
     private final CategoryRepository categoryRepository;
+    private final UserCategoryBridgeRepository userCategoryBridgeRepository;
     private final ClovaClient clovaClient;
     private final ObjectMapper objectMapper;
 
@@ -48,6 +52,7 @@ public class AffirmationService {
     private static final String CONTENT_TYPE_JSON = "application/json";
     private static final String CONTENT_TYPE_SSE = "text/event-stream";
 
+    @Transactional
     public ToneExampleResponseDto createToneExamples(List<Long> problemIds) {
         if (problemIds == null || problemIds.isEmpty()) {
             log.warn("빈 problemIds 리스트로 요청됨");
@@ -58,6 +63,9 @@ public class AffirmationService {
             log.warn("너무 많은 problemIds: {}", problemIds.size());
             throw new IllegalArgumentException("한 번에 처리할 수 있는 문제는 최대 " + MAX_PROBLEM_IDS + "개입니다.");
         }
+
+        // 톤 카테고리가 없으면 생성
+        createToneCategoriesIfNotExists();
 
         // 리스트 복사 후 shuffle (원본 수정 피함)
         List<Long> shuffledIds = new ArrayList<>(problemIds);
@@ -449,6 +457,157 @@ public class AffirmationService {
                 .tone2(cleanToneText(tones[1]))
                 .tone3(cleanToneText(tones[2]))
                 .build();
+    }
+
+    /**
+     * 사용자의 메인 확언 문구를 생성합니다.
+     * 사용자가 선택한 문제와 톤을 기반으로 개인화된 확언 문구를 생성합니다.
+     */
+    public MainAffirmationResponseDto generateMainAffirmation(Long userId) {
+        log.info("메인 확언 문구 생성 시작. userId: {}", userId);
+        
+        // 1. 사용자가 선택한 카테고리들 조회
+        List<UserCategoryBridge> userCategories = userCategoryBridgeRepository.findByUserId(userId);
+        
+        if (userCategories.isEmpty()) {
+            log.warn("사용자의 선택된 카테고리가 없음. userId: {}", userId);
+            throw new IllegalStateException("온보딩이 완료되지 않았습니다. 먼저 문제와 톤을 선택해주세요.");
+        }
+        
+        // 2. 문제 카테고리와 톤 카테고리 분리
+        List<Category> problemCategories = new ArrayList<>();
+        Category toneCategory = null;
+        
+        for (UserCategoryBridge bridge : userCategories) {
+            Category category = bridge.getCategory();
+            if (category.getType() == CategoryType.PROBLEM) {
+                problemCategories.add(category);
+            } else if (category.getType() == CategoryType.TONE) {
+                toneCategory = category;
+            }
+        }
+        
+        if (problemCategories.isEmpty()) {
+            log.error("문제 카테고리가 없음. userId: {}", userId);
+            throw new IllegalStateException("선택된 문제가 없습니다.");
+        }
+        
+        if (toneCategory == null) {
+            log.error("톤 카테고리가 없음. userId: {}", userId);
+            throw new IllegalStateException("선택된 톤이 없습니다.");
+        }
+        
+        // 3. 문제 카테고리에서 랜덤으로 1개 선택 (매번 다른 확언 생성)
+        List<Category> shuffledProblems = new ArrayList<>(problemCategories);
+        Collections.shuffle(shuffledProblems);
+        Category selectedProblem = shuffledProblems.getFirst();
+        
+        log.info("랜덤 선택된 문제 카테고리: {} (userId: {})", selectedProblem.getName(), userId);
+        
+        // 4. 개인화된 프롬프트 생성 (1개 문제만 사용)
+        String prompt = createMainAffirmationPrompt(selectedProblem, toneCategory);
+        
+        // 4. Clova API 요청 바디 구성
+        Map<String, Object> requestBody = buildClovaRequestBody(prompt);
+        
+        String requestId = UuidUtil.generateRequestId();
+        log.info("메인 확언 문구 생성 API 호출. userId: {}, requestId: {}", userId, requestId);
+        
+        // 5. Clova API 호출
+        String clovaResponse = callClovaApiSafely(requestBody, requestId);
+        
+        // 6. 응답에서 확언 문구 추출
+        String affirmation = extractAffirmationFromResponse(clovaResponse, requestId);
+        
+        log.info("메인 확언 문구 생성 완료. userId: {}, requestId: {}", userId, requestId);
+        
+        return MainAffirmationResponseDto.builder()
+                .affirmation(affirmation)
+                .build();
+    }
+    
+    /**
+     * 메인 확언을 위한 프롬프트를 생성합니다.
+     */
+    private String createMainAffirmationPrompt(Category selectedProblem, Category toneCategory) {
+        String problemText = selectedProblem.getName();
+        String toneName = toneCategory.getName();
+        
+        final String MAIN_AFFIRMATION_PROMPT = """
+            사용자 정보:
+            - 선택한 문제: %s
+            - 선택한 톤: %s
+            
+            위 정보를 바탕으로 사용자를 위한 하나의 완벽한 확언 문구를 생성해주세요.
+            
+            요구사항:
+            1. 선택된 문제(%s)에 집중한 구체적인 확언 문구
+            2. 선택된 톤(%s)의 특성을 반영
+            3. 1인칭 관점으로 작성 ("나는", "내가" 등)
+            4. 긍정적이고 힘이 되는 메시지
+            5. 한국어로 작성
+            6. 30자 이상 80자 이하의 적절한 길이
+            
+            확언 문구만 출력하고 다른 설명은 포함하지 마세요.
+            """;
+            
+        return String.format(MAIN_AFFIRMATION_PROMPT, problemText, toneName, problemText, toneName);
+    }
+    
+    /**
+     * Clova API 응답에서 확언 문구를 추출합니다.
+     */
+    private String extractAffirmationFromResponse(String clovaResponse, String requestId) {
+        StringBuilder contentBuilder = new StringBuilder();
+        
+        try {
+            String[] lines = clovaResponse.split("\\n");
+            
+            for (String line : lines) {
+                if (line.startsWith(SSE_DATA_PREFIX)) {
+                    String data = line.substring(SSE_DATA_PREFIX.length()).trim();
+                    if (!data.isEmpty() && !data.equals(SSE_DONE_SIGNAL)) {
+                        String content = extractContentFromSseData(data);
+                        if (content != null) {
+                            contentBuilder.append(content);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("SSE 응답 처리 중 오류 발생. requestId: {}, error: {}", requestId, e.getMessage());
+            throw new RuntimeException("AI 응답 처리 중 오류가 발생했습니다. 다시 시도해주세요.");
+        }
+        
+        String affirmation = contentBuilder.toString().trim()
+                .replaceAll("\\*\\*|#", "") // 마크다운 제거
+                .replaceAll("\"", "") // 따옴표 제거  
+                .trim();
+        
+        if (affirmation.isEmpty()) {
+            log.error("AI 응답 내용이 비어있음. requestId: {}, response: {}", requestId, clovaResponse);
+            throw new RuntimeException("AI가 응답을 생성하지 못했습니다. 다시 시도해주세요.");
+        }
+        
+        return affirmation;
+    }
+
+    /**
+     * 톤 카테고리가 존재하지 않으면 생성합니다.
+     */
+    private void createToneCategoriesIfNotExists() {
+        String[] toneNames = {"Joy", "Wednesday", "Zelda"};
+        
+        for (String toneName : toneNames) {
+            if (!categoryRepository.existsByTypeAndName(CategoryType.TONE, toneName)) {
+                Category toneCategory = Category.builder()
+                        .type(CategoryType.TONE)
+                        .name(toneName)
+                        .build();
+                categoryRepository.save(toneCategory);
+                log.info("톤 카테고리 생성: {}", toneName);
+            }
+        }
     }
 
 }

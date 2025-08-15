@@ -1,5 +1,6 @@
 package com.checkmate.bub.affirmation.controller;
 
+import com.checkmate.bub.affirmation.dto.MainAffirmationResponseDto;
 import com.checkmate.bub.affirmation.dto.ToneExampleResponseDto;
 import com.checkmate.bub.affirmation.service.AffirmationService;
 import jakarta.validation.constraints.NotEmpty;
@@ -7,10 +8,9 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -30,6 +30,17 @@ public class AffirmationController {
         log.info("Received problemIds: {}", problemIds);
 
         ToneExampleResponseDto response = affirmationService.createToneExamples(problemIds);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/main")
+    public ResponseEntity<MainAffirmationResponseDto> getMainAffirmation(Authentication authentication) {
+        
+        // JWT에서 사용자 ID 추출 (subject 클레임에서)
+        String userId = authentication.getName(); // JWT의 subject 클레임에서 사용자 ID
+        log.info("홈 화면 확언 문구 요청 - 사용자 ID: {}", userId);
+        
+        MainAffirmationResponseDto response = affirmationService.generateMainAffirmation(Long.parseLong(userId));
         return ResponseEntity.ok(response);
     }
 }
