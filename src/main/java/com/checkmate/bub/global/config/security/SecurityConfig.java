@@ -72,6 +72,9 @@ public class SecurityConfig {
 
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
                             .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll()  // /favicon.ico 허용 유지 (필요 시)
+                            
+                            // 테스트용 인증 API 허용
+                            .requestMatchers("/test/auth/**").permitAll()
 
                             .requestMatchers("/api/v1/affirmations/tone-examples").permitAll() // 임시 테스트용
 

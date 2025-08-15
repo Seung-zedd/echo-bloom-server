@@ -27,4 +27,9 @@ public class UserCategoryBridge {
     @JoinColumn(name = "category_id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
+
+    public UserCategoryBridge(User user, Category category) {
+        this.user = user;
+        this.category = category;
+    }
 }
