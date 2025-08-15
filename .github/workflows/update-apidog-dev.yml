@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # 최신 버전 사용
 
       - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
+        run: chmod +x ./gradlew  # gradlew에 실행 권한 부여
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -22,17 +22,21 @@ jobs:
           java-version: '21'
 
       - name: Build project with Gradle
-        run: ./gradlew build
+        run: ./gradlew bootJar  # bootJar로 실행 가능한 JAR 생성
 
       - name: Run Spring Boot app in background
         run: |
-          JAR_PATH=$(ls build/libs/*.jar | head -n 1)
+          JAR_PATH=$(ls build/libs/ | grep -v plain.jar | grep '.jar' | head -n 1)
           if [ -z "$JAR_PATH" ]; then
-            echo "No JAR found under build/libs"; exit 1
+            echo "No executable JAR found"; exit 1
           fi
-          nohup java -jar "$JAR_PATH" --spring.profiles.active=dev --server.port=8081 > app.log 2>&1 &  # 로그 파일 지정, 포트 변경(옵션)
+
+          JAR_PATH=build/libs/$JAR_PATH
+
+          nohup java -jar "$JAR_PATH" --spring.profiles.active=dev --server.port=8081 > app.log 2>&1 &  # 로그 파일 지정, 포트 변경
           echo $! > app.pid
           tail -f app.log &  # 실시간 로그 출력 (디버깅용)
+
           # Wait until app is ready (max ~150s, 증가)
           for i in {1..30}; do
             if curl -fsS http://localhost:8081/v3/api-docs >/dev/null 2>&1 || \
@@ -60,4 +64,4 @@ jobs:
 
       - name: Stop server (cleanup)
         if: always()
-        run: pkill -f 'java -jar' || true
+        run: pkill -f 'java -jar' || true  # 실패 무시 추가
