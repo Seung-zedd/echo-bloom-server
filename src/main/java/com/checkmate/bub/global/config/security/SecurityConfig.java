@@ -74,8 +74,8 @@ public class SecurityConfig {
                             .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll()  // /favicon.ico 허용 유지 (필요 시)
                             
                             // 테스트용 인증 API 허용
+                            //todo: 프론트 통합 테스트할 때는 아래의 2개 경로 지울 것
                             .requestMatchers("/test/auth/**").permitAll()
-
                             .requestMatchers("/api/v1/affirmations/tone-examples").permitAll() // 임시 테스트용
 
                             // 비회원용 확언 체험 API 경로는 인증 없이 모두 허용
