@@ -65,17 +65,22 @@ public class SecurityConfig {
                     }
 
 
-                            // OPTIONS 메서드 (CORS preflight) 전체 허용 – 401 에러 방지
+                    // OPTIONS 메서드 (CORS preflight) 전체 허용 – 401 에러 방지
                     authorize
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                             .requestMatchers(HttpMethod.OPTIONS, "/main.html").permitAll()
 
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
-                            .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll()  // /favicon.ico 허용 유지 (필요 시)
-                            
-                            // 테스트용 인증 API 허용
-                            //todo: 프론트 통합 테스트할 때는 아래의 2개 경로 지울 것
-                            .requestMatchers("/test/auth/**").permitAll()
+                            .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll();  // /favicon.ico 허용 유지 (필요 시)
+
+                    // 테스트용 인증 API 허용
+                    //todo: 프론트 통합 테스트할 때는 아래의 2개 경로 지울 것
+                    // dev 환경에서만 공개
+                    if ("dev".equals(activeProfile)) {
+                        authorize.requestMatchers("/test/auth/**").permitAll();
+                    }
+
+                    authorize
                             .requestMatchers("/api/v1/affirmations/tone-examples").permitAll() // 임시 테스트용
 
                             // 비회원용 확언 체험 API 경로는 인증 없이 모두 허용

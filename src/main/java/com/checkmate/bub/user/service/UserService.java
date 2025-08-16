@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +29,10 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        List<Category> categories = categoryRepository.findAllById(requestDto.getCategoryIds());
-        
-        if (categories.size() != requestDto.getCategoryIds().size()) {
+        Set<Long> distinctIds = new HashSet<>(requestDto.getCategoryIds());
+        List<Category> categories = categoryRepository.findAllById(distinctIds);
+
+        if (categories.size() != distinctIds.size()) {
             throw new IllegalArgumentException("존재하지 않는 카테고리가 포함되어 있습니다.");
         }
 
