@@ -20,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @Transactional(readOnly = true)
@@ -256,23 +254,43 @@ public class AffirmationService {
             throw new RuntimeException("빈 응답 내용입니다.");
         }
 
-        // 패턴 매칭으로 톤 추출
-        Map<String, String> toneMap = new LinkedHashMap<>();
-        Pattern pattern = Pattern.compile("(Joy|Wednesday|Zelda):\\s*([^\\n]+?)(?=(?:Joy|Wednesday|Zelda):|$)", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(content);
-
-        while (matcher.find()) {
-            String toneName = matcher.group(1);
-            String toneContent = matcher.group(2)
+        // 예상되는 톤 패턴들
+        String[] tonePatterns = {"Joy:", "Wednesday:", "Zelda:"};
+        List<String> tones = new ArrayList<>();
+        
+        for (String pattern : tonePatterns) {
+            // 첫 번째 매칭만 사용하여 중복 방지
+            int startIndex = content.indexOf(pattern);
+            if (startIndex != -1) {
+                startIndex += pattern.length();
+                int endIndex = findNextPatternIndex(content, tonePatterns, pattern, startIndex);
+                
+                String tone = content.substring(startIndex, endIndex)
                     .replaceAll("[\"\\n\\r]", "")
                     .trim();
-
-            if (!toneContent.isEmpty() && !toneMap.containsKey(toneName)) {
-                toneMap.put(toneName, toneContent);
+                
+                // 다른 톤 패턴이 섞여있는지 확인 및 제거 (패턴명 포함)
+                for (String otherPattern : tonePatterns) {
+                    if (!otherPattern.equals(pattern)) {
+                        String otherPatternName = otherPattern.replace(":", "");
+                        if (tone.contains(otherPatternName)) {
+                            int cutIndex = tone.indexOf(otherPatternName);
+                            tone = tone.substring(0, cutIndex).trim();
+                            break;
+                        }
+                    }
+                }
+                
+                // 마지막에 따옴표가 남아있으면 제거
+                if (tone.endsWith("\"")) {
+                    tone = tone.substring(0, tone.length() - 1).trim();
+                }
+                
+                if (!tone.isEmpty()) {
+                    tones.add(tone);
+                }
             }
         }
-
-        List<String> tones = new ArrayList<>(toneMap.values());
 
         // 패턴이 없으면 기존 방식으로 분할 (백업)
         if (tones.isEmpty()) {
@@ -283,14 +301,13 @@ public class AffirmationService {
                     : fallbackTones;
         }
 
-        // 중복 제거 및 개수 제한
         return tones.toArray(new String[0]);
     }
 
     /**
      * 다음 패턴의 인덱스를 찾습니다.
      */
-    /*private int findNextPatternIndex(String content, String[] patterns, String currentPattern, int startIndex) {
+    private int findNextPatternIndex(String content, String[] patterns, String currentPattern, int startIndex) {
         int endIndex = content.length();
 
         for (String nextPattern : patterns) {
@@ -303,7 +320,7 @@ public class AffirmationService {
         }
 
         return endIndex;
-    }*/
+    }
 
     /**
      * 톤 텍스트를 정제합니다.
