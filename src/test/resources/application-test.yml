@@ -13,7 +13,7 @@ spring:
   # JPA 설정 (테스트에서 테이블 자동 생성)
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     database-platform: org.hibernate.dialect.H2Dialect  # H2 DB dialect
 
   # 카카오 로그인 설정 (테스트용 더미 값 – 실제 키 대신)
