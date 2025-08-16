@@ -466,10 +466,10 @@ public class AffirmationService {
 
     /**
      * 사용자의 메인 확언 문구를 생성합니다.
-     * 사용자가 선택한 문제와 톤을 기반으로 개인화된 확언 문구를 생성합니다.
+     * 사용자가 선택한 문제와 톤을 기반으로 개인화된 확언 문구 3개를 생성합니다.
      */
     public MainAffirmationResponseDto generateMainAffirmation(Long userId) {
-        log.info("메인 확언 문구 생성 시작. userId: {}", userId);
+        log.info("메인 확언 문구 3개 생성 시작. userId: {}", userId);
 
         // 1. 사용자가 선택한 카테고리들 조회
         List<UserCategoryBridge> userCategories = userCategoryBridgeRepository.findByUserId(userId);
@@ -502,39 +502,47 @@ public class AffirmationService {
             throw new IllegalStateException("선택된 톤이 없습니다.");
         }
 
-        // 3. 문제 카테고리에서 랜덤으로 1개 선택 (매번 다른 확언 생성)
+        // 3. 3개의 확언 문구 생성
+        List<String> affirmations = new ArrayList<>();
         List<Category> shuffledProblems = new ArrayList<>(problemCategories);
         Collections.shuffle(shuffledProblems);
-        Category selectedProblem = shuffledProblems.getFirst();
 
-        log.info("랜덤 선택된 문제 카테고리: {} (userId: {})", selectedProblem.getName(), userId);
+        for (int i = 0; i < 3; i++) {
+            // 문제 카테고리 순환 선택 (문제가 적을 경우 재사용)
+            Category selectedProblem = shuffledProblems.get(i % shuffledProblems.size());
+            
+            log.info("확언 {}번째 생성 - 선택된 문제: {} (userId: {})", i + 1, selectedProblem.getName(), userId);
 
-        // 4. 개인화된 프롬프트 생성 (1개 문제만 사용)
-        String prompt = createMainAffirmationPrompt(selectedProblem, toneCategory);
+            // 개인화된 프롬프트 생성
+            String prompt = createMainAffirmationPrompt(selectedProblem, toneCategory, i + 1);
 
-        // 4. Clova API 요청 바디 구성
-        Map<String, Object> requestBody = buildClovaRequestBody(prompt);
+            // Clova API 요청 바디 구성
+            Map<String, Object> requestBody = buildClovaRequestBody(prompt);
 
-        String requestId = UuidUtil.generateRequestId();
-        log.info("메인 확언 문구 생성 API 호출. userId: {}, requestId: {}", userId, requestId);
+            String requestId = UuidUtil.generateRequestId();
+            log.info("메인 확언 문구 {}번째 API 호출. userId: {}, requestId: {}", i + 1, userId, requestId);
 
-        // 5. Clova API 호출
-        String clovaResponse = callClovaApiSafely(requestBody, requestId);
+            // Clova API 호출
+            String clovaResponse = callClovaApiSafely(requestBody, requestId);
 
-        // 6. 응답에서 확언 문구 추출
-        String affirmation = extractAffirmationFromResponse(clovaResponse, requestId);
+            // 응답에서 확언 문구 추출
+            String affirmation = extractAffirmationFromResponse(clovaResponse, requestId);
+            affirmations.add(affirmation);
 
-        log.info("메인 확언 문구 생성 완료. userId: {}, requestId: {}", userId, requestId);
+            log.info("메인 확언 문구 {}번째 생성 완료. userId: {}, requestId: {}", i + 1, userId, requestId);
+        }
 
         return MainAffirmationResponseDto.builder()
-                .affirmation(affirmation)
+                .affirmation1(affirmations.get(0))
+                .affirmation2(affirmations.get(1))
+                .affirmation3(affirmations.get(2))
                 .build();
     }
 
     /**
      * 메인 확언을 위한 프롬프트를 생성합니다.
      */
-    private String createMainAffirmationPrompt(Category selectedProblem, Category toneCategory) {
+    private String createMainAffirmationPrompt(Category selectedProblem, Category toneCategory, int orderNumber) {
         String problemText = selectedProblem.getName();
         String toneName = toneCategory.getName();
 
@@ -542,6 +550,7 @@ public class AffirmationService {
                 사용자 정보:
                 - 선택한 문제: %s
                 - 선택한 톤: %s
+                - 확언 순서: %d번째
                 
                 위 정보를 바탕으로 사용자를 위한 하나의 완벽한 확언 문구를 생성해주세요.
                 
@@ -552,11 +561,12 @@ public class AffirmationService {
                 4. 긍정적이고 힘이 되는 메시지
                 5. 한국어로 작성
                 6. 30자 이상 80자 이하의 적절한 길이
+                7. 이전과는 다른 새로운 확언 문구 (다양성 확보)
                 
                 확언 문구만 출력하고 다른 설명은 포함하지 마세요.
                 """;
 
-        return String.format(MAIN_AFFIRMATION_PROMPT, problemText, toneName, problemText, toneName);
+        return String.format(MAIN_AFFIRMATION_PROMPT, problemText, toneName, orderNumber, problemText, toneName);
     }
 
     /**
