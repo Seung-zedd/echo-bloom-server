@@ -16,6 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
+    //todo: 프론트 통합 테스트 하기 전에 더미 데이터는 삭제할 것
     private final CategoryRepository categoryRepository;
 
     @Override

@@ -589,6 +589,9 @@ public class AffirmationService {
                 .replaceAll("\"", "") // 따옴표 제거  
                 .trim();
 
+        // 중복된 내용 제거 (같은 문장이 반복되는 경우)
+        affirmation = removeDuplicateContent(affirmation);
+
         if (affirmation.isEmpty()) {
             log.error("AI 응답 내용이 비어있음. requestId: {}, response: {}", requestId, clovaResponse);
             throw new RuntimeException("AI가 응답을 생성하지 못했습니다. 다시 시도해주세요.");
@@ -596,6 +599,47 @@ public class AffirmationService {
 
         return affirmation;
     }
+
+    /**
+     * 중복된 내용을 제거합니다 (메인 확언용).
+     */
+    private String removeDuplicateContent(String content) {
+        if (content == null || content.isEmpty()) {
+            return content;
+        }
+
+        log.debug("중복 제거 전 content: {}", content);
+        
+        // 가장 간단한 방법: 전체 문자열을 절반으로 나누어 비교
+        int length = content.length();
+        if (length >= 2) {
+            int halfLength = length / 2;
+            String firstHalf = content.substring(0, halfLength);
+            String secondHalf = content.substring(halfLength);
+            
+            // 정확히 같은 경우
+            if (firstHalf.equals(secondHalf)) {
+                log.warn("정확한 중복 내용 감지 및 제거: {}", secondHalf);
+                return firstHalf;
+            }
+            
+            // 거의 같은 경우 (길이 차이가 1-2자 정도)
+            if (Math.abs(firstHalf.length() - secondHalf.length()) <= 2) {
+                int minLength = Math.min(firstHalf.length(), secondHalf.length());
+                if (minLength > 0 && firstHalf.substring(0, minLength).equals(secondHalf.substring(0, minLength))) {
+                    // 80% 이상 겹치면 중복으로 간주
+                    double similarity = (double) minLength / Math.max(firstHalf.length(), secondHalf.length());
+                    if (similarity >= 0.8) {
+                        log.warn("유사한 중복 내용 감지 및 제거. 유사도: {}", similarity);
+                        return firstHalf.length() >= secondHalf.length() ? firstHalf : secondHalf;
+                    }
+                }
+            }
+        }
+
+        return content;
+    }
+
 
     /**
      * 톤 카테고리가 존재하지 않으면 생성합니다.
