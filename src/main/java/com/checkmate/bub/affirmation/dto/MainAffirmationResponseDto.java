@@ -6,5 +6,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class MainAffirmationResponseDto {
-    private String affirmation;
+    private String affirmation1;
+    private String affirmation2;
+    private String affirmation3;
 }
