@@ -19,3 +19,9 @@ spring:
     hibernate:
       naming:
         physical-strategy: com.checkmate.bub.global.config.CamelCaseToSnakeAndUpperCaseStrategy
+
+  # Flyway 설정 (추가)
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
