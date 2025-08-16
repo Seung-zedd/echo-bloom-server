@@ -36,7 +36,13 @@ dependencyManagement {
 dependencies {
 
     // DB 스키마 버전 관리하는 도구
-    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-core:11.7.2'
+
+    // Flyway PostgreSQL 지원 모듈 (가장 중요)
+    //! 위의 Flyway 버전과 반드시 맞출 것
+    implementation("org.flywaydb:flyway-database-postgresql:11.7.2")
+
+    runtimeOnly 'org.postgresql:postgresql:42.7.2'
 
     // FeignClient(해커톤 끝나고 나중에 WebClient로 migrate할 예정)
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
@@ -67,7 +73,7 @@ dependencies {
     // 개발 환경에서만 적용(developmentOnly로 이미 운영 환경에 배포되는 jar,war 파일에 포함 x)
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'org.postgresql:postgresql'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
