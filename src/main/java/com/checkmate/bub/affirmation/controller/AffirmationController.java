@@ -36,11 +36,21 @@ public class AffirmationController {
     @GetMapping("/main")
     public ResponseEntity<MainAffirmationResponseDto> getMainAffirmation(Authentication authentication) {
         
+        if (authentication == null || authentication.getName() == null) {
+            log.error("인증 정보가 없습니다");
+            throw new IllegalStateException("인증이 필요합니다");
+        }
+        
         // JWT에서 사용자 ID 추출 (subject 클레임에서)
         String userId = authentication.getName(); // JWT의 subject 클레임에서 사용자 ID
         log.info("홈 화면 확언 문구 요청 - 사용자 ID: {}", userId);
         
-        MainAffirmationResponseDto response = affirmationService.generateMainAffirmation(Long.parseLong(userId));
-        return ResponseEntity.ok(response);
+        try {
+            MainAffirmationResponseDto response = affirmationService.generateMainAffirmation(Long.parseLong(userId));
+            return ResponseEntity.ok(response);
+        } catch (NumberFormatException e) {
+            log.error("유효하지 않은 사용자 ID 형식: {}", userId);
+            throw new IllegalArgumentException("유효하지 않은 사용자 ID입니다");
+        }
     }
 }
