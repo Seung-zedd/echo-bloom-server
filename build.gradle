@@ -35,6 +35,9 @@ dependencyManagement {
 
 dependencies {
 
+    // DB 스키마 버전 관리하는 도구
+    implementation 'org.flywaydb:flyway-core'
+
     // FeignClient(해커톤 끝나고 나중에 WebClient로 migrate할 예정)
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
@@ -91,26 +94,6 @@ dependencies {
     testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 }
-
-// MapStruct generated source 경로 설정
-def mapstructGeneratedDir = file('build/generated/sources/annotationProcessor/java/main')
-
-sourceSets {
-    main {
-        java {
-            srcDirs += mapstructGeneratedDir
-        }
-    }
-}
-
-tasks.named('compileJava') {
-    options.generatedSourceOutputDirectory = mapstructGeneratedDir
-}
-
-clean {
-    delete mapstructGeneratedDir
-}
-
 
 
 /*// querydsl generated 경로 설정

@@ -13,7 +13,7 @@ spring:
   # JPA 설정 (테스트에서 테이블 자동 생성)
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     database-platform: org.hibernate.dialect.H2Dialect  # H2 DB dialect
 
   # 카카오 로그인 설정 (테스트용 더미 값 – 실제 키 대신)
@@ -37,9 +37,6 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-      resourceserver:
-        jwt:
-          issuer-uri: ""  # test에서 issuer-uri 제공 – 자동 JwtDecoder 생성[3]
 
 # JWT 설정 (당신 제공 값 유지 – 더미 secret)
 jwt:

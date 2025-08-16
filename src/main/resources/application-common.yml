@@ -19,10 +19,3 @@ spring:
     hibernate:
       naming:
         physical-strategy: com.checkmate.bub.global.config.CamelCaseToSnakeAndUpperCaseStrategy
-
-    # 추가: OAuth2 Resource Server 설정 (JWT issuer-uri – Kakao 토큰 검증)
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          dpop: false  // DPoP disable (문서 미지원 – 테스트 필요[2])

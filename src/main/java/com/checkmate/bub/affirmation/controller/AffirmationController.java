@@ -1,5 +1,6 @@
 package com.checkmate.bub.affirmation.controller;
 
+import com.checkmate.bub.affirmation.dto.MainAffirmationResponseDto;
 import com.checkmate.bub.affirmation.dto.ToneExampleResponseDto;
 import com.checkmate.bub.affirmation.service.AffirmationService;
 import jakarta.validation.constraints.NotEmpty;
@@ -7,10 +8,9 @@ import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -31,5 +31,26 @@ public class AffirmationController {
 
         ToneExampleResponseDto response = affirmationService.createToneExamples(problemIds);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/main")
+    public ResponseEntity<MainAffirmationResponseDto> getMainAffirmation(Authentication authentication) {
+        
+        if (authentication == null || authentication.getName() == null) {
+            log.error("인증 정보가 없습니다");
+            throw new IllegalStateException("인증이 필요합니다");
+        }
+        
+        // JWT에서 사용자 ID 추출 (subject 클레임에서)
+        String userId = authentication.getName(); // JWT의 subject 클레임에서 사용자 ID
+        log.info("홈 화면 확언 문구 요청 - 사용자 ID: {}", userId);
+        
+        try {
+            MainAffirmationResponseDto response = affirmationService.generateMainAffirmation(Long.parseLong(userId));
+            return ResponseEntity.ok(response);
+        } catch (NumberFormatException e) {
+            log.error("유효하지 않은 사용자 ID 형식: {}", userId);
+            throw new IllegalArgumentException("유효하지 않은 사용자 ID입니다");
+        }
     }
 }

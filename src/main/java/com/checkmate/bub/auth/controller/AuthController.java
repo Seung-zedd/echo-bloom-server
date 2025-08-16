@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.Duration;
@@ -29,7 +30,7 @@ public class AuthController {
     @GetMapping("/callback")
     public ResponseEntity<Void> kakaoCallback(@RequestParam("code") String code, HttpServletResponse response) {
 
-        log.info("Callback called with code: {}", code);
+        log.info("Kakao callback invoked");
         AuthResponseDto authResponse = authService.loginWithKakao(code);
 
         // 유틸로 환경 체크
@@ -57,11 +58,13 @@ public class AuthController {
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
         // /home으로 리다이렉트
-        //todo: 리다이렉트 엔드포인트가 수정되면 변경할 것
-        log.info("Redirecting to /home.html");
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create("http://localhost:8080/home.html"))
-                .build();
+        //todo: 프론트 리다이렉트 홈 페이지 경로가 변경되면 수정할 것
+        log.info("Redirecting to /home-jwt.html");
+        URI redirectUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/home-jwt.html")
+                .build()
+                .toUri();
+        return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
     }
 
     @GetMapping("/api/check-auth")
