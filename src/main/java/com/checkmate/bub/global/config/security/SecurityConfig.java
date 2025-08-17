@@ -74,14 +74,12 @@ public class SecurityConfig {
                             .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll();  // /favicon.ico 허용 유지 (필요 시)
 
                     // 테스트용 인증 API 허용
-                    //todo: 프론트 통합 테스트할 때는 아래의 2개 경로 지울 것
                     // dev 환경에서만 공개
                     if ("dev".equals(activeProfile)) {
                         authorize.requestMatchers("/test/auth/**").permitAll();
                     }
 
                     authorize
-                            .requestMatchers("/api/v1/affirmations/tone-examples").permitAll() // 임시 테스트용
 
                             // 카테고리 생성 API는 인증된 사용자만 접근 가능(@PreAuthorize 대용)
                             .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").authenticated()
