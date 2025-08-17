@@ -34,13 +34,13 @@ public class AuthController {
         AuthResponseDto authResponse = authService.loginWithKakao(code);
 
         // 유틸로 환경 체크
-        boolean isDev = envUtil.isDevEnvironment();
-        boolean cookieSecure = !isDev;  // dev: false, prod: true
+        boolean isLocal = envUtil.isLocalEnvironment();
+        boolean cookieSecure = !isLocal;  // local: false, dev, prod: true
 
         // 액세스 토큰 쿠키 (ResponseCookie 사용)
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", authResponse.getAccessToken())
                 .httpOnly(true)          // JS 접근 불가
-                .secure(cookieSecure)    // dev: false, prod: true
+                .secure(cookieSecure)    // local: false, dev, prod: true
                 .sameSite("Strict")      // CSRF 방지 (여기서 설정 가능!)
                 .path("/")               // 전체 경로
                 .maxAge(Duration.ofSeconds(3600))  // 1시간

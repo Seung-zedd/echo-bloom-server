@@ -33,7 +33,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${spring.profiles.active:dev}")  // 기본 dev
+    @Value("${spring.profiles.active:local}")  // 기본 local
     private String activeProfile;
 
 
@@ -59,7 +59,7 @@ public class SecurityConfig {
 
                 // 4. HTTP 요청에 대한 접근 권한 설정
                 .authorizeHttpRequests(authorize -> {
-                    if ("dev".equals(activeProfile)) {
+                    if ("local".equals(activeProfile)) {
                         authorize
                                 .requestMatchers("/v3/api-docs", "/swagger-ui/**").permitAll();
                     }
@@ -74,8 +74,8 @@ public class SecurityConfig {
                             .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll();  // /favicon.ico 허용 유지 (필요 시)
 
                     // 테스트용 인증 API 허용
-                    // dev 환경에서만 공개
-                    if ("dev".equals(activeProfile)) {
+                    // local 환경에서만 공개
+                    if ("local".equals(activeProfile)) {
                         authorize.requestMatchers("/test/auth/**").permitAll();
                     }
 
@@ -106,7 +106,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:*", "http://localhost:3000", "http://localhost:8080"));  // dev 환경 localhost 포트 wildcard + 구체적 추가
+        configuration.setAllowedOrigins(List.of("http://localhost:*", "http://localhost:3000", "http://localhost:8080"));  // local 환경 localhost 포트 wildcard + 구체적 추가
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));  // OPTIONS 명시 허용 (preflight)
         configuration.setAllowedHeaders(List.of("*"));  // 모든 헤더 허용
         configuration.setAllowCredentials(true);  // 쿠키/credentials 허용
