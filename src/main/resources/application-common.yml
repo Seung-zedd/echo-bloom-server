@@ -3,22 +3,24 @@ spring:
   config:
     activate:
       on-profile: common
-  application:
-    name: echo-bloom-server
 
-  # H2 콘솔을 기본적으로 비활성화
-  h2:
-    console:
-      enabled: false
-    # JPA
+  # 애플리케이션 이름 설정 (공통)
+  application:
+    name: echo-bloom-server  # 원하는 이름으로 변경 (예: MySpringBootApp)
+
+  # 데이터베이스 드라이버 (공통)
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  # JPA 설정 (공통: format_sql과 naming strategy)
   jpa:
     properties:
       hibernate:
         format_sql: true
-
     hibernate:
       naming:
         physical-strategy: com.checkmate.bub.global.config.CamelCaseToSnakeAndUpperCaseStrategy
+
   # kakao 설정
   security:
     oauth2:
@@ -29,18 +31,15 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+        registration:
+          kakao:
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
 
-  # Flyway 설정 (추가)
+# Flyway 설정 (추가)
   flyway:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 1
-
-# clova 설정
-clova:
-  api-key: ${CLOVA_API_KEY}
-
-  # clova speech recognition 설정
-  speech-recognition:
-    client-id: ${CLOVA_CLIENT_ID}
-    client-secret: ${CLOVA_CLIENT_SECRET}
