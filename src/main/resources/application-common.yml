@@ -12,6 +12,11 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
 
+  # H2 콘솔 비활성화 (모든 환경에서 명시적으로 false 설정)
+  h2:
+    console:
+      enabled: false
+
   # JPA 설정 (공통: format_sql과 naming strategy)
   jpa:
     properties:
