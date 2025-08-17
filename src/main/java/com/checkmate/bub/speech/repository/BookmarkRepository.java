@@ -1,6 +1,6 @@
 package com.checkmate.bub.speech.repository;
 
-import com.checkmate.bub.speech.entity.BookmarkEntity;
+import com.checkmate.bub.speech.domain.BookmarkEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

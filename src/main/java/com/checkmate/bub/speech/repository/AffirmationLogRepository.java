@@ -1,6 +1,6 @@
 package com.checkmate.bub.speech.repository;
 
-import com.checkmate.bub.speech.entity.AffirmationLogEntity;
+import com.checkmate.bub.speech.domain.AffirmationLogEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

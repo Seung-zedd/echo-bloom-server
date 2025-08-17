@@ -1,6 +1,6 @@
 package com.checkmate.bub.speech.service;
 
-import com.checkmate.bub.speech.entity.BookmarkEntity;
+import com.checkmate.bub.speech.domain.BookmarkEntity;
 import com.checkmate.bub.speech.repository.BookmarkRepository;
 import com.checkmate.bub.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;

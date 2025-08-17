@@ -1,7 +1,7 @@
 package com.checkmate.bub.speech.controller;
 
 import com.checkmate.bub.speech.dto.BookmarkRequestDto;
-import com.checkmate.bub.speech.entity.BookmarkEntity;
+import com.checkmate.bub.speech.domain.BookmarkEntity;
 import com.checkmate.bub.speech.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,7 @@ package com.checkmate.bub.speech.controller;
 
 import com.checkmate.bub.speech.dto.SpeechCompareResponseDto;
 import com.checkmate.bub.speech.dto.SpeechRecognitionResponseDto;
-import com.checkmate.bub.speech.entity.AffirmationLogEntity;
+import com.checkmate.bub.speech.domain.AffirmationLogEntity;
 import com.checkmate.bub.speech.service.SpeechService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

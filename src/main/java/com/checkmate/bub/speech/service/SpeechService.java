@@ -5,7 +5,7 @@ import com.checkmate.bub.category.constant.CategoryType;
 import com.checkmate.bub.speech.constant.DifferenceType;
 import com.checkmate.bub.speech.dto.SpeechCompareResponseDto;
 import com.checkmate.bub.speech.dto.SpeechRecognitionResponseDto;
-import com.checkmate.bub.speech.entity.AffirmationLogEntity;
+import com.checkmate.bub.speech.domain.AffirmationLogEntity;
 import com.checkmate.bub.speech.repository.AffirmationLogRepository;
 import com.checkmate.bub.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
