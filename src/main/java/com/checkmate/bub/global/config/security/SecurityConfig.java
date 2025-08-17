@@ -83,8 +83,6 @@ public class SecurityConfig {
                     authorize
                             .requestMatchers("/api/v1/affirmations/tone-examples").permitAll() // 임시 테스트용
 
-                            // 비회원용 확언 체험 API 경로는 인증 없이 모두 허용
-                            .requestMatchers("/api/affirmations/guest").permitAll()
                             // 카테고리 생성 API는 인증된 사용자만 접근 가능(@PreAuthorize 대용)
                             .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").authenticated()
 

@@ -29,7 +29,6 @@ public class User extends BaseEntity {
     @Column(length = 500)
     private String profileImageUrl;
     private String email;
-    private String displayName; // 앱에서 사용할 별칭
     private LocalDate dateOfBirth; // 생년월일
     private String gender; // 성
     private String interest; // 관심사
