@@ -71,7 +71,7 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.OPTIONS, "/main.html").permitAll()
 
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
-                            .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll();  // /favicon.ico 허용 유지 (필요 시)
+                            .requestMatchers("/auth/kakao/callback").permitAll();
 
                     // 테스트용 인증 API 허용
                     // local 환경에서만 공개
@@ -84,13 +84,12 @@ public class SecurityConfig {
                             // 카테고리 생성 API는 인증된 사용자만 접근 가능(@PreAuthorize 대용)
                             .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").authenticated()
 
-                            //todo: 승진님과 논의해보고 뷰 계층 경로 어디까지 허용할지 정할 것
-                            .requestMatchers("/app.js", "/app2.js", "/img/**", "/css/**", "/js/**", "/static/**", "/", "/main.html", "/error").permitAll()
+                            .requestMatchers("/", "/main.html", "/img/**", "/css/**", "/error", "/favicon.ico").permitAll()
                             .requestMatchers("/views/**").authenticated()  // HTML 파일 추가
 
                             // /home과 .well-known 경로 허용 추가 (에러 방지)
                             .requestMatchers("/.well-known/**").permitAll()
-                            .requestMatchers("/home-jwt.html").authenticated()  // 리다이렉트 경로 인증
+
                             // 위에서 지정한 경로 외의 모든 요청은 반드시 인증(로그인) 필요
                             .anyRequest().authenticated();
 

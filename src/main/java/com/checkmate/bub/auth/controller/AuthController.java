@@ -57,11 +57,12 @@ public class AuthController {
                 .build();
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-        // /home으로 리다이렉트
-        //todo: 프론트 리다이렉트 홈 페이지 경로가 변경되면 수정할 것
-        log.info("Redirecting to /home-jwt.html");
+        // 신규 사용자인지 기존 사용자인지에 따라 다른 페이지로 리다이렉트
+        String redirectPath = authResponse.isNewUser() ? "/views/search.html" : "/home.html";
+        log.info("Redirecting to {} (isNewUser: {})", redirectPath, authResponse.isNewUser());
+        
         URI redirectUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/home-jwt.html")
+                .path(redirectPath)
                 .build()
                 .toUri();
         return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();

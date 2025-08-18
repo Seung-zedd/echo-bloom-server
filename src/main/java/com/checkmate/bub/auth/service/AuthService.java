@@ -58,6 +58,7 @@ public class AuthService {
             KakaoUserInfoResponseDto userInfo = getKakaoUserInfo(tokenResponse.getAccessToken());
 
             // 3. 받은 사용자 정보로 우리 서비스의 회원을 찾거나, 없으면 새로 가입시킵니다.
+            boolean isNewUser = !userRepository.existsByKakaoId(userInfo.getId());
             User user = userRepository.findByKakaoId(userInfo.getId())
                     .orElseGet(() -> registerNewUser(userInfo));
 
@@ -69,6 +70,7 @@ public class AuthService {
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
+                    .isNewUser(isNewUser)
                     .build();
         } catch (WebClientResponseException e) {
             log.error("Kakao API call failed: {}", e.getMessage());
