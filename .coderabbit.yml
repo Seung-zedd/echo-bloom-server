@@ -13,7 +13,10 @@ reviews:
   security:
     enabled: true  # 보안 리뷰 활성화
     severity_threshold: "medium"  # 중간 이상 취약점만 보고 (low, medium, high 중 선택 가능)
-  # 플러그인 추가: 보안 스캔 플러그인 활성화 (기존 리뷰에 보안 레이어 추가)
-  plugins:
-    - name: "security-scan"  # CodeRabbit의 보안 스캔 플러그인
-      enabled: true
+  exclusions:
+    - "*/clova/*"
+  depth: "medium"
+# 플러그인 추가: 보안 스캔 플러그인 활성화 (기존 리뷰에 보안 레이어 추가)
+plugins:
+  - name: "security-scan"  # CodeRabbit의 보안 스캔 플러그인
+    enabled: true
