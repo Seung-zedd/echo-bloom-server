@@ -1,0 +1,96 @@
+<?php // views/search2.php — #stage 안에 삽입될 조각만 반환 ?>
+<div class="view" id="surveyChoices">
+  <style>
+    .q-title{
+      margin: 0 0 6px;
+      font-weight: 800;
+      font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+      font-size: clamp(18px, 5vw, 22px);
+      letter-spacing: -.02em;
+      color: #0f4a24;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .q-sub{
+      margin: 0 0 30px 0;
+      font-size: clamp(12px, 3.2vw, 13px);
+      color: rgba(0,0,0,.55);
+      text-align: center;
+    }
+
+    .choices{
+      list-style: none; padding: 0; margin: 0 0 18px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .opt{
+      width: 100%;
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 45px; padding: 12px 60px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.85);
+      border: 2px solid #1e7a39;
+      color: #0f4a24; font-weight: 700; font-size: 0.85rem;
+      font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+      text-align: center; cursor: pointer;
+      transition: transform .06s ease, background .15s ease, color .15s ease, border-color .15s ease;
+    }
+    .opt:hover {
+      background: var(--accent);  /* 버튼색을 포인트색으로 */
+      color: #fff;                /* 글자색은 흰색으로 */
+      border-color: var(--accent);
+    }
+    .opt:active{ transform: scale(.98); }
+    .opt.selected{
+      background: #1e7a39; color: #fff; border-color: #1e7a39;
+    }
+    .opt[disabled]{ opacity:.55; cursor: not-allowed; }
+
+    .bottom{ margin-top: 16px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+    .cta{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:0 36px; height:40px; border-radius:999px;
+      background: rgba(255,255,255,.85);
+      border:2px solid #1e7a39; color:#0f4a24; font-weight:800; font-size:1.05rem;
+      text-decoration:none; cursor:pointer; white-space:nowrap;
+      box-shadow:0 6px 16px rgba(30,122,57,.12);
+      transition: transform .06s ease, background .2s ease, color .2s ease, border-color .2s ease;
+    }
+        .cta:hover {
+      background: var(--accent);  /* 버튼색을 포인트색으로 */
+      color: #fff;                /* 글자색은 흰색으로 */
+      border-color: var(--accent);
+    }
+    .cta.is-disabled{
+      opacity:.45; cursor:not-allowed; pointer-events:none;
+      filter: grayscale(20%);
+    }
+    .hint{ margin:0; font-size:12px; color:rgba(0,0,0,.55); }
+  </style>
+
+
+  <div>
+    <h3 class="q-title">Q.<br/>지금 어떤 문제를 겪고 있나요?</h3>
+    <p class="q-sub">(최대 3개까지 선택해주세요.) <span id="selCount" aria-live="polite"></span></p>
+
+    <ul class="choices" id="choiceList">
+      <li><button type="button" class="opt" data-value="일상에 활력이 없어요." name="일상에 활력이 없어요.">일상에 활력이 없어요.</button></li>
+      <li><button type="button" class="opt" data-value="계획을 끝내지 못하고 집중력이 떨어져요." name="계획을 끝내지 못하고 집중력이 떨어져요.">계획을 끝내지 못하고 집중력이 떨어져요.</button></li>
+      <li><button type="button" class="opt" data-value="걱정이 많고 불안해요." name="걱정이 많고 불안해요.">걱정이 많고 불안해요.</button></li>
+      <li><button type="button" class="opt" data-value="과거를 후회해요." name="과거를 후회해요.">과거를 후회해요.</button></li>
+      <li><button type="button" class="opt" data-value="스스로가 부족하게 느껴지고 자신감이 없어요." name="스스로가 부족하게 느껴지고 자신감이 없어요.">스스로가 부족하게 느껴지고 자신감이 없어요.</button></li>
+      <li><button type="button" class="opt" data-value="누군가를 용서하는 것이 어려워요." name="누군가를 용서하는 것이 어려워요.">누군가를 용서하는 것이 어려워요.</button></li>
+      <li><button type="button" class="opt" data-value="외롭고 소속감을 느끼기 힘들어요." name="외롭고 소속감을 느끼기 힘들어요.">외롭고 소속감을 느끼기 힘들어요.</button></li>
+      <li><button type="button" class="opt" data-value="뭘 위해 살아야 하는지 모르겠어요." name="뭘 위해 살아야 하는지 모르겠어요.">뭘 위해 살아야 하는지 모르겠어요.</button></li>
+      <li><button type="button" class="opt" data-value="내가 모든 걸 망친 것 같고 제자리를 느껴요." name="내가 모든 걸 망친 것 같고 제자리를 느껴요.">내가 모든 걸 망친 것 같고 제자리를 느껴요.</button></li>
+    </ul>
+
+    <div class="bottom">
+      <a href="#" class="cta is-disabled" id="toNext" aria-disabled="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+
+    </div>
+  </div>
+</div>

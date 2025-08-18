@@ -1,0 +1,80 @@
+<?php // views/search3.php ?>
+<div class="view" id="toneStep">
+  <style>
+    .q-wrap{ width:100%; max-width:360px; margin:0 auto; text-align:center; color:#0f4a24; }
+    .q-title{ margin:0 0 6px; font-weight:800; font-size:clamp(18px,5vw,22px); font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif; letter-spacing:-.02em; }
+    .q-sub{ margin:0 0 60px; font-size:clamp(12px,3.2vw,13px); color:rgba(0,0,0,.55); }
+
+    .choices{ list-style:none; margin:0 0 16px; padding:0; display:flex; flex-direction:column; gap:12px; }
+    .opt{
+      width:100%; min-height:48px; padding:12px 16px;
+      display:inline-flex; align-items:center; justify-content:center; text-align:center;
+      border-radius:999px; background:rgba(255,255,255,.85); border:2px solid #1e7a39;
+      color:#0f4a24; font-weight:700; font-size:0.9rem; cursor:pointer;
+      font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+      transition:transform .06s ease, background .15s ease, color .15s ease, border-color .15s ease;
+    }
+    .opt:active{ transform:scale(.98) }
+    .opt.selected{ background:#1e7a39; border-color:#1e7a39; color:#fff }
+
+    /* 버튼 가로 나란히 */
+.btn-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 120px; /* 화면 하단으로 밀기 */
+  padding: 20px 0;
+  gap: 100px;
+}
+
+.btn-row .cta {
+  flex: 1;
+  height: 40px;
+  border-radius: 999px;
+  font-size: 0.5rem;
+  font-weight: 700;
+}
+
+.btn-row .outline {
+  background: transparent;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+}
+
+.btn-row .is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+  </style>
+
+
+  <div class="q-wrap">
+    <h3 class="q-title">Q. 어떤 톤이 마음에 드나요?</h3>
+    <p class="q-sub">셋 중 하나를 골라주세요.</p>
+
+    <ul class="choices" id="toneList">
+      <li><button type="button" class="opt" data-value="hopeful_soft">“나는 어떤 어려움 속에서도 희망을 찾을 수 있어.”</button></li>
+      <li><button type="button" class="opt" data-value="hopeful_firm">“어려워도 괜찮아, 나는 희망을 찾을 수 있을 거야.”</button></li>
+      <li><button type="button" class="opt" data-value="hopeful_strong">“어떤 어려움도 나를 꺾을 수 없다, 나는 반드시 희망을 찾아낼 것이다.”</button></li>
+    </ul>
+
+     <!-- 버튼 영역 -->
+    <div class="btn-row">
+
+        <button type="button" id="prevStep" class="cta outline">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 19l-7-7 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <button type="button" id="toNext" class="cta is-disabled" aria-disabled="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+        
+    </div>
+
+  </div>
+</div>

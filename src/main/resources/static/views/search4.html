@@ -1,0 +1,68 @@
+
+  <style>
+    .done-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;   /* 세로 중앙 */
+      align-items: center;       /* 가로 중앙 */
+      height: 100%;               /* 부모 높이 채움 */
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .done-wrap{
+      max-width:360px;
+      width: 100%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:22px;
+      color: var(--ink, #0f4a24);
+    }
+
+    .done-copy{
+      margin:0;
+      font-weight:800;
+      font-size: clamp(18px, 5vw, 22px);
+      line-height:1.8;
+      letter-spacing:-.02em;
+      font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+      text-shadow: 0 1px 0 rgba(255,255,255,.25);
+    }
+
+    .done-cta{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:100%;
+      max-width: 320px;
+      height:54px; padding:0 28px;
+      border-radius:999px;
+      background: rgba(255,255,255,.9);
+      border: 2px solid var(--accent, #1e7a39);
+      color: var(--ink, #0f4a24);
+      font-weight:800; font-size:1.02rem;
+      text-decoration:none; white-space:nowrap; cursor:pointer;
+      box-shadow: 0 6px 16px rgba(30,122,57,.12);
+      transition: transform .06s ease, background .2s ease, color .2s ease, border-color .2s ease;
+    }
+    .done-cta:hover{ background: var(--accent, #1e7a39); color:#fff; border-color: var(--accent, #1e7a39); }
+    .done-cta:active{ transform: scale(.98); }
+  </style>
+
+<div class="view" id="finalStep">
+  <div class="done-container">
+    <div class="done-wrap">
+      <p class="done-copy">
+        좋아요!<br>
+        변화를 위한 모든 준비가 끝났어요.
+      </p>
+
+     <div id="debugArea" style="padding:10px; background:#f8f8f8; font-size:0.9rem; margin-bottom:1rem;">
+    <strong>선택한 문제:</strong> <span id="debugProblems"></span><br>
+    <strong>선택한 톤:</strong> <span id="debugTone"></span><br>
+    <span>디버깅 편하게 보시라고 만든 영역입니다. 나중에 지울 예정.</span>
+  </div> 
+  
+      <a href="../home.html" class="done-cta" id="startNow">에코블룸 시작하기</a>
+    </div>
+  </div>
+</div>

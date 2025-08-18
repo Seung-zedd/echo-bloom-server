@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>모바일 시작 화면</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+  @font-face { 
+    font-family: 'HakgyoansimNadeuriTTF-B';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimNadeuriTTF-B.woff2') format('woff2');
+    font-weight: 700; font-style: normal;
+  }
+  :root{
+    --maxw: 420px;
+    --accent: #ffcc33; --btn-bg: rgba(255,255,255,.12);
+    --btn-border: rgba(255,255,255,.65);
+    --text: #fff; --sub: rgba(255,255,255,.8);
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0; font-family:Pretendard,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--text); background:#1a7a29}
+
+  /* 배경 + 오버레이는 screen 레이어에서 고정 */
+  .screen{
+    position:relative;
+    min-height:100vh;
+    max-width:420px;
+    margin:0 auto;
+    background:url("img/basic.png") center/cover no-repeat;
+    padding-left:max(20px, env(safe-area-inset-left));
+    padding-right:max(20px, env(safe-area-inset-right));
+  }
+  
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 1;
+  pointer-events: none; /* 필요 시 클릭 막고 싶으면 제거 */
+}
+
+  /* 실제로 페이드할 컨텐츠 레이어 */
+  #app{
+    position:relative;
+    z-index:2; /* overlay 위 */
+    min-height:100vh;
+    padding: max(6vh,40px) 20px 28px;
+    display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .leaving{ opacity:0; transform: translateY(6px); }
+  .entering{ opacity:0; transform: translateY(6px); }
+  .entered{ opacity:1; transform: translateY(0); }
+
+    /* 오버레이(풀스크린) 화면일 때 #app 패딩 제거 */
+    #app.full {
+    padding: 0 !important;
+    overflow:hidden;
+    }
+
+  /* 콘텐츠 스타일들 (기존과 동일) */
+  .headline{
+    margin-top:20vh; text-align:center;
+    font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+    font-size: clamp(20px, 5.5vw, 26px);
+    letter-spacing:-0.02em; text-shadow:0 1px 0 rgba(0,0,0,.15); line-height:1.4;
+  }
+  .headline .accent{ color:var(--accent) }
+  .flower{ width:min(44vh, 220px); max-width:35%; height:auto; display:block; margin:24px auto 0;
+    filter: drop-shadow(0 8px 14px rgba(0,0,0,.18)); user-select:none; -webkit-user-drag:none; }
+  .cta{ width:100%; display:flex; flex-direction:column; align-items:center; gap:14px; margin-bottom:20vh; }
+  .kakao-btn{
+    width:min(300px, 92%); padding:16px 22px; border-radius:999px;
+    border:1.5px solid var(--btn-border); background:var(--btn-bg); color:#fff;
+    font-weight:700; font-size:16px; text-align:center; backdrop-filter: blur(4px);
+    -webkit-tap-highlight-color: transparent; cursor:pointer;
+    transition: transform .06s ease, background .2s ease, opacity .2s ease;
+  }
+  .kakao-btn:hover{ background:rgba(255,255,255,.25) }
+  .kakao-btn:active{ transform:scale(.98) }
+  .kakao-btn:focus-visible{ outline:2px solid #fff; outline-offset:3px }
+  .skip{ font-size:13px; color:var(--sub); text-decoration:none; }
+  .skip:active{ opacity:.7 }
+</style>
+</head>
+<body>
+
+  <div class="screen">
+    <main id="app" role="main" class="entered">
+      <!-- 메인 콘텐츠 (오버레이 필요 없음) -->
+      <h1 class="headline">변화는 바로 <span class="accent">지금</span>부터</h1>
+      <img src="img/flower.png" alt="노란색 꽃" class="flower" />
+      <div class="cta">
+        <button type="button" class="kakao-btn" id="startKakao">카카오로 시작하기</button>
+        <a href="#" class="skip" id="skipLink">로그인 없이 이용해볼게요.</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</body>
+</html>
