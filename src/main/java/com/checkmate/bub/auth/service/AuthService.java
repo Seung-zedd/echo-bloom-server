@@ -135,4 +135,13 @@ public class AuthService {
                 .build();
         return userRepository.save(newUser);
     }
+    
+    // AuthController에서 사용할 getter 메서드들
+    public String getClientId() {
+        return clientId;
+    }
+    
+    public String getRedirectUri() {
+        return redirectUri;
+    }
 }

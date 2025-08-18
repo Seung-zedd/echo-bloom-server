@@ -24,6 +24,10 @@ public class UserService {
     private final CategoryRepository categoryRepository;
     private final UserCategoryBridgeRepository userCategoryBridgeRepository;
 
+    public List<UserCategoryBridge> getUserCategories(Long userId) {
+        return userCategoryBridgeRepository.findByUserId(userId);
+    }
+    
     @Transactional
     public void updateUserCategories(Long userId, UserCategoryRequestDto requestDto) {
         User user = userRepository.findById(userId)
@@ -43,5 +47,17 @@ public class UserService {
                 .toList();
 
         userCategoryBridgeRepository.saveAll(bridges);
+    }
+    
+    @Transactional
+    public void withdrawUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+                
+        // 사용자와 연관된 데이터 삭제
+        userCategoryBridgeRepository.deleteByUserId(userId);
+        
+        // 사용자 삭제
+        userRepository.delete(user);
     }
 }

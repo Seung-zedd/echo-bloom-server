@@ -71,7 +71,8 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.OPTIONS, "/main.html").permitAll()
 
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
-                            .requestMatchers("/auth/kakao/callback").permitAll();
+                            .requestMatchers("/auth/kakao/callback").permitAll()
+                            .requestMatchers("/auth/kakao/login-url").permitAll();
 
                     // 테스트용 인증 API 허용
                     // local 환경에서만 공개
@@ -81,11 +82,12 @@ public class SecurityConfig {
 
                     authorize
 
-                            // 카테고리 생성 API는 인증된 사용자만 접근 가능(@PreAuthorize 대용)
-                            .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").authenticated()
 
-                            .requestMatchers("/", "/main.html", "/img/**", "/css/**", "/error", "/favicon.ico").permitAll()
-                            .requestMatchers("/views/**").authenticated()  // HTML 파일 추가
+                            // 익명 사용자용 리소스 (메인 랜딩 페이지용만)
+                            .requestMatchers("/", "/main.html", "/app.js", "/*.css", "/img/**", "/music/**", "/css/**", "/error", "/favicon.ico").permitAll()
+                            
+                            // 인증된 사용자용 리소스 (로그인 후 접근 가능)
+                            .requestMatchers("/home.html", "/app_*.js", "/views/**").authenticated()
 
                             // /home과 .well-known 경로 허용 추가 (에러 방지)
                             .requestMatchers("/.well-known/**").permitAll()

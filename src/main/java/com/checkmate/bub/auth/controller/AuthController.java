@@ -41,7 +41,7 @@ public class AuthController {
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", authResponse.getAccessToken())
                 .httpOnly(true)          // JS 접근 불가
                 .secure(cookieSecure)    // local: false, dev, prod: true
-                .sameSite("Strict")      // CSRF 방지 (여기서 설정 가능!)
+                .sameSite("Lax")         // Strict -> Lax로 변경 (리다이렉트 시 쿠키 전달 허용)
                 .path("/")               // 전체 경로
                 .maxAge(Duration.ofSeconds(3600))  // 1시간
                 .build();
@@ -51,7 +51,7 @@ public class AuthController {
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authResponse.getRefreshToken())
                 .httpOnly(true)
                 .secure(cookieSecure)
-                .sameSite("Strict")
+                .sameSite("Lax")         // Strict -> Lax로 변경
                 .path("/")
                 .maxAge(Duration.ofSeconds(604800))  // 7일
                 .build();
@@ -71,5 +71,47 @@ public class AuthController {
     @GetMapping("/api/check-auth")
     public ResponseEntity<String> checkAuth() {
         return ResponseEntity.ok("Authenticated");
+    }
+    
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletResponse response) {
+        // 쿠키 삭제를 위해 만료시간을 0으로 설정
+        ResponseCookie expiredAccessCookie = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(!envUtil.isLocalEnvironment())
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.addHeader("Set-Cookie", expiredAccessCookie.toString());
+        
+        ResponseCookie expiredRefreshCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(!envUtil.isLocalEnvironment())
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.addHeader("Set-Cookie", expiredRefreshCookie.toString());
+        
+        return ResponseEntity.ok("Logout successful");
+    }
+    
+    @GetMapping("/login-url")
+    public ResponseEntity<String> getKakaoLoginUrl() {
+        String kakaoLoginUrl = buildKakaoAuthUrl();
+        return ResponseEntity.ok(kakaoLoginUrl);
+    }
+    
+    private String buildKakaoAuthUrl() {
+        String baseUrl = "https://kauth.kakao.com/oauth/authorize";
+        // AuthService에서 이미 주입받은 설정값 사용
+        String scope = "profile_nickname profile_image account_email";
+        
+        return String.format("%s?client_id=%s&redirect_uri=%s&response_type=code&scope=%s",
+                baseUrl, 
+                authService.getClientId(), 
+                authService.getRedirectUri(), 
+                scope);
     }
 }
