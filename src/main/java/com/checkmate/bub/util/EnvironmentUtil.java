@@ -12,8 +12,8 @@ public class EnvironmentUtil {
 
     private final Environment environment;
 
-    public boolean isDevEnvironment() {
-        return Arrays.asList(environment.getActiveProfiles()).contains("dev");
+    public boolean isLocalEnvironment() {
+        return Arrays.asList(environment.getActiveProfiles()).contains("local");
     }
 
 }

@@ -1,0 +1,53 @@
+<style>
+/* 반짝이는 애니메이션 */
+@keyframes glow {
+  0%   { filter: drop-shadow(0 0 4px rgba(255, 200, 0, 0.8)); opacity: 1; }
+  50%  { filter: drop-shadow(0 0 12px rgba(255, 230, 150, 1)); opacity: 0.2; }
+  100% { filter: drop-shadow(0 0 4px rgba(255, 200, 0, 0.8)); opacity: 1; }
+}
+
+.glowing {
+  animation: glow 1.8s ease-in-out infinite;
+}
+
+/* 마이크 토글 버튼 스타일 */
+.mic-btn {
+  background: transparent; /* 흰 배경 제거 */
+  border: none;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+</style>
+
+<section style="display:flex;flex-direction:column;justify-content:center;align-items:center;">
+  <!-- 1) 문장 버블 -->
+  <div class="bubble" style="width:340px;">
+    <div id="readQuote" style="font-weight:700;font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;font-size:1.05rem;">
+      <!-- 메인 스크립트에서 주입됨 -->
+    </div>
+  </div>
+
+  <!-- 2) 버블 밖 이미지 -->
+  <img src="img/꽃봉우리.png" alt="꽃봉우리"
+       style="display:block;max-width:120px;width:100%;height:auto;margin:60px 0 0 0;">
+
+  <!-- 3) 안내문 -->
+  <div style="font-size:0.85rem;color:white;text-align:center;margin-top:10px;">
+    아래의 꽃 버튼을 눌러 당신의 목소리를 들려주세요.<br/>
+    문장을 모두 말한 뒤 다시 버튼을 눌러 녹음을 종료해주세요.
+  </div>
+
+<!-- 꽃 아이콘 마이크 토글 버튼 -->
+<button id="micToggle" class="mic-btn" aria-pressed="false" type="button">
+  <img id="flowerIcon" src="img/flower-icon.png" alt="꽃"
+       style="width:48px;height:48px;display:block;">
+</button>
+
+
+  <!-- (선택) 실시간 인식 결과 표시 영역
+  <div id="transcript" style="margin-top:6px;max-width:420px;font-size:.9rem;color:#222;text-align:center;"></div>
+ -->
+
+</section>

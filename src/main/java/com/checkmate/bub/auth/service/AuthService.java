@@ -3,9 +3,12 @@ package com.checkmate.bub.auth.service;
 import com.checkmate.bub.auth.dto.AuthResponseDto;
 import com.checkmate.bub.auth.dto.KakaoTokenResponseDto;
 import com.checkmate.bub.auth.dto.KakaoUserInfoResponseDto;
+import com.checkmate.bub.bridge.repository.UserCategoryBridgeRepository;
+import com.checkmate.bub.category.constant.CategoryType;
 import com.checkmate.bub.global.jwt.JwtTokenProvider;
 import com.checkmate.bub.user.domain.User;
 import com.checkmate.bub.user.repository.UserRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,11 +34,15 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final WebClient webClient;
+    private final UserCategoryBridgeRepository userCategoryBridgeRepository;
 
+    // AuthController에서 사용할 getter 메서드들
+    @Getter
     @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
     private String clientId;
     @Value("${spring.security.oauth2.client.registration.kakao.client-secret}")
     private String clientSecret;
+    @Getter
     @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
     private String redirectUri;
     @Value("${spring.security.oauth2.client.provider.kakao.token-uri}")
@@ -60,6 +67,12 @@ public class AuthService {
             // 3. 받은 사용자 정보로 우리 서비스의 회원을 찾거나, 없으면 새로 가입시킵니다.
             User user = userRepository.findByKakaoId(userInfo.getId())
                     .orElseGet(() -> registerNewUser(userInfo));
+            
+            // Check if user has completed full onboarding (both problems and tone selected)
+            boolean hasProblems = userCategoryBridgeRepository.existsByUserIdAndCategoryType(user.getId(), CategoryType.PROBLEM);
+            boolean hasTone = userCategoryBridgeRepository.existsByUserIdAndCategoryType(user.getId(), CategoryType.TONE);
+            boolean hasCompletedOnboarding = hasProblems && hasTone;
+            boolean isNewUser = !hasCompletedOnboarding;
 
             // 4. 우리 서비스의 자체 JWT를 생성하여 반환합니다.
             String accessToken = jwtTokenProvider.createAccessToken(user.getId());
@@ -69,6 +82,7 @@ public class AuthService {
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
+                    .isNewUser(isNewUser)
                     .build();
         } catch (WebClientResponseException e) {
             log.error("Kakao API call failed: {}", e.getMessage());
@@ -133,4 +147,5 @@ public class AuthService {
                 .build();
         return userRepository.save(newUser);
     }
+
 }

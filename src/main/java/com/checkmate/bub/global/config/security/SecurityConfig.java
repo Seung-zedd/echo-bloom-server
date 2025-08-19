@@ -33,7 +33,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${spring.profiles.active:dev}")  // 기본 dev
+    @Value("${spring.profiles.active:local}")  // 기본 local
     private String activeProfile;
 
 
@@ -59,7 +59,7 @@ public class SecurityConfig {
 
                 // 4. HTTP 요청에 대한 접근 권한 설정
                 .authorizeHttpRequests(authorize -> {
-                    if ("dev".equals(activeProfile)) {
+                    if ("local".equals(activeProfile)) {
                         authorize
                                 .requestMatchers("/v3/api-docs", "/swagger-ui/**").permitAll();
                     }
@@ -71,30 +71,27 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.OPTIONS, "/main.html").permitAll()
 
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
-                            .requestMatchers("/auth/kakao/callback", "/favicon.ico").permitAll();  // /favicon.ico 허용 유지 (필요 시)
+                            .requestMatchers("/auth/kakao/callback").permitAll()
+                            .requestMatchers("/auth/kakao/login-url").permitAll();
 
                     // 테스트용 인증 API 허용
-                    //todo: 프론트 통합 테스트할 때는 아래의 2개 경로 지울 것
-                    // dev 환경에서만 공개
-                    if ("dev".equals(activeProfile)) {
+                    // local 환경에서만 공개
+                    if ("local".equals(activeProfile)) {
                         authorize.requestMatchers("/test/auth/**").permitAll();
                     }
 
                     authorize
-                            .requestMatchers("/api/v1/affirmations/tone-examples").permitAll() // 임시 테스트용
 
-                            // 비회원용 확언 체험 API 경로는 인증 없이 모두 허용
-                            .requestMatchers("/api/affirmations/guest").permitAll()
-                            // 카테고리 생성 API는 인증된 사용자만 접근 가능(@PreAuthorize 대용)
-                            .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").authenticated()
 
-                            //todo: 승진님과 논의해보고 뷰 계층 경로 어디까지 허용할지 정할 것
-                            .requestMatchers("/app.js", "/app2.js", "/img/**", "/css/**", "/js/**", "/static/**", "/", "/main.html", "/error").permitAll()
-                            .requestMatchers("/views/**").authenticated()  // HTML 파일 추가
+                            // 익명 사용자용 리소스 (메인 랜딩 페이지용만)
+                            .requestMatchers("/", "/main.html", "/app.js", "/*.css", "/img/**", "/music/**", "/css/**", "/error", "/favicon.ico").permitAll()
+                            
+                            // 인증된 사용자용 리소스 (로그인 후 접근 가능)
+                            .requestMatchers("/home.html", "/app_*.js", "/views/**").authenticated()
 
                             // /home과 .well-known 경로 허용 추가 (에러 방지)
                             .requestMatchers("/.well-known/**").permitAll()
-                            .requestMatchers("/home-jwt.html").authenticated()  // 리다이렉트 경로 인증
+
                             // 위에서 지정한 경로 외의 모든 요청은 반드시 인증(로그인) 필요
                             .anyRequest().authenticated();
 
@@ -110,7 +107,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:*", "http://localhost:3000", "http://localhost:8080"));  // dev 환경 localhost 포트 wildcard + 구체적 추가
+        configuration.setAllowedOrigins(List.of("http://localhost:*", "http://localhost:3000", "http://localhost:8080", "http://echobloom.co.kr", "https://echobloom.co.kr"));  // local 환경 + echobloom.co.kr 도메인 추가
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));  // OPTIONS 명시 허용 (preflight)
         configuration.setAllowedHeaders(List.of("*"));  // 모든 헤더 허용
         configuration.setAllowCredentials(true);  // 쿠키/credentials 허용

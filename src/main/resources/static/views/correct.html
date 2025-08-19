@@ -1,0 +1,41 @@
+<section style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:16px;">
+  <!-- 버블 (문장 + 우상단 북마크 버튼) -->
+  <div class="bubble" style="position:relative;width:340px;">
+    <button id="bookmarkToggle" type="button" aria-pressed="false" title="북마크"
+            style="position:absolute;top:8px;right:8px;border:none;background:transparent;cursor:pointer;display:grid;place-items:center;">
+      <!-- 비활성(테두리 별) -->
+      <svg id="bookmarkIcon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+              fill="none" stroke="#f4c430" stroke-width="2" stroke-linejoin="round"></path>
+      </svg>
+    </button>
+
+    <div id="correctQuote"
+         style="font-weight:700;font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;font-size:1.05rem;">
+      <!-- JS에서 현재 문장 주입 -->
+    </div>
+  </div>
+
+  <!-- 버블 밖 이미지 -->
+  <img src="img/꽃봉우리.png" alt="꽃봉우리"
+       style="display:block;max-width:120px;width:100%;height:auto;margin-top:60px;">
+
+  <!-- 랜덤 응원 문구 -->
+  <div id="encourageText" style="font-size:0.95rem;color:white;text-align:center;margin-top:10px;">
+    <!-- JS에서 15개 중 랜덤 출력 -->
+  </div>
+
+<!-- 홈으로 -->
+<button id="goHome" type="button"
+        style="margin-top:8px;border:1px solid rgba(255,255,255,.65);
+               background:rgba(255,255,255,.12);color:#fff;
+               font-weight:600;padding:10px 28px;border-radius:999px;
+               backdrop-filter:blur(4px);cursor:pointer;display:grid;place-items:center;">
+  <!-- 집 아이콘 SVG -->
+  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+       stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5z"/>
+  </svg>
+</button>
+
+</section>

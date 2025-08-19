@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>모바일 시작 화면</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+  @font-face { 
+    font-family: 'HakgyoansimNadeuriTTF-B';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimNadeuriTTF-B.woff2') format('woff2');
+    font-weight: 700; font-style: normal;
+  }
+
+  :root{
+    --maxw: 420px;
+    --card-bg: #fff;
+    --line: #eceef2;
+    --text: #222;
+    --sub: #6b7280;
+    --shadow: 0 10px 30px rgba(0,0,0,.12);
+    --radius: 18px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Pretendard,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--text);
+    background:#1a7a29;
+  }
+
+  .screen{
+    position:relative;
+    min-height:100vh;
+    max-width:var(--maxw);
+    margin:0 auto;
+    background:url("../img/메인 배경.png") center/cover no-repeat;
+    padding-left:var(--padL);
+    padding-right:var(--padR);
+  }
+
+  .bleed-x{
+    margin-left: calc(-1 * var(--padL));
+    margin-right: calc(-1 * var(--padR));
+    width: calc(100% + var(--padL) + var(--padR));
+  }
+
+  .header{
+    position: sticky; top: 0; z-index: 5;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 16px;
+    height:56px;
+    backdrop-filter: blur(6px);
+    background: #fff;
+  }
+  .header .left, .header .right{display:flex; align-items:center; gap:10px}
+  .brand{display:flex; align-items:center; gap:8px; font-weight:600; color:#444;}
+
+  #app{
+    position:relative; z-index:2;
+    min-height: calc(100vh - 56px);
+    padding: max(6vh,40px) 20px 28px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .leaving{ opacity:0; transform: translateY(6px); }
+  .entering{ opacity:0; transform: translateY(6px); }
+  .entered{ opacity:1; transform: translateY(0); }
+
+  /* 카드 */
+  .settings-card{
+    width:100%; max-width:var(--maxw);
+    background:var(--card-bg);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;                     /* 둥근 모서리에 라인 깔끔히 */
+    border:1px solid #f5f6f7;
+  }
+
+  /* 리스트 기본 */
+  .settings-list{list-style:none; margin:0; padding:0}
+  .settings-item + .settings-item{ border-top:1px solid var(--line); }
+
+  /* 항목(전체를 클릭 가능) */
+  .settings-link{
+    display:flex; align-items:center; gap:14px;
+    padding:16px 18px;
+    text-decoration:none; color:inherit;
+    position:relative;
+  }
+  .settings-link:active{ background:#f7f7f9; }
+  .settings-link:hover{ background:#f7f7f9; }
+
+  /* 왼쪽 아이콘(연한 회색 원 + 안쪽 심볼) */
+  .icon-wrap{
+    width:38px; height:38px; border-radius:50%;
+    background:#f2f3f5; display:grid; place-items:center;
+    flex:0 0 38px;
+  }
+  .icon{ width:20px; height:20px; display:block; }
+
+  /* 텍스트 */
+  .label{font-size:0.98rem; font-weight:600;}
+  .sub{font-size:.82rem; color:var(--sub); margin-top:2px;}
+
+  /* 우측 꺾쇠 */
+  .chev{
+    margin-left:auto; width:22px; height:22px; font-size:1.2rem;
+  }
+  
+  #app.full { padding:0 !important; overflow:hidden; }
+
+  /* Modal */
+.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:1000; }
+.modal.show{ display:flex; }
+.modal-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); backdrop-filter:blur(2px); }
+.modal-card{
+  position:relative; background:#fff; width:calc(100% - 32px); max-width:420px;
+  border-radius:var(--radius); box-shadow:var(--shadow); padding:20px;
+  animation:pop .18s ease;
+}
+@keyframes pop{ from{ transform:scale(.98); opacity:.0 } to{ transform:scale(1); opacity:1 } }
+
+.modal-body { text-align: center; }
+.modal-sub{ margin:0 0 16px; color:#6b7280; font-size:.92rem; }
+
+.modal-actions{ display:flex; gap:8px; justify-content:center; margin-top:14px; }
+
+.btn, .btn:link, .btn:visited { text-decoration: none; }
+.btn{
+  appearance:none; border:1px solid #e5e7eb; background:#fff; color:#222;
+  padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; /* 가운데 정렬 */
+}
+.btn.ghost{ background:#fff; }
+.btn.danger{ background:#1e7a39;; border-color:#1e7a39;; color:#fff; }
+.btn.primary{ background:#1e7a39; border-color:#1e7a39; color:#fff; }
+.btn:hover { filter:brightness(.95); }
+
+.back-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:30px; height:30px; border-radius:9999px;
+  color:#444; text-decoration:none; cursor:pointer;
+}
+.ico{ width:22px; height:22px; display:inline-block; }
+
+</style>
+</head>
+<body>
+
+  <div class="screen">
+
+<header class="header bleed-x" role="banner" aria-label="상단 헤더">
+  <div class="left brand">
+    <a href="mypage.html" class="back-btn" aria-label="마이페이지로 돌아가기">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M15 6l-6 6 6 6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round" />
+      </svg>
+    </a>
+    <span>설정</span>
+  </div>
+</header>
+
+
+    <main id="app" role="main" class="entered">
+
+  <div class="settings-card">
+    <ul class="settings-list" role="list">
+      <li class="settings-item">
+        <a class="settings-link" href="https://forms.gle/icYyyWjgqouT6R2H7" target="_blank">
+          <span class="icon-wrap">
+            <!-- mail -->
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M4 6h16v12H4z" stroke-width="1.7" />
+              <path d="m4 7 8 6 8-6" stroke-width="1.7" />
+            </svg>
+          </span>
+          <div>
+            <div class="label">문의 및 의견 제안</div>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+            <path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </li>
+
+      <li class="settings-item">
+        <a class="settings-link" href="notice.html" id="goNotice">
+           <span class="icon-wrap">
+            <!-- doc -->
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M7 3h7l5 5v13H7z" stroke-width="1.7"/>
+              <path d="M14 3v5h5" stroke-width="1.7"/>
+            </svg>
+          </span>
+          <div class="label">공지사항</div>
+          <svg class="chev" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+            <path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </li>
+
+      <li class="settings-item">
+        <a class="settings-link" href="https://humorous-platypus-8b4.notion.site/BUB-247d3e38b64180f8b5ecd2419182bf86" target="_blank">
+          <span class="icon-wrap">
+            <!-- shield -->
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 3l7 3v6c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3z" stroke-width="1.7"/>
+              <path d="M12 8v6" stroke-width="1.7"/>
+            </svg>
+          </span>
+          <div class="label">개인정보처리방침</div>
+          <svg class="chev" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+            <path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </li>
+
+      <li class="settings-item">
+        <a class="settings-link" href="https://lumbar-cut-285.notion.site/24f28c2ff11880afb6d5d322b71ce3a8?pvs=74" target="_blank">
+          <span class="icon-wrap">
+            <!-- info -->
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <circle cx="12" cy="12" r="9" stroke-width="1.7"/>
+              <path d="M12 10v6M12 7h.01" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <div class="label">이용약관</div>
+          <svg class="chev" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+            <path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </li>
+
+      <li class="settings-item">
+        <a class="settings-link" href="#" id="logoutLink">
+          <span class="icon-wrap">
+            <!-- power -->
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 3v8" stroke-width="1.7" stroke-linecap="round"/>
+              <path d="M6.5 6.5a7 7 0 1 0 11 0" stroke-width="1.7"/>
+            </svg>
+          </span>
+          <div class="label">로그아웃</div>
+          <svg class="chev" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+            <path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </li>
+
+      <li class="settings-item">
+        <a class="settings-link" href="withdraw.html">
+          <span class="icon-wrap">
+            <!-- door out -->
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M5 3h9v18H5z" stroke-width="1.7"/>
+              <path d="M14 12h6m0 0-2-2m2 2-2 2" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <div class="label">회원탈퇴</div>
+          <svg class="chev" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+            <path d="M9 6l6 6-6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+      </section>
+    </main>
+  </div>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+  <div class="modal-backdrop" data-close="1"></div>
+  <div class="modal-card" role="document">
+    <div class="modal-body" id="logoutModalBody">
+      <h3 id="logoutTitle" style="margin:0 0 8px;">로그아웃 하시겠습니까?</h3>
+      <p class="modal-sub">현재 기기에서 로그아웃됩니다.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" data-action="cancel">아니오</button>
+        <button type="button" class="btn danger" data-action="confirm">예</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../app_setting.js"></script>
+
+</body>
+</html>

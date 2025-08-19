@@ -11,6 +11,10 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Table(name = "category",  // 테이블 이름 (필요 시 지정)
+        indexes = {@Index(name = "idx_category_type_name",  // 인덱스 이름: 컬럼 조합 반영
+                columnList = "category_type, name",  // DB 컬럼 이름으로 변경
+                unique = true)})  // 중복 방지 필요 시 true
 public class Category extends BaseEntity {
 
     @Id
@@ -24,9 +28,4 @@ public class Category extends BaseEntity {
     private CategoryType type; // 문제, 톤 -> 오늘의 확언 문구 생성
     private String name; // 태그 이름
 
-    // 더티체킹을 위한 업데이트 메서드
-    public void update(CategoryType type, String name) {
-        this.type = type;
-        this.name = name;
-    }
 }

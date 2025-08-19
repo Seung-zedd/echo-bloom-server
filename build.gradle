@@ -46,6 +46,7 @@ dependencies {
 
     // FeignClient(해커톤 끝나고 나중에 WebClient로 migrate할 예정)
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'io.github.openfeign.form:feign-form:3.8.0' // 최신 안정 버전으로 조정
 
     // github-action으로 Apidog 자동화
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
@@ -57,8 +58,11 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-    // p6spy 디펜던시 (쿼리 파라미터 출력)
+    // p6spy 디펜던시 (쿼리 파라미터 출력) - exclude from tests
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'com.github.gavlyukovskiy', module: 'p6spy-spring-boot-starter'
+    }
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
     // spring-security 관련
@@ -74,7 +78,6 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.h2database:h2'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // QueryDSL
@@ -89,15 +92,6 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
-
-    // Lombok-MapStruct Binding (ensures compatibility)
-    implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-
-    // MapStruct (must come after Lombok)
-    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
 }
 

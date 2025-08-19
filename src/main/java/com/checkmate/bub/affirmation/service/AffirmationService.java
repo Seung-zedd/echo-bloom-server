@@ -8,6 +8,7 @@ import com.checkmate.bub.bridge.repository.UserCategoryBridgeRepository;
 import com.checkmate.bub.category.constant.CategoryType;
 import com.checkmate.bub.category.domain.Category;
 import com.checkmate.bub.category.repository.CategoryRepository;
+import com.checkmate.bub.user.service.helper.UserCategoryBridgeHelper;
 import com.checkmate.bub.util.UuidUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +31,7 @@ public class AffirmationService {
     private final UserCategoryBridgeRepository userCategoryBridgeRepository;
     private final ClovaClient clovaClient;
     private final ObjectMapper objectMapper;
+    private final UserCategoryBridgeHelper userCategoryBridgeHelper;
 
     @Value("${clova.api-key}")
     private String apiKey;
@@ -54,7 +56,7 @@ public class AffirmationService {
     private static final String CONTENT_TYPE_SSE = "text/event-stream";
 
     @Transactional
-    public ToneExampleResponseDto createToneExamples(List<Long> problemIds) {
+    public ToneExampleResponseDto createToneExamples(List<Long> problemIds, Long userId) {
         if (problemIds == null || problemIds.isEmpty()) {
             log.warn("빈 problemIds 리스트로 요청됨");
             throw new IllegalArgumentException("문제 ID 목록이 비어있습니다. 최소 1개의 문제를 선택해주세요.");
@@ -68,13 +70,16 @@ public class AffirmationService {
         // 톤 카테고리가 없으면 생성
         createToneCategoriesIfNotExists();
 
+        // 사용자 문제 선택 저장
+        userCategoryBridgeHelper.saveSelections(userId, problemIds, CategoryType.PROBLEM);
+        
         // 리스트 복사 후 shuffle (원본 수정 피함)
         List<Long> shuffledIds = new ArrayList<>(problemIds);
         Collections.shuffle(shuffledIds);
 
         // 랜덤으로 하나 선택
         Long selectedProblemId = shuffledIds.getFirst();
-        log.info("Selected random problemId: {}", selectedProblemId);  // 디버깅 로그 추가
+        log.info("Selected random problemId: {} for userId: {}", selectedProblemId, userId);
 
         Category problemCategory = categoryRepository.findById(selectedProblemId)
                 .orElseThrow(() -> new EntityNotFoundException("문제 카테고리를 찾을 수 없습니다."));
@@ -97,6 +102,9 @@ public class AffirmationService {
 
         // SSE 응답에서 컨텐츠 추출 및 톤 파싱
         String[] tones = extractTonesFromSseResponse(clovaResponse, requestId);
+
+        // Save generated tones to CategoryRepository
+        saveTonesToCategory(tones, selectedProblemId);
 
         // DTO 반환 (최종 정제 처리)
         return buildResponseDto(tones);
@@ -649,10 +657,37 @@ public class AffirmationService {
 
         return content;
     }
-
+    
+    
+    /**
+     * Save user's selected tone (delegate to helper)
+     */
+    @Transactional
+    public void saveToneSelection(Long userId, String toneName) {
+        userCategoryBridgeHelper.saveToneByName(userId, toneName);
+    }
 
     /**
-     * 톤 카테고리가 존재하지 않으면 생성합니다.
+     * Save generated tone examples to CategoryRepository
+     */
+    private void saveTonesToCategory(String[] tones, Long problemId) {
+        String[] toneNames = {"Joy", "Wednesday", "Zelda"};
+        
+        for (int i = 0; i < tones.length && i < toneNames.length; i++) {
+            String categoryName = toneNames[i] + "_Example_" + problemId + "_" + System.currentTimeMillis();
+            
+            Category toneExampleCategory = Category.builder()
+                    .type(CategoryType.TONE)
+                    .name(categoryName)
+                    .build();
+            
+            categoryRepository.save(toneExampleCategory); // 여기서 3가지 다른 톤들을 저장
+            log.info("Saved tone example to category: {} -> {}", categoryName, tones[i]);
+        }
+    }
+
+    /**
+     * Create tone categories if not exists
      */
     private void createToneCategoriesIfNotExists() {
         String[] toneNames = {"Joy", "Wednesday", "Zelda"};
@@ -664,7 +699,7 @@ public class AffirmationService {
                         .name(toneName)
                         .build();
                 categoryRepository.save(toneCategory);
-                log.info("톤 카테고리 생성: {}", toneName);
+                log.info("Created tone category: {}", toneName);
             }
         }
     }

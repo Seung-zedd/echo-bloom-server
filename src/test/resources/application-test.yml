@@ -10,11 +10,23 @@ spring:
     username: test-username  # 더미 값
     password: test-password  # 더미 값
 
+# Disable p6spy completely for tests
+decorator:
+  datasource:
+    enabled: false
+
+  # Disable Flyway for tests to avoid migration issues
+  flyway:
+    enabled: false
+    
   # JPA 설정 (테스트에서 테이블 자동 생성)
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
+      naming:
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
     database-platform: org.hibernate.dialect.H2Dialect  # H2 DB dialect
+    show-sql: false
 
   # 카카오 로그인 설정 (테스트용 더미 값 – 실제 키 대신)
   security:
