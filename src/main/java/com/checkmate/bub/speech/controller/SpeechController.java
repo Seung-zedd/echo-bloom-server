@@ -76,6 +76,7 @@ public class SpeechController {
     }
     
     /**
+     * //! 화면 설계를 다시 해야 하기 때문에 앱 런칭 이후에 사용할 예정
      * POST /api/v1/speech/compare - 상세 음성 비교 분석
      * Levenshtein 편집 거리 알고리즘 사용
      */

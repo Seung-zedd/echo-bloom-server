@@ -26,7 +26,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
+@Transactional(readOnly = true)
 public class SpeechService {
     
     private final ClovaSpeechClient clovaSpeechClient;
@@ -132,6 +132,7 @@ public class SpeechService {
     }
     
     /**
+     * //! 화면 설계를 다시 해야 하기 때문에 엡 런칭 이후에 사용할 예정
      * POST /api/v1/speech/compare 엔드포인트용 상세 비교 분석
      * Levenshtein 편집 거리 알고리즘을 사용하여 상세한 차이점 분석 제공
      */
@@ -311,7 +312,6 @@ public class SpeechService {
      * 사용자의 음성 인식 기록 조회 (히스토리 및 캐릭터 성장용)
      * GET /api/v1/history/logs 엔드포인트에서 사용
      */
-    @Transactional(readOnly = true)
     public List<AffirmationLogEntity> getUserSpeechLogs() {
         String userNickname = SecurityUtils.getCurrentNickname();
         return affirmationLogRepository.findByUserNicknameOrderByCreatedAtDesc(userNickname);
@@ -341,10 +341,8 @@ public class SpeechService {
         
         // 중첩된 구조인 경우: { "results": [{ "text": "..." }] }
         Object resultsObj = sttResult.get("results");
-        if (resultsObj instanceof List) {
-            List<?> results = (List<?>) resultsObj;
-            if (!results.isEmpty() && results.getFirst() instanceof Map) {
-                Map<?, ?> firstResult = (Map<?, ?>) results.getFirst();
+        if (resultsObj instanceof List<?> results) {
+            if (!results.isEmpty() && results.getFirst() instanceof Map<?, ?> firstResult) {
                 Object nestedText = firstResult.get("text");
                 if (nestedText != null) {
                     return nestedText.toString().trim();

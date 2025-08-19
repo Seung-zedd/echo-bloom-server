@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
+@Transactional(readOnly = true)
 public class BookmarkService {
     
     private final BookmarkRepository bookmarkRepository;
@@ -25,6 +25,7 @@ public class BookmarkService {
      * UR-USER-021: 확언 북마크 추가
      * AR-ADMIN-005: 개인화된 문장 저장
      */
+    @Transactional
     public BookmarkEntity addBookmark(String sentence, String tone) {
         String userNickname = SecurityUtils.getCurrentNickname();
         
@@ -46,6 +47,7 @@ public class BookmarkService {
      * UR-USER-022: 확언 북마크 제거
      * AR-ADMIN-005: 개인화된 문장 관리
      */
+    @Transactional
     public void removeBookmark(String sentence) {
         String userNickname = SecurityUtils.getCurrentNickname();
         
@@ -60,7 +62,6 @@ public class BookmarkService {
     /**
      * 사용자의 모든 북마크 조회
      */
-    @Transactional(readOnly = true)
     public List<BookmarkEntity> getUserBookmarks() {
         String userNickname = SecurityUtils.getCurrentNickname();
         return bookmarkRepository.findByUserNicknameOrderByCreatedAtDesc(userNickname);
@@ -69,7 +70,6 @@ public class BookmarkService {
     /**
      * 특정 문장이 북마크되어 있는지 확인
      */
-    @Transactional(readOnly = true)
     public boolean isBookmarked(String sentence) {
         String userNickname = SecurityUtils.getCurrentNickname();
         return bookmarkRepository.existsByUserNicknameAndSentence(userNickname, sentence);

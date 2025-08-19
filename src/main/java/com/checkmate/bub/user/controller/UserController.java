@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
+    //* This Controller is used for my-page view.
+
     private final UserService userService;
 
     @GetMapping("/categories")

@@ -1,10 +1,10 @@
 package com.checkmate.bub.affirmation.controller;
 
 import com.checkmate.bub.affirmation.dto.MainAffirmationResponseDto;
+import com.checkmate.bub.affirmation.dto.ToneExampleRequestDto;
 import com.checkmate.bub.affirmation.dto.ToneExampleResponseDto;
 import com.checkmate.bub.affirmation.service.AffirmationService;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/affirmations")
@@ -24,13 +23,34 @@ public class AffirmationController {
 
     @PostMapping("/tone-examples")
     public ResponseEntity<ToneExampleResponseDto> createToneExamples(
-            @RequestBody @NotEmpty(message = "문제 ID 목록은 비어 있을 수 없습니다.") @Size(max = 3, message = "최대 3개의 문제만 선택할 수 있습니다.") List<Long> problemIds) {
+            @Valid @RequestBody ToneExampleRequestDto requestDto,
+            Authentication authentication) {
 
-        // 로그로 입력 확인
-        log.info("Received problemIds: {}", problemIds);
+        if (authentication == null || authentication.getName() == null) {
+            log.error("인증 정보가 없습니다");
+            throw new IllegalStateException("인증이 필요합니다");
+        }
+        
+        Long userId = Long.parseLong(authentication.getName());
+        log.info("Received request from userId: {}, problems={}, tone={}", userId, requestDto.getProblems(), requestDto.getTone());
 
-        ToneExampleResponseDto response = affirmationService.createToneExamples(problemIds);
-        return ResponseEntity.ok(response);
+        // 문제 선택 단계 처리
+        if (requestDto.getProblems() != null && !requestDto.getProblems().isEmpty()) {
+            ToneExampleResponseDto response = affirmationService.createToneExamples(requestDto.getProblems(), userId);
+            return ResponseEntity.ok(response);
+        }
+        
+        // 톤 선택 단계 처리
+        if (requestDto.getTone() != null) {
+            log.info("Tone selection received: {}", requestDto.getTone());
+            affirmationService.saveToneSelection(userId, requestDto.getTone());
+            ToneExampleResponseDto response = ToneExampleResponseDto.builder()
+                    .tone1(requestDto.getTone())
+                    .build();
+            return ResponseEntity.ok(response);
+        }
+
+        throw new IllegalArgumentException("문제 ID 목록 또는 톤이 필요합니다.");
     }
 
     @GetMapping("/main")
