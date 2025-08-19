@@ -1,0 +1,22 @@
+# 언어 설정
+language: 'ko'
+# 리뷰 프로필을 CHILL로 설정하여 속도를 높이고 핵심 문제에 집중합니다.
+profile: "CHILL"
+# CoderabbitAI의 리뷰 관련 설정을 정의합니다.
+reviews:
+  # Pull Request가 어떤 브랜치를 향할 때 리뷰를 트리거할지 지정합니다.
+  # 이 설정은 오직 'dev' 브랜치로 향하는 PR만 리뷰하도록 합니다.
+  auto_review:
+    base_branches:
+    - "dev"
+  # 보안 강화: 리뷰에서 보안 취약점(예: SQL 인젝션, XSS 등)을 우선적으로 검토하도록 설정
+  security:
+    enabled: true  # 보안 리뷰 활성화
+    severity_threshold: "medium"  # 중간 이상 취약점만 보고 (low, medium, high 중 선택 가능)
+  exclusions:
+    - "*/clova/*"
+  depth: "medium"
+# 플러그인 추가: 보안 스캔 플러그인 활성화 (기존 리뷰에 보안 레이어 추가)
+plugins:
+  - name: "security-scan"  # CodeRabbit의 보안 스캔 플러그인
+    enabled: true

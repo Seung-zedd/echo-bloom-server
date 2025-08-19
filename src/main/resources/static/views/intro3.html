@@ -1,0 +1,97 @@
+<!-- views/intro_step2.php -->
+<div data-view data-overlay="true" class="intro intro-step2">
+  <style>
+    .intro{
+      position:relative;
+      height:100dvh; width:100%; overflow:hidden;
+      color:#fff; font-family:Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      display:flex; align-items:center; justify-content:center; text-align:center;
+      padding-inline:20px;
+    }
+    /* X 버튼 (우상단) */
+    .intro-close{
+      position:absolute;
+      top:calc(env(safe-area-inset-top,0px) + 12px);
+      right:calc(env(safe-area-inset-right,0px));
+      width:36px; height:36px; border:0; background:transparent; cursor:pointer; z-index:3;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .intro-close::before, .intro-close::after{
+      content:""; position:absolute; left:50%; top:50%;
+      width:22px; height:2px; background:#fff; border-radius:2px; transform-origin:center;
+    }
+    .intro-close::before{ transform:translate(-50%,-50%) rotate(45deg); }
+    .intro-close::after{  transform:translate(-50%,-50%) rotate(-45deg); }
+
+    /* 중앙 스택 */
+    .intro-center{
+      max-width:88%;
+      display:flex; flex-direction:column; align-items:center;
+      gap:30px;
+      transform: translateY(-2vh); /* 살짝 위로 (스크린샷 분위기) */
+    }
+
+    .intro-title{
+      margin:0;
+      font-weight:800;
+      font-size: clamp(18px, 5vw, 22px);
+      letter-spacing:-.02em;
+      text-shadow:0 1px 0 rgba(0,0,0,.15);
+      line-height:1.5;
+      word-break:keep-all;
+      font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+    }
+    .intro-em{ color:#ffcc33; }
+
+    .intro-desc{
+      margin:10px 0 0;
+      max-width: 100%;
+      font-size: clamp(12px, 3.2vw, 13.5px); /* ← 줄임 */
+      line-height:1.9;
+      color: rgba(255,255,255,.92);
+      text-shadow:0 1px 0 rgba(0,0,0,.07);
+      word-break:keep-all;
+      opacity:.95;
+    }
+
+    /* 다음 버튼 (알약) */
+    .intro-next{
+      margin-top: 26px;
+      display:inline-flex; align-items:center; justify-content:center;
+      width:96px; height:40px; border-radius:999px;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.35);
+      color:#fff; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+      cursor:pointer; transition:transform .06s ease, background .2s ease, opacity .2s ease;
+    }
+    .intro-next:hover{ background:rgba(255,255,255,.26); }
+    .intro-next:active{ transform:scale(.98); }
+    .intro-next svg{ display:block; }
+  </style>
+
+  <!-- 닫기: 메인으로 -->
+  <button type="button" class="intro-close" id="goBack" aria-label="닫기"></button>
+
+  <!-- 중앙 콘텐츠 -->
+  <div class="intro-center">
+    <h2 class="intro-title"><span class="intro-em">에코블룸이</span><br/>당신의 뇌를 긍정적으로 활성화시킬게요.</h2>
+
+     <p class="intro-desc">
+      놀랍게도, 긍정적인 메시지를 소리 내어 읽으면<br/>
+      우리 뇌의 <strong>'전전두엽'</strong>이 활성화된다는 연구 결과가 있어요.
+      이 전전두엽은 우리가 새로운 것을 계획하고, <br/>
+      실행할 수 있도록 돕는 역할을 해요.<br/><br/>
+      에코블룸은 AI 기술로<br/>
+      당신의 상황과 마음에 딱 맞는 긍정 확언을 매일 제공해요.<br/><br/>
+      따라 읽는 것만으로도 당신의 뇌는<br/>
+      조금씩 새로운 변화를 위한 준비를 시작합니다.
+    </p>
+
+    <button type="button" class="intro-next" id="goDeeper3" aria-label="다음">
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+  </div>
+</div>

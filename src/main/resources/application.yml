@@ -1,0 +1,8 @@
+
+spring:
+  profiles:
+    default: local # 기본 로컬 활성화
+    group:
+      local: local, common
+      dev: dev, common
+      prod: prod, common

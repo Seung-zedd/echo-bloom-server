@@ -1,0 +1,116 @@
+<!-- views/intro_step2.php -->
+<div data-view data-overlay="true" class="intro intro-step2">
+  <style>
+    .intro{
+      position:relative;
+      height:100dvh; width:100%; overflow:hidden;
+      color:#fff; font-family:Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      display:flex; align-items:center; justify-content:center; text-align:center;
+      padding-inline:20px;
+    }
+    /* X 버튼 (우상단) */
+    .intro-close{
+      position:absolute;
+      top:calc(env(safe-area-inset-top,0px) + 12px);
+      right:calc(env(safe-area-inset-right,0px));
+      width:36px; height:36px; border:0; background:transparent; cursor:pointer; z-index:3;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .intro-close::before, .intro-close::after{
+      content:""; position:absolute; left:50%; top:50%;
+      width:22px; height:2px; background:#fff; border-radius:2px; transform-origin:center;
+    }
+    .intro-close::before{ transform:translate(-50%,-50%) rotate(45deg); }
+    .intro-close::after{  transform:translate(-50%,-50%) rotate(-45deg); }
+
+    /* 중앙 스택 */
+    .intro-center{
+      max-width:88%;
+      display:flex; flex-direction:column; align-items:center;
+      gap:30px;
+      transform: translateY(-2vh); /* 살짝 위로 (스크린샷 분위기) */
+    }
+
+    .intro-title{
+      margin:0;
+      font-weight:800;
+      font-size: clamp(18px, 5vw, 22px);
+      letter-spacing:-.02em;
+      text-shadow:0 1px 0 rgba(0,0,0,.15);
+      line-height:1.5;
+      word-break:keep-all;
+      font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+    }
+    .intro-em{ color:#ffcc33; }
+
+    .intro-desc{
+      margin:10px 0 0;
+      max-width: 100%;
+      font-size: clamp(12px, 3.2vw, 13.5px); /* ← 줄임 */
+      line-height:1.9;
+      color: rgba(255,255,255,.92);
+      text-shadow:0 1px 0 rgba(0,0,0,.07);
+      word-break:keep-all;
+      opacity:.95;
+    }
+
+    .intro-next{
+    margin-top: 26px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding: 0 40px;                  /* 좌우 여백 넓힘 */
+    height: 52px;                     /* 높이 ↑ */
+    border-radius: 999px;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.35);
+    color:#fff;
+    font-size: 1.1rem;                /* 글자 크기 ↑ */
+    font-weight: 700;                  /* 굵게 */
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    cursor:pointer;
+    transition:transform .06s ease, background .2s ease, opacity .2s ease;
+    white-space: nowrap;               /* 줄바꿈 방지 */
+    font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+    }
+    .intro-next:hover{ background:rgba(255,255,255,.26); }
+    .intro-next:active{ transform:scale(.98); }
+    .intro-next svg{ display:block; }
+    a {
+     text-decoration: none;  /* 밑줄 제거 */
+     color:white;
+    }
+  </style>
+
+  <!-- 닫기: 메인으로 -->
+  <button type="button" class="intro-close" id="goBack" aria-label="닫기"></button>
+
+  <!-- 중앙 콘텐츠 -->
+  <div class="intro-center">
+     <h2 class="intro-title">'나는 이런 사람이야.'<br/>말하는 순간 <span class="intro-em"> 현실이&nbsp;</span>됩니다.</h2>
+
+
+    <p class="intro-desc">
+      심리학적으로, 행동을 바꾸고 싶다면<br/>
+      그 행동을 하는 사람의 '정체성'을 <br/>
+      먼저 갖는 것이 훨씬 효과적이에요.<br/><br/>
+      “나는 할 수 있는 사람이야”,<br/>
+      “나는 나를 사랑하는 사람이야”<br/>
+      라고 직접 소리 내어 말해 보세요.<br/>
+      에코블룸은 당신이 긍정 확언을 직접 말하게 함으로써<br/>
+      당신의 정체성을 긍정적으로 재설정하도록 돕습니다.<br/><br/>
+      오늘부터 에코블룸과 함께,<br/>
+      당신이 꿈꿔왔던 최고의 나를<br/>
+      만들어 가는 여정을 시작해 보세요.
+    </p>
+
+    <button type="button" class="intro-next" id="goDeeper4" aria-label="다음">
+      <a href="views/search.html">
+        <!--<a href="http://localhost:8080/auth/kakao/callback">-->
+        에코블룸 체험하기
+      </a>
+    </button>
+
+  </div>
+</div>
