@@ -1,12 +1,16 @@
 package com.checkmate.bub.speech.controller;
 
 import com.checkmate.bub.speech.dto.BookmarkRequestDto;
+import com.checkmate.bub.speech.dto.BookmarkResponseDto;
 import com.checkmate.bub.speech.domain.BookmarkEntity;
 import com.checkmate.bub.speech.service.BookmarkService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.stream.Collectors;
 
 import java.util.List;
 
@@ -26,7 +30,7 @@ public class BookmarkController {
      * AR-ADMIN-005: 개인화된 문장 저장
      */
     @PostMapping("/add")
-    public ResponseEntity<BookmarkEntity> addBookmark(@RequestBody BookmarkRequestDto request) {
+    public ResponseEntity<BookmarkResponseDto> addBookmark(@Valid @RequestBody BookmarkRequestDto request) {
         try {
             log.info("북마크 추가 요청 - 문장: {}", request.getSentence());
             
@@ -34,7 +38,15 @@ public class BookmarkController {
                     request.getSentence(), 
                     request.getTone());
             
-            return ResponseEntity.ok(bookmark);
+            BookmarkResponseDto response = BookmarkResponseDto.of(
+                    bookmark.getId(),
+                    bookmark.getSentence(),
+                    bookmark.getTone(),
+                    bookmark.getCreatedAt(),
+                    true
+            );
+            
+            return ResponseEntity.ok(response);
             
         } catch (IllegalArgumentException e) {
             log.warn("북마크 추가 실패: {}", e.getMessage());
@@ -70,24 +82,35 @@ public class BookmarkController {
      * 사용자의 모든 북마크 조회
      */
     @GetMapping
-    public ResponseEntity<List<BookmarkEntity>> getUserBookmarks() {
+    public ResponseEntity<List<BookmarkResponseDto>> getUserBookmarks() {
         try {
-            List<BookmarkEntity> bookmarks = bookmarkService.getUserBookmarks();
+            List<BookmarkResponseDto> bookmarks = bookmarkService.getUserBookmarks()
+                    .stream()
+                    .map(entity -> BookmarkResponseDto.of(
+                            entity.getId(),
+                            entity.getSentence(),
+                            entity.getTone(),
+                            entity.getCreatedAt(),
+                            true
+                    ))
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(bookmarks);
         } catch (Exception e) {
             log.error("북마크 조회 오류", e);
             return ResponseEntity.status(500).build();
         }
     }
-    
+
+
     /**
      * 특정 문장의 북마크 상태 확인
      */
     @GetMapping("/check")
-    public ResponseEntity<Boolean> isBookmarked(@RequestParam("sentence") String sentence) {
+    public ResponseEntity<BookmarkResponseDto> isBookmarked(@RequestParam("sentence") String sentence) {
         try {
             boolean bookmarked = bookmarkService.isBookmarked(sentence);
-            return ResponseEntity.ok(bookmarked);
+            BookmarkResponseDto response = BookmarkResponseDto.ofBookmarkStatus(bookmarked);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("북마크 상태 확인 오류", e);
             return ResponseEntity.status(500).build();

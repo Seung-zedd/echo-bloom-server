@@ -107,7 +107,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:*", "http://localhost:3000", "http://localhost:8080"));  // local 환경 localhost 포트 wildcard + 구체적 추가
+        configuration.setAllowedOrigins(List.of("http://localhost:*", "http://localhost:3000", "http://localhost:8080", "http://echobloom.co.kr", "https://echobloom.co.kr"));  // local 환경 + echobloom.co.kr 도메인 추가
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));  // OPTIONS 명시 허용 (preflight)
         configuration.setAllowedHeaders(List.of("*"));  // 모든 헤더 허용
         configuration.setAllowCredentials(true);  // 쿠키/credentials 허용
