@@ -1,3 +1,7 @@
+    document.getElementById('goBack').addEventListener('click', () => {
+    window.location.href = 'setting.html';
+  });
+  
   (function(){
     const agree = document.getElementById('agreeWithdraw');
     const btn = document.getElementById('withdrawBtn');

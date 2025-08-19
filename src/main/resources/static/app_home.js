@@ -791,9 +791,11 @@ function initBookmarkView(){
   */
 }
 
-// ===== 커스텀문장 API 엔드포인트 =====
-const CUSTOM_LIST_ME_API    = '/api/v1/bookmarks';                    // 커스텀 문장 리스트 불러오는 서버 (JWT 인증)
-const CUSTOM_LIST_BYID_API  = (uid) => `/api/v1/bookmarks`;           // 커스텀 문장 리스트 불러오는 서버 (쿠키 id 기반)
+// ===== 북마크/커스텀문장 API 엔드포인트 =====
+const BOOKMARK_LIST_ME_API = '/api/v1/bookmarks';                     // JWT 인증
+const BOOKMARK_LIST_BYID_API = (uid) => `/api/v1/bookmarks`;          // 쿠키 id 기반
+const CUSTOM_LIST_ME_API    = '/api/v1/bookmarks';                    // JWT 인증 (북마크와 동일)
+const CUSTOM_LIST_BYID_API  = (uid) => `/api/v1/bookmarks`;           // 쿠키 id 기반
 
 function initCustomView(){
   const quoteEl = app.querySelector('#quoteText');       // 커스텀 문장 표시 영역

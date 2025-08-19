@@ -30,9 +30,9 @@ public class AuthController {
         log.info("Kakao callback invoked");
         AuthResponseDto authResponse = authService.loginWithKakao(code);
 
-        // 유틸로 환경 체크
-        boolean isLocal = envUtil.isLocalEnvironment();
-        boolean cookieSecure = !isLocal;  // local: false, dev, prod: true
+        // 유틸로 환경 체크 (HTTP 환경에서는 secure=false)
+        boolean isHttpEnv = envUtil.isHttpEnvironment();
+        boolean cookieSecure = !isHttpEnv;  // local/dev: false, prod: true
 
         // 액세스 토큰 쿠키 (ResponseCookie 사용)
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", authResponse.getAccessToken())

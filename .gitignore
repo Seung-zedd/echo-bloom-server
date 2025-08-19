@@ -41,3 +41,50 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### front file ###
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors / IDE
+.vscode/
+.idea/
+*.code-workspace
+.vs/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependencies (쓰면)
+node_modules/
+
+# Build / Output
+dist/
+build/
+out/
+.tmp/
+.temp/
+
+# Caches
+coverage/
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.sass-cache/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Misc
+*.swp
+*~
+
