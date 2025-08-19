@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 
-//* /Tone-Examples End Point to store three different tones with toneExampleResponseDto to store unselected tones (related to modifying tones in mypage > sentence invoked by 'updateUserCategories' method of UserController)
+//* /Tone-Examples End Point where AffirmationService stored three different tones with toneExampleResponseDto (related to modifying tones in mypage > sentence invoked by 'updateUserCategories' method of UserController)
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     // 중복 방지
     boolean existsByTypeAndName(CategoryType type, String name);

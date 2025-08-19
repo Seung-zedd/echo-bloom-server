@@ -739,7 +739,7 @@ public class AffirmationService {
                     .name(categoryName)
                     .build();
             
-            categoryRepository.save(toneExampleCategory);
+            categoryRepository.save(toneExampleCategory); // 여기서 3가지 다른 톤들을 저장
             log.info("Saved tone example to category: {} -> {}", categoryName, tones[i]);
         }
     }
