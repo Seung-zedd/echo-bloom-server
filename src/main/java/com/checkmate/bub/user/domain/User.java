@@ -33,5 +33,4 @@ public class User extends BaseEntity {
     private String gender; // 성
     private String interest; // 관심사
     private String jobGroup; // 직군
-
 }

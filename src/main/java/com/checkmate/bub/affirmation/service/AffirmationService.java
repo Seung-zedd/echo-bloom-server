@@ -8,8 +8,7 @@ import com.checkmate.bub.bridge.repository.UserCategoryBridgeRepository;
 import com.checkmate.bub.category.constant.CategoryType;
 import com.checkmate.bub.category.domain.Category;
 import com.checkmate.bub.category.repository.CategoryRepository;
-import com.checkmate.bub.user.domain.User;
-import com.checkmate.bub.user.repository.UserRepository;
+import com.checkmate.bub.user.service.helper.UserCategoryBridgeHelper;
 import com.checkmate.bub.util.UuidUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,9 +29,9 @@ import java.util.*;
 public class AffirmationService {
     private final CategoryRepository categoryRepository;
     private final UserCategoryBridgeRepository userCategoryBridgeRepository;
-    private final UserRepository userRepository;
     private final ClovaClient clovaClient;
     private final ObjectMapper objectMapper;
+    private final UserCategoryBridgeHelper userCategoryBridgeHelper;
 
     @Value("${clova.api-key}")
     private String apiKey;
@@ -72,7 +71,7 @@ public class AffirmationService {
         createToneCategoriesIfNotExists();
 
         // 사용자 문제 선택 저장
-        saveProblemSelections(userId, problemIds);
+        userCategoryBridgeHelper.saveSelections(userId, problemIds, CategoryType.PROBLEM);
         
         // 리스트 복사 후 shuffle (원본 수정 피함)
         List<Long> shuffledIds = new ArrayList<>(problemIds);
@@ -659,70 +658,13 @@ public class AffirmationService {
         return content;
     }
     
-    /**
-     * 사용자가 선택한 문제들을 UserCategoryBridge에 저장합니다.
-     */
-    @Transactional
-    public void saveProblemSelections(Long userId, List<Long> problemIds) {
-        log.info("사용자 문제 선택 저장 시작. userId: {}, problemIds: {}", userId, problemIds);
-        
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
-        
-        // 기존 문제 선택 삭제 (새로운 선택으로 대체)
-        List<UserCategoryBridge> existingProblemSelections = userCategoryBridgeRepository
-            .findByUserIdAndCategoryType(userId, CategoryType.PROBLEM);
-        if (!existingProblemSelections.isEmpty()) {
-            userCategoryBridgeRepository.deleteAll(existingProblemSelections);
-            log.info("기존 문제 선택 {} 개 삭제", existingProblemSelections.size());
-        }
-        
-        // 새로운 문제 선택 저장
-        for (Long problemId : problemIds) {
-            Category category = categoryRepository.findById(problemId)
-                .orElseThrow(() -> new EntityNotFoundException("카테고리를 찾을 수 없습니다. categoryId: " + problemId));
-            
-            if (category.getType() != CategoryType.PROBLEM) {
-                throw new IllegalArgumentException("문제 유형의 카테고리가 아닙니다. categoryId: " + problemId);
-            }
-            
-            UserCategoryBridge bridge = new UserCategoryBridge(user, category);
-            userCategoryBridgeRepository.save(bridge);
-            log.info("문제 선택 저장: {} -> {}", userId, category.getName());
-        }
-        
-        log.info("사용자 문제 선택 저장 완료. userId: {}, 저장된 문제 수: {}", userId, problemIds.size());
-    }
     
     /**
-     * 사용자가 선택한 톤을 UserCategoryBridge에 저장합니다.
+     * Save user's selected tone (delegate to helper)
      */
     @Transactional
     public void saveToneSelection(Long userId, String toneName) {
-        log.info("사용자 톤 선택 저장 시작. userId: {}, toneName: {}", userId, toneName);
-        
-        // 사용자 조회
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. userId: " + userId));
-        
-        // 톤 카테고리 조회
-        Category toneCategory = categoryRepository.findByTypeAndName(CategoryType.TONE, toneName)
-            .orElseThrow(() -> new EntityNotFoundException("톤 카테고리를 찾을 수 없습니다. toneName: " + toneName));
-        
-        // 기존 톤 선택 삭제 (단일 선택이므로)
-        List<UserCategoryBridge> existingToneSelections = userCategoryBridgeRepository
-            .findByUserIdAndCategoryType(userId, CategoryType.TONE);
-        if (!existingToneSelections.isEmpty()) {
-            userCategoryBridgeRepository.deleteAll(existingToneSelections);
-            log.info("기존 톤 선택 {} 개 삭제", existingToneSelections.size());
-        }
-        
-        // 새로운 톤 선택 저장
-        UserCategoryBridge bridge = new UserCategoryBridge(user, toneCategory);
-        userCategoryBridgeRepository.save(bridge);
-        
-        log.info("사용자 톤 선택 저장 완료. userId: {}, toneName: {}", userId, toneName);
+        userCategoryBridgeHelper.saveToneByName(userId, toneName);
     }
 
     /**

@@ -158,7 +158,7 @@ function initChoiceStep(){
 
   list.forEach(btn => {
     btn.addEventListener('click', () => {
-      const val = String(btn.dataset.value);
+      const val = Number(btn.dataset.value);
       const idx = selected.indexOf(val);
       if (idx > -1){
         selected.splice(idx,1);
