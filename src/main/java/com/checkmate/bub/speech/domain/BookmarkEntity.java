@@ -12,7 +12,10 @@ import lombok.NoArgsConstructor;
  * 사용자가 문장을 정확히 읽은 후 북마크에 추가/제거할 수 있는 기능
  */
 @Entity
-@Table(name = "bookmarks")
+@Table(
+        name = "bookmark",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_nickname", "sentence"})
+)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor

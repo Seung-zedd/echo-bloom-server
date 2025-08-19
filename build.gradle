@@ -46,7 +46,7 @@ dependencies {
 
     // FeignClient(해커톤 끝나고 나중에 WebClient로 migrate할 예정)
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
-    implementation 'io.github.openfeign.form:feign-form-spring:3.8.0' // 버전은 상황에 맞게 조정
+    implementation 'io.github.openfeign.form:feign-form:4.0.0' // 최신 안정 버전으로 조정
 
     // github-action으로 Apidog 자동화
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
