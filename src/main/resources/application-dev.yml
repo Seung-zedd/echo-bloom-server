@@ -11,7 +11,7 @@ spring:
 
   # 데이터베이스 설정 (Cloud DB)
   datasource:
-    url: jdbc:postgresql://echobloom-db-server:5432/BUB  # NCP DB 엔드포인트로 변경
+    url: ${DEV_POSTGRESQL_URL}  # NCP DB 엔드포인트로 변경
     username: ${DEV_POSTGRESQL_USERNAME}
     password: ${DEV_POSTGRESQL_PASSWORD}
 
