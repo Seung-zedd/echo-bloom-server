@@ -1,12 +1,9 @@
 package com.checkmate.bub.speech.service;
 
 import com.checkmate.bub.ai.clova.ClovaSpeechClient;
-import com.checkmate.bub.category.constant.CategoryType;
 import com.checkmate.bub.speech.constant.DifferenceType;
 import com.checkmate.bub.speech.dto.SpeechCompareResponseDto;
 import com.checkmate.bub.speech.dto.SpeechRecognitionResponseDto;
-import com.checkmate.bub.speech.domain.AffirmationLogEntity;
-import com.checkmate.bub.speech.repository.AffirmationLogRepository;
 import com.checkmate.bub.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +27,7 @@ import java.util.Map;
 public class SpeechService {
     
     private final ClovaSpeechClient clovaSpeechClient;
-    private final AffirmationLogRepository affirmationLogRepository;
-    
+
     // application-common.yml에서 CLOVA_CLIENT_ID, CLOVA_CLIENT_SECRET 환경변수 주입
     @Value("${clova.speech-recognition.client-id}")
     private String clovaClientId;
@@ -51,8 +47,7 @@ public class SpeechService {
      * UR-USER-018: 음성 인식 재시도 - 부정확하거나 15초 내 완료 실패 시 재시도 처리
      * AR-ADMIN-002: 음성 인식 동작 - 실시간 음성 인식 및 정확도 검증
      */
-    public SpeechRecognitionResponseDto recognizeSpeech(MultipartFile audioFile, String originalSentence, 
-                                                       String tone, Integer currentRetryCount) {
+    public SpeechRecognitionResponseDto recognizeSpeech(MultipartFile audioFile, String originalSentence, Integer currentRetryCount) {
         try {
             String userNickname = SecurityUtils.getCurrentNickname();
             log.info("음성 인식 시작 - 사용자: {}, 재시도 횟수: {}", userNickname, currentRetryCount);
@@ -62,8 +57,6 @@ public class SpeechService {
                     audioFile,
                     clovaClientId,
                     clovaClientSecret,
-                    "multipart/form-data",
-                    "application/json",
                     "ko-KR"
             );
             
@@ -77,8 +70,8 @@ public class SpeechService {
             
             // UR-USER-016: 성공 기준 체크 (80% 이상)
             if (accuracy >= MIN_ACCURACY_THRESHOLD) {
-                // UR-USER-017: 로그 저장 - 정확한 읽기 시 확언 로그 DB 저장
-                saveAffirmationLog(originalSentence, tone);
+                /*// UR-USER-017(deprecated): 로그 저장 - 정확한 읽기 시 확언 로그 DB 저장
+                saveAffirmationLog(originalSentence, tone);*/
                 log.info("음성 인식 성공 - 로그 저장 완료");
                 
                 return SpeechRecognitionResponseDto.builder()
@@ -145,8 +138,6 @@ public class SpeechService {
                     audioFile,
                     clovaClientId,
                     clovaClientSecret,
-                    "multipart/form-data",
-                    "application/json",
                     "ko-KR"
             );
             
@@ -179,14 +170,14 @@ public class SpeechService {
     }
     
     /**
-     * UR-USER-017: 확언 로그 저장
+     * UR-USER-017(deprecated): 확언 로그 저장
      * 사용자가 문장을 정확히 읽었을 때 AffirmationLogEntity로 DB에 저장
      * userNickname: 현재 카카오 로그인된 사용자 닉네임 (Authentication에서 전달받음)
      * sentence: MainAffirmationResponseDto.affirmation1/2/3에서 가져온 문장
      * problem: CategoryType.PROBLEM으로 고정
      * createdAt: BaseTimeEntity에서 자동 설정 (읽은 시간)
      */
-    private void saveAffirmationLog(String sentence, String tone) {
+   /* private void saveAffirmationLog(String sentence, String tone) {
         String userNickname = SecurityUtils.getCurrentNickname();
         AffirmationLogEntity affirmationLog = AffirmationLogEntity.builder()
                 .userNickname(userNickname) // 카카오 로그인 사용자 닉네임
@@ -197,7 +188,7 @@ public class SpeechService {
         
         affirmationLogRepository.save(affirmationLog);
         log.info("확언 로그 저장 완료 - 사용자: {}, 문장: {}", userNickname, sentence);
-    }
+    }*/
     
     /**
      * 정확도 계산 (Levenshtein 거리 기반 유사도)
@@ -309,13 +300,13 @@ public class SpeechService {
     }
     
     /**
-     * 사용자의 음성 인식 기록 조회 (히스토리 및 캐릭터 성장용)
+     * (deprecated)사용자의 음성 인식 기록 조회 (히스토리 및 캐릭터 성장용)
      * GET /api/v1/history/logs 엔드포인트에서 사용
      */
-    public List<AffirmationLogEntity> getUserSpeechLogs() {
+    /*public List<AffirmationLogEntity> getUserSpeechLogs() {
         String userNickname = SecurityUtils.getCurrentNickname();
         return affirmationLogRepository.findByUserNicknameOrderByCreatedAtDesc(userNickname);
-    }
+    }*/
     
     /**
      * CLOVA STT API 응답에서 인식된 텍스트 추출
