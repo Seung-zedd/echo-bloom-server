@@ -9,22 +9,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up SSH
-        continue-on-error: true  # SSH 키 추가 실패 시에도 워크플로우 계속 진행
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          log-public-key: true  # 디버깅을 위한 공개 키 로그 활성화 (기존 로그 참조)
-
-      - name: Deploy to server
-        if: always()  # 이전 스텝 실패 여부와 상관없이 실행
+      - name: Decode SSH Key
+        id: decode_key
         run: |
-          ssh -v -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_PORT }} '
-            cd /root/echo-bloom-server || { git clone https://github.com/checkmate-BUB/echo-bloom-server.git /root/echo-bloom-server && cd /root/echo-bloom-server; }
+          RAW_KEY=$(echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d)
+          echo "raw_key<<EOF" >> $GITHUB_OUTPUT  # Set as multi-line output
+          echo "$RAW_KEY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ steps.decode_key.outputs.raw_key }}  # Pass decoded raw key
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            set -e
+            REPO_DIR="/root/echo-bloom-server"
+            if [ ! -d "$REPO_DIR" ]; then
+              git clone https://github.com/checkmate-BUB/echo-bloom-server.git "$REPO_DIR"
+            fi
+            cd "$REPO_DIR"
             git pull origin main
             chmod +x ./gradlew
             ./gradlew clean build -x test
-            pkill -f "java -jar" || true
+            pkill -9 -f "java -jar.*echo-bloom-server" || true
+            sleep 2
+            if pgrep -f "java -jar.*echo-bloom-server" > /dev/null; then
+              echo "Failed to kill app" >&2
+              exit 1
+            fi
             nohup java -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
             echo "Deployment completed"
-          ' || { echo "SSH connection failed"; exit 1; }  # 실패 시 명확한 메시지 출력
