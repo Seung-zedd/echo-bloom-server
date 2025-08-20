@@ -1,0 +1,8 @@
+.git
+.gitignore
+node_modules
+.gradle
+build
+target
+**/*.iml
+*.log
