@@ -1,23 +1,23 @@
 name: Deploy to NCP Server
-
 on:
   push:
     branches: [main]
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up SSH
+        continue-on-error: true  # SSH 키 추가 실패 시에도 워크플로우 계속 진행
         uses: webfactory/ssh-agent@v0.8.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          log-public-key: true  # 공개 키 로그 활성화 (기존 로그 참조)
 
       - name: Deploy to server
+        if: always()  # 이전 스텝 실패 여부와 상관없이 실행
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_PORT }} '
             cd /root/echo-bloom-server || { git clone https://github.com/checkmate-BUB/echo-bloom-server.git /root/echo-bloom-server && cd /root/echo-bloom-server; }
