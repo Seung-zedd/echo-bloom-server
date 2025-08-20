@@ -17,10 +17,10 @@ jobs:
           ssh-add keyfile || { echo "ssh-add failed"; exit 1; }
           ssh-add -l || { echo "No keys loaded"; exit 1; }  # Confirm key loaded
           
-          # Deploy with robust directory handling
-          ssh -v -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_PORT }} '
+          # Deploy with robust handling (capture output for verification)
+          OUTPUT=$(ssh -v -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_PORT }} '
             set -e  # Exit on error
-            REPO_DIR="/root/echo-bloom-server"  # Your actual path here
+            REPO_DIR="/root/echo-bloom-server"  # Your project root (src, gradle, build here after clone)
             if [ ! -d "$REPO_DIR" ]; then
               git clone https://github.com/checkmate-BUB/echo-bloom-server.git "$REPO_DIR"
             fi
@@ -29,8 +29,18 @@ jobs:
             chmod +x ./gradlew
             ./gradlew clean build -x test || { echo "Gradle build failed"; exit 1; }
             pkill -f "java -jar" || true
-            nohup java -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            nohup java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar -Dspring.profiles.active=dev > app.log 2>&1 &  # JAR path is relative to REPO_DIR
             echo "Deployment completed"
-          ' || { echo "SSH connection or script failed"; exit 1; }
+          ' 2>&1)  # Capture all output (including verbose)
+          
+          echo "$OUTPUT"  # Print for logs
+          
+          # Check success (ignore -1 if message present)
+          if echo "$OUTPUT" | grep -q "Deployment completed"; then
+            echo "Deployment succeeded!"
+          else
+            echo "Deployment failed - see output above"
+            exit 1
+          fi
           
           rm keyfile  # Cleanup
