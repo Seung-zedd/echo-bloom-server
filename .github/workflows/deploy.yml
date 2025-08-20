@@ -12,15 +12,15 @@ jobs:
 
       - name: Create SSH Key File
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key.pem
-          chmod 600 ssh_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $GITHUB_WORKSPACE/ssh_key.pem
+          chmod 600 $GITHUB_WORKSPACE/ssh_key.pem  # Fix permission denied
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key_path: ssh_key.pem  # 직접 만든 키 파일 경로 사용
+          key_path: $GITHUB_WORKSPACE/ssh_key.pem  # Use full path to avoid issues
           port: ${{ secrets.SERVER_PORT }}
           script: |
             set -e
