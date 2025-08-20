@@ -28,14 +28,21 @@ jobs:
             git pull origin main || { echo "Git pull failed"; exit 1; }
             chmod +x ./gradlew
             ./gradlew clean build -x test || { echo "Gradle build failed"; exit 1; }
-            pkill -f "java -jar" || true
+            
+            # Enhanced process killing: Force kill any running JAR and verify
+            pkill -9 -f "java -jar.*echo-bloom-server" || true  # -9 for forceful kill
+            sleep 2  # Brief wait to ensure process stops
+            if pgrep -f "java -jar.*echo-bloom-server" > /dev/null; then
+              echo "Failed to kill running app process"; exit 1;
+            fi
+            
             nohup java -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
             echo "Deployment completed"
           ' 2>&1)
           
           echo "$OUTPUT"  # Log output
           
-          # Check success (ignore -1 if message present)
+          # Check success (ignore non-zero exit if message present)
           if echo "$OUTPUT" | grep -q "Deployment completed"; then
             echo "Deployment succeeded!"
           else
