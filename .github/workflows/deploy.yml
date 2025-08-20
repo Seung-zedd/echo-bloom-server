@@ -28,12 +28,14 @@ jobs:
           script: |
             set -e
 
-            # 1. 모든 Java 프로세스 및 이전 앱 강제 종료
-            pkill -9 -f 'echo-bloom-server.*\.jar' || true
+            # 1. Kill all running Java processes before deployment
             pkill -9 -f 'java' || true
             sleep 2
 
-            # 2. 배포 디렉토리 처리
+            # 2. Verify only desired processes remain (optional debug)
+            ps aux | grep java || true
+
+            # 3. Prepare deployment directory
             REPO_DIR="/root/echo-bloom-server"
             if [ ! -d "$REPO_DIR" ]; then
               git clone https://github.com/checkmate-BUB/echo-bloom-server.git "$REPO_DIR"
@@ -42,10 +44,13 @@ jobs:
             git pull origin main
             chmod +x ./gradlew
 
-            # 3. Gradle 빌드 JVM 제한
+            # 4. Limit Gradle build JVM heap size
             ./gradlew clean build -x test -Dorg.gradle.jvmargs="-Xmx1g" --no-daemon
 
-            # 4. 앱 실행 JVM 제한 (메모리 문제 방지)
+            # 5. Limit application JVM heap size and start the app
             nohup java -Xmx1g -Xms256m -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+
+            # 6. Show running Java processes after deploy (optional debug)
+            ps aux | grep java || true
 
             echo "Deployment completed"
