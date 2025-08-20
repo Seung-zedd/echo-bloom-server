@@ -40,5 +40,5 @@ jobs:
               echo "Failed to kill app" >&2
               exit 1
             fi
-            nohup java -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            nohup java -Xmx1g -Xms256m -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
             echo "Deployment completed"
