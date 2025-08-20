@@ -22,4 +22,7 @@ public interface UserCategoryBridgeRepository extends JpaRepository<UserCategory
     List<UserCategoryBridge> findByUserIdAndCategoryType(@Param("userId") Long userId, @Param("categoryType") CategoryType categoryType);
 
     boolean existsByUserIdAndCategoryType(Long userId, CategoryType category);
+    
+    @Query("SELECT COUNT(ucb) > 0 FROM UserCategoryBridge ucb WHERE ucb.user.id = :userId AND ucb.category.id = :categoryId")
+    boolean existsByUserIdAndCategoryId(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
 }
