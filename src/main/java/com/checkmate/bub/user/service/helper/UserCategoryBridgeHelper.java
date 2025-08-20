@@ -45,6 +45,7 @@ public class UserCategoryBridgeHelper {
                 .findByUserIdAndCategoryType(userId, expectedType);
         if (!existingSelections.isEmpty()) {
             userCategoryBridgeRepository.deleteAll(existingSelections);
+            userCategoryBridgeRepository.flush(); // Force immediate deletion
             log.info("Deleted {} existing selections (type: {})", existingSelections.size(), expectedType);
         }
 
@@ -57,9 +58,21 @@ public class UserCategoryBridgeHelper {
                 throw new IllegalArgumentException("Category type mismatch. expected: " + expectedType + ", categoryId: " + categoryId);
             }
 
-            UserCategoryBridge bridge = new UserCategoryBridge(user, category);
-            userCategoryBridgeRepository.save(bridge);
-            log.info("Saved selection: {} -> {} (type: {})", userId, category.getName(), expectedType);
+            // Check if this combination already exists to avoid constraint violation
+            boolean exists = userCategoryBridgeRepository.existsByUserIdAndCategoryId(userId, categoryId);
+            if (exists) {
+                log.warn("User-category bridge already exists: userId={}, categoryId={}, skipping", userId, categoryId);
+                continue;
+            }
+
+            try {
+                UserCategoryBridge bridge = new UserCategoryBridge(user, category);
+                userCategoryBridgeRepository.save(bridge);
+                log.info("Saved selection: {} -> {} (type: {})", userId, category.getName(), expectedType);
+            } catch (Exception e) {
+                log.error("Failed to save user-category bridge: userId={}, categoryId={}", userId, categoryId, e);
+                // Continue with next category instead of failing completely
+            }
         }
 
         log.info("Category selection save completed. userId: {}, saved count: {}, type: {}", userId, categoryIds.size(), expectedType);

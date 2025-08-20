@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.QueryHints;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -21,5 +22,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     
     // 조회
     Optional<Category> findByTypeAndName(CategoryType type, String name);
+    
+    // 패턴으로 시작하는 카테고리 조회 (톤 예시 정리용)
+    List<Category> findByTypeAndNameStartingWith(CategoryType type, String namePrefix);
 
 }

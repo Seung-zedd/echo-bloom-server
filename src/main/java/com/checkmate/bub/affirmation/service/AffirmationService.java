@@ -673,16 +673,56 @@ public class AffirmationService {
     private void saveTonesToCategory(String[] tones, Long problemId) {
         String[] toneNames = {"Joy", "Wednesday", "Zelda"};
         
+        // Clean up any existing tone examples for this problem to avoid duplicates
+        cleanupExistingToneExamples(problemId);
+        
         for (int i = 0; i < tones.length && i < toneNames.length; i++) {
-            String categoryName = toneNames[i] + "_Example_" + problemId + "_" + System.currentTimeMillis();
+            // Use nanoTime + random to ensure uniqueness even in rapid succession
+            String uniqueId = System.nanoTime() + "_" + (int)(Math.random() * 10000);
+            String categoryName = toneNames[i] + "_Example_" + problemId + "_" + uniqueId;
+            
+            // Check if category name already exists to avoid constraint violation
+            if (categoryRepository.existsByTypeAndName(CategoryType.TONE, categoryName)) {
+                log.warn("Category name already exists, skipping: {}", categoryName);
+                continue;
+            }
             
             Category toneExampleCategory = Category.builder()
                     .type(CategoryType.TONE)
                     .name(categoryName)
                     .build();
             
-            categoryRepository.save(toneExampleCategory); // 여기서 3가지 다른 톤들을 저장
-            log.info("Saved tone example to category: {} -> {}", categoryName, tones[i]);
+            try {
+                categoryRepository.save(toneExampleCategory);
+                log.info("Saved tone example to category: {} -> {}", categoryName, tones[i]);
+            } catch (Exception e) {
+                log.error("Failed to save tone example category: {}", categoryName, e);
+                // Continue with next tone instead of failing completely
+            }
+        }
+    }
+    
+    /**
+     * Clean up existing tone examples for a specific problem to avoid duplicates
+     */
+    private void cleanupExistingToneExamples(Long problemId) {
+        try {
+            String[] toneNames = {"Joy", "Wednesday", "Zelda"};
+            for (String toneName : toneNames) {
+                String pattern = toneName + "_Example_" + problemId + "_";
+                // Find and delete categories that match the pattern
+                categoryRepository.findByTypeAndNameStartingWith(CategoryType.TONE, pattern)
+                    .forEach(category -> {
+                        try {
+                            categoryRepository.delete(category);
+                            log.info("Cleaned up existing tone example: {}", category.getName());
+                        } catch (Exception e) {
+                            log.warn("Failed to cleanup tone example: {}", category.getName(), e);
+                        }
+                    });
+            }
+        } catch (Exception e) {
+            log.warn("Failed to cleanup existing tone examples for problemId: {}", problemId, e);
         }
     }
 
