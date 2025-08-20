@@ -225,6 +225,8 @@ function fetchWithTimeout(url, opts={}, ms=5000){
 
 // ✅ 초기 진입 시 자동으로 한 번 불러오기
 async function loadInitialQuote(){
+  console.log('loadInitialQuote() called'); // Debug log
+  
   // (옵션) 로딩 표시
   setQuote('불러오는 중…');
 
@@ -239,6 +241,8 @@ async function loadInitialQuote(){
     const data = await res.json().catch(() => ({}));
     
     // Extract the 3 generated affirmations from MainAffirmationResponseDto
+    console.log('API response:', data); // Debug log
+    
     if (data && (data.affirmation1 || data.affirmation2 || data.affirmation3)) {
       GENERATED_AFFIRMATIONS = [
         data.affirmation1,
@@ -246,10 +250,13 @@ async function loadInitialQuote(){
         data.affirmation3
       ].filter(Boolean); // Remove any null/undefined values
       
+      console.log('Generated affirmations:', GENERATED_AFFIRMATIONS); // Debug log
+      
       // Set the first affirmation
       if (GENERATED_AFFIRMATIONS.length > 0) {
         setQuote(GENERATED_AFFIRMATIONS[0]);
         affirmationIdx = 1; // Next will be affirmation2
+        console.log('Set first affirmation:', GENERATED_AFFIRMATIONS[0]); // Debug log
         return;
       }
     }
