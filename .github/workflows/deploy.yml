@@ -10,17 +10,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create SSH Key File
+      - name: Decode SSH Key
+        id: decode_key
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $GITHUB_WORKSPACE/ssh_key.pem
-          chmod 600 $GITHUB_WORKSPACE/ssh_key.pem  # Fix permission denied
+          RAW_KEY=$(echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d -i)  # -i: 무효 입력 무시 (오류 방지)
+          echo "raw_key<<EOF" >> $GITHUB_OUTPUT
+          echo "$RAW_KEY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key_path: $GITHUB_WORKSPACE/ssh_key.pem  # Use full path to avoid issues
+          key: ${{ steps.decode_key.outputs.raw_key }}  # 디코딩된 키 사용 (key_path 대신 key로 변경)
           port: ${{ secrets.SERVER_PORT }}
           script: |
             set -e
