@@ -9,20 +9,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up SSH Manually
-        continue-on-error: true
+      - name: Set up SSH and Deploy
         run: |
-          eval $(ssh-agent -s)  # agent 시작
-          echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d > keyfile || { echo "Base64 decoding failed"; exit 1; }  # 디코딩 실패 확인
+          eval $(ssh-agent -s)  # Start agent
+          echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d > keyfile || { echo "Base64 decoding failed"; exit 1; }
           chmod 600 keyfile
-          # echo >> keyfile 제거: 불필요한 newline 추가 방지
-          ssh-add keyfile || { echo "ssh-add failed - check format"; exit 1; }
-          ssh-add -l || { echo "No keys loaded"; exit 1; }  # 로드 확인
-          rm keyfile
-
-      - name: Deploy to server
-        if: always()
-        run: |
+          ssh-add keyfile || { echo "ssh-add failed"; exit 1; }
+          ssh-add -l || { echo "No keys loaded"; exit 1; }  # Confirm key loaded
+          
+          # Now deploy using the active agent
           ssh -v -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_PORT }} '
             cd /root/echo-bloom-server || { git clone https://github.com/checkmate-BUB/echo-bloom-server.git /root/echo-bloom-server && cd /root/echo-bloom-server; }
             git pull origin main
@@ -32,3 +27,5 @@ jobs:
             nohup java -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
             echo "Deployment completed"
           ' || { echo "SSH connection failed"; exit 1; }
+          
+          rm keyfile  # Cleanup
