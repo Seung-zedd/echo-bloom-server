@@ -36,12 +36,15 @@ public class AffirmationController {
 
         // 문제 선택 단계 처리
         if (requestDto.getProblems() != null && !requestDto.getProblems().isEmpty()) {
+            if (requestDto.getProblems().size() > 3) {
+                throw new IllegalArgumentException("최대 3개의 문제만 선택할 수 있습니다.");
+            }
             ToneExampleResponseDto response = affirmationService.createToneExamples(requestDto.getProblems(), userId);
             return ResponseEntity.ok(response);
         }
         
         // 톤 선택 단계 처리
-        if (requestDto.getTone() != null) {
+        if (requestDto.getTone() != null && !requestDto.getTone().trim().isEmpty()) {
             log.info("Tone selection received: {}", requestDto.getTone());
             affirmationService.saveToneSelection(userId, requestDto.getTone());
             ToneExampleResponseDto response = ToneExampleResponseDto.builder()

@@ -190,16 +190,16 @@ if (musicToggle && musicIcon && bgMusic) {
 /* ==========================
    NEXT: 서버 문장 로드 + 폴백
 ========================== */
+// Generated affirmations from API (will be populated on load)
+let GENERATED_AFFIRMATIONS = [];
+
+// True fallback quotes (only used if API completely fails)
 const FALLBACK_QUOTES = [
-  '“어려워도 괜찮아.<br/>나는 희망을 찾을 수 있을 거야!”',
-  '“말하기 테스트용”',
-  '“로딩 실패시 송출되는 테스트 문장 - <br/>지금의 너도 충분히 잘하고 있어.”',
-  '“로딩 실패시 송출되는 테스트 문장 -<br/>어둠 속에서도 작은 빛은 늘 있어.”',
-  '“로딩 실패시 송출되는 테스트 문장 -<br/>천천히 가도 괜찮아, 멈추지만 않으면 돼.”',
-  '“로딩 실패시 송출되는 테스트 문장 -<br/>오늘의 수고가 내일의 힘이 될 거야.”',
-  '“로딩 실패시 송출되는 테스트 문장 -<br/>이제 할 말이 없음 걍 열심히 살아라”'
+  '"어려워도 괜찮아.<br/>나는 희망을 찾을 수 있을 거야!"',
+  '"지금의 나도 충분히 잘하고 있어."',
+  '"어둠 속에서도 작은 빛은 늘 있어."'
 ];
-let fallbackIdx = 0;
+let affirmationIdx = 0;
 
 function getQuoteEl(){
   return document.getElementById('quoteText');
@@ -210,9 +210,11 @@ function setQuote(text){
   if (!el) return;
   el.innerHTML = text.replace(/\n/g, '<br/>');
 }
-function showFallback(){
-  setQuote(FALLBACK_QUOTES[fallbackIdx]);
-  fallbackIdx = (fallbackIdx + 1) % FALLBACK_QUOTES.length;
+function showNextAffirmation(){
+  // Use generated affirmations if available, otherwise fallback quotes
+  const quotes = GENERATED_AFFIRMATIONS.length > 0 ? GENERATED_AFFIRMATIONS : FALLBACK_QUOTES;
+  setQuote(quotes[affirmationIdx]);
+  affirmationIdx = (affirmationIdx + 1) % quotes.length;
 }
 function fetchWithTimeout(url, opts={}, ms=5000){
   return Promise.race([
@@ -235,19 +237,45 @@ async function loadInitialQuote(){
     });
     if (!res.ok) throw new Error('bad-status ' + res.status);
     const data = await res.json().catch(() => ({}));
-    const text = (data && typeof data.text === 'string') ? data.text.trim() : '';
-    if (text) setQuote(text);
-    else showFallback();
+    
+    // Extract the 3 generated affirmations from MainAffirmationResponseDto
+    if (data && (data.affirmation1 || data.affirmation2 || data.affirmation3)) {
+      GENERATED_AFFIRMATIONS = [
+        data.affirmation1,
+        data.affirmation2, 
+        data.affirmation3
+      ].filter(Boolean); // Remove any null/undefined values
+      
+      // Set the first affirmation
+      if (GENERATED_AFFIRMATIONS.length > 0) {
+        setQuote(GENERATED_AFFIRMATIONS[0]);
+        affirmationIdx = 1; // Next will be affirmation2
+        return;
+      }
+    }
+    
+    // Fallback if no affirmations in response
+    showNextAffirmation();
   } catch (e) {
-    showFallback();
+    showNextAffirmation();
     console.error('initial quote load failed:', e);
   }
 }
 
-// 기존 next 버튼용 로더(유지)
+// Next 버튼용 - 생성된 affirmations 순환하거나 새로 로드
 async function loadNextQuote(btn){
   btn.disabled = true;
   btn.setAttribute('aria-busy', 'true');
+  
+  // If we have generated affirmations, cycle through them first
+  if (GENERATED_AFFIRMATIONS.length > 0) {
+    showNextAffirmation();
+    btn.disabled = false;
+    btn.removeAttribute('aria-busy');
+    return;
+  }
+  
+  // Otherwise, try to load new affirmations from API
   try {
     const res = await fetchWithTimeout(QUOTE_API, {
       method: 'GET',
@@ -257,11 +285,25 @@ async function loadNextQuote(btn){
     });
     if (!res.ok) throw new Error('bad-status ' + res.status);
     const data = await res.json().catch(() => ({}));
-    const text = (data && typeof data.text === 'string') ? data.text.trim() : '';
-    if (text) setQuote(text);
-    else showFallback();
+    
+    // Extract the 3 generated affirmations from MainAffirmationResponseDto
+    if (data && (data.affirmation1 || data.affirmation2 || data.affirmation3)) {
+      GENERATED_AFFIRMATIONS = [
+        data.affirmation1,
+        data.affirmation2, 
+        data.affirmation3
+      ].filter(Boolean);
+      
+      if (GENERATED_AFFIRMATIONS.length > 0) {
+        setQuote(GENERATED_AFFIRMATIONS[0]);
+        affirmationIdx = 1;
+        return;
+      }
+    }
+    
+    showNextAffirmation();
   } catch (e) {
-    showFallback();
+    showNextAffirmation();
     console.error('quote load failed:', e);
   } finally {
     btn.disabled = false;
