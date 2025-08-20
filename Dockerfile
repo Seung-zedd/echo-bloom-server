@@ -2,6 +2,7 @@
 FROM gradle:8.8-jdk17-alpine AS build
 WORKDIR /app
 COPY . .
+RUN chmod +x gradlew  # gradlew 실행 권한 부여
 RUN ./gradlew clean bootJar --no-daemon
 
 # ---- Run Stage ----
