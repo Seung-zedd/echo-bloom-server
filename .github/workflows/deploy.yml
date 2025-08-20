@@ -9,15 +9,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up SSH
-        continue-on-error: true  # SSH 키 추가 실패 시에도 워크플로우 계속 진행
-        uses: webfactory/ssh-agent@v0.8.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          log-public-key: true  # 디버깅을 위한 공개 키 로그 활성화 (기존 로그 참조)
+      - name: Set up SSH Manually
+        continue-on-error: true  # 키 추가 실패 시에도 계속 진행
+        run: |
+          eval $(ssh-agent -s)  # ssh-agent 시작
+          echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d > keyfile  # base64 디코딩
+          chmod 600 keyfile
+          echo >> keyfile  # trailing newline 강제 추가
+          ssh-add keyfile  # 키 추가
+          ssh-add -l  # 로드된 키 목록 출력 (디버깅용)
+          rm keyfile  # 파일 삭제
 
       - name: Deploy to server
-        if: always()  # 이전 스텝 실패 여부와 상관없이 실행
+        if: always()  # 이전 스텝 실패 무시
         run: |
           ssh -v -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_PORT }} '
             cd /root/echo-bloom-server || { git clone https://github.com/checkmate-BUB/echo-bloom-server.git /root/echo-bloom-server && cd /root/echo-bloom-server; }
@@ -27,4 +31,5 @@ jobs:
             pkill -f "java -jar" || true
             nohup java -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
             echo "Deployment completed"
-          ' || { echo "SSH connection failed"; exit 1; }  # 실패 시 명확한 메시지 출력
+          ' || { echo "SSH connection failed"; exit 1; }
+
