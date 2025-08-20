@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", status.getReasonPhrase());
         errorResponse.put("message", message);
         //! 운영 환경에서는 상세 정보 노출 방지
-        if (envUtil.isLocalEnvironment()) {
+        if (envUtil.isLocalEnvironment() || envUtil.isDevEnvironment()) {
             errorResponse.put("details", details);
         }
 

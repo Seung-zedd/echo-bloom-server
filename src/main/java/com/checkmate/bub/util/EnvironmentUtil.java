@@ -16,6 +16,12 @@ public class EnvironmentUtil {
         return Arrays.asList(environment.getActiveProfiles()).contains("local");
     }
 
+    public boolean isDevEnvironment() {
+        return Arrays.asList(environment.getActiveProfiles()).contains("dev");
+    }
+
+
+
     public boolean isHttpEnvironment() {
         return Arrays.asList(environment.getActiveProfiles()).contains("local") ||
                Arrays.asList(environment.getActiveProfiles()).contains("dev");

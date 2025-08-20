@@ -62,7 +62,7 @@ public class CategoryInitializer implements CommandLineRunner {
         String[] toneNames = {"Joy", "Wednesday", "Zelda"};
 
         for (String toneName : toneNames) {
-            if (categoryRepository.existsByTypeAndName(CategoryType.TONE, toneName)) {
+            if (!categoryRepository.existsByTypeAndName(CategoryType.TONE, toneName)) {
                 Category toneCategory = Category.builder()
                         .type(CategoryType.TONE)
                         .name(toneName)
