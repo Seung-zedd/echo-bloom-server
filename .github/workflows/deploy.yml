@@ -1,0 +1,30 @@
+name: Deploy to NCP Server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_PORT }} '
+            cd /root/echo-bloom-server || { git clone https://github.com/checkmate-BUB/echo-bloom-server.git /root/echo-bloom-server && cd /root/echo-bloom-server; }
+            git pull origin main
+            chmod +x ./gradlew
+            ./gradlew clean build -x test
+            pkill -f "java -jar" || true  # 기존 프로세스 종료
+            nohup java -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            echo "Deployment completed"
+          '
