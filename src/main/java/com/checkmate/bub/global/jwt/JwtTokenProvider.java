@@ -77,7 +77,7 @@ public class JwtTokenProvider {
      */
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().verifyWith(key).build().parseClaimsJws(token);
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
             // 토큰이 만료되었거나, 서명이 잘못되었거나 등등...
@@ -91,7 +91,7 @@ public class JwtTokenProvider {
      * @return Spring Security가 사용할 인증 정보
      */
     public Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parser().verifyWith(key).build().parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
         String userId = claims.getSubject();
 
         //todo: 사용자 역할 정보 조회 로직 추가
