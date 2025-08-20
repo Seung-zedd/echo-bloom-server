@@ -186,7 +186,13 @@ function initChoiceStep(){
 
     lockButton(next, true);
     try {
-      await postSurvey({ problems: selected });
+      const response = await postSurvey({ problems: selected });
+      const toneData = await response.json();
+      
+      // Store tone examples for use in search3.html
+      window.__SURVEY__ = window.__SURVEY__ || {};
+      window.__SURVEY__.toneExamples = toneData;
+      
       swapInner('search3.html');
     } catch (err){
       console.error(err);
@@ -205,6 +211,25 @@ function initToneStep(){
   const root = stage?.querySelector('#toneStep');
   if(!root) return;
 
+  // Populate dynamic tone examples if available
+  const toneExamples = window.__SURVEY__?.toneExamples;
+  console.log('ToneExamples from survey:', toneExamples); // Debug log
+  
+  if (toneExamples) {
+    const toneList = root.querySelector('#toneList');
+    if (toneList) {
+      console.log('Updating tone list with dynamic examples'); // Debug log
+      toneList.innerHTML = `
+        <li><button type="button" class="opt" data-value="tone1">"${toneExamples.tone1 || 'Loading...'}"</button></li>
+        <li><button type="button" class="opt" data-value="tone2">"${toneExamples.tone2 || 'Loading...'}"</button></li>
+        <li><button type="button" class="opt" data-value="tone3">"${toneExamples.tone3 || 'Loading...'}"</button></li>
+      `;
+    }
+  } else {
+    console.log('No tone examples found, using hardcoded defaults'); // Debug log
+  }
+
+  // Get the updated list AFTER dynamic population
   const list = [...root.querySelectorAll('.opt')];
   const prev = root.querySelector('#prevStep');
   const next = root.querySelector('#toNext');
@@ -224,7 +249,17 @@ function initToneStep(){
       list.forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       window.__SURVEY__ = window.__SURVEY__ || {};
-      window.__SURVEY__.tone = btn.dataset.value; // 즉시 로컬 저장
+      
+      // Save the static tone name based on the selected value
+      // Map tone1/tone2/tone3 to Joy/Wednesday/Zelda
+      const toneMapping = {
+        'tone1': 'Joy',
+        'tone2': 'Wednesday', 
+        'tone3': 'Zelda'
+      };
+      
+      window.__SURVEY__.tone = toneMapping[btn.dataset.value] || btn.dataset.value;
+      
       enableNext(true);
     });
   });

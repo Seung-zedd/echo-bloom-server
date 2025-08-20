@@ -65,11 +65,6 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.FOUND).location(redirectUri).build();
     }
 
-    @GetMapping("/api/check-auth")
-    public ResponseEntity<String> checkAuth() {
-        return ResponseEntity.ok("Authenticated");
-    }
-    
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
         // 쿠키 삭제를 위해 만료시간을 0으로 설정
