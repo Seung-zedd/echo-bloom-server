@@ -51,9 +51,9 @@ public class JwtTokenProvider {
         Date validity = new Date(now.getTime() + accessTokenValidityInMilliseconds);
 
         return Jwts.builder()
-                .setSubject(userId.toString()) // 토큰의 주체로 사용자 ID를 저장
-                .setIssuedAt(now) // 토큰 발급 시간
-                .setExpiration(validity) // 토큰 만료 시간
+                .subject(userId.toString()) // 토큰의 주체로 사용자 ID를 저장
+                .issuedAt(now) // 토큰 발급 시간
+                .expiration(validity) // 토큰 만료 시간
                 .signWith(key) // 1. signWith(key, algorithm) 대신 signWith(key) 사용
                 .compact();
     }
@@ -63,9 +63,9 @@ public class JwtTokenProvider {
         Date validity = new Date(now.getTime() + refreshTokenValidityInMilliseconds);
 
         return Jwts.builder()
-                .setSubject(userId.toString())
-                .setIssuedAt(now)
-                .setExpiration(validity)
+                .subject(userId.toString())
+                .issuedAt(now)
+                .expiration(validity)
                 .signWith(key) // 1. signWith(key, algorithm) 대신 signWith(key) 사용
                 .compact();
     }
