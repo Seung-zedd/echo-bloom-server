@@ -10,18 +10,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up SSH Manually
-        continue-on-error: true  # 키 추가 실패 시에도 계속
+        continue-on-error: true
         run: |
           eval $(ssh-agent -s)  # agent 시작
-          echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d > keyfile  # 디코딩
+          echo "${{ secrets.SSH_PRIVATE_KEY_BASE64 }}" | base64 -d > keyfile || { echo "Base64 decoding failed"; exit 1; }  # 디코딩 실패 확인
           chmod 600 keyfile
-          echo >> keyfile  # newline 추가
-          ssh-add keyfile  # 키 추가
-          ssh-add -l  # 디버깅: 로드된 키 출력 (로그에 ED25519 키가 나와야 함)
+          # echo >> keyfile 제거: 불필요한 newline 추가 방지
+          ssh-add keyfile || { echo "ssh-add failed - check format"; exit 1; }
+          ssh-add -l || { echo "No keys loaded"; exit 1; }  # 로드 확인
           rm keyfile
 
       - name: Deploy to server
-        if: always()  # 이전 실패 무시
+        if: always()
         run: |
           ssh -v -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -p ${{ secrets.SERVER_PORT }} '
             cd /root/echo-bloom-server || { git clone https://github.com/checkmate-BUB/echo-bloom-server.git /root/echo-bloom-server && cd /root/echo-bloom-server; }
