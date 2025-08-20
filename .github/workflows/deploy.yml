@@ -28,29 +28,4 @@ jobs:
           script: |
             set -e
 
-            # 1. Kill ALL previous java processes (prevents zombie JVMs and OOM)
-            pkill -9 -f 'java' || true
-            sleep 2
-
-            # 2. Optional: List current running java for debugging (should be empty now)
-            ps aux | grep java || true
-
-            # 3. Prepare project
-            REPO_DIR="/root/echo-bloom-server"
-            if [ ! -d "$REPO_DIR" ]; then
-              git clone https://github.com/checkmate-BUB/echo-bloom-server.git "$REPO_DIR"
-            fi
-            cd "$REPO_DIR"
-            git pull origin main
-            chmod +x ./gradlew
-
-            # 4. Build with limited Gradle heap
-            ./gradlew clean build -x test -Dorg.gradle.jvmargs="-Xmx1g" --no-daemon
-
-            # 5. Run app with limited JVM heap
-            nohup java -Xmx1g -Xms256m -jar -Dspring.profiles.active=dev build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-
-            # 6. Confirm only one Java process is running
-            ps aux | grep java || true
-
-            echo "Deployment completed"
+            # Kill all Java
