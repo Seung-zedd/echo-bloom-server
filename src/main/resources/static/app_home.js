@@ -531,6 +531,7 @@ function initReadVoice(){
   // ---------- Clova STT API 우선 ----------
   let mediaRecorder;
   let audioChunks = [];
+  let currentRetryCount = 0; // 재시도 횟수 추적
 
   btn.addEventListener('click', async () => {
     if (!isListening) {
@@ -557,9 +558,9 @@ function initReadVoice(){
             const formData = new FormData();
             formData.append('audioFile', audioBlob, 'speech.wav');
             formData.append('originalSentence', readQuoteRaw);
-            formData.append('currentRetryCount', '0');
+            formData.append('retryCount', currentRetryCount.toString());
             
-            console.log('📡 Sending to Clova STT...');
+            console.log('📡 Sending to Clova STT... (retry count:', currentRetryCount, ')');
             const response = await fetch(ASR_API, {
               method: 'POST',
               body: formData,
@@ -571,9 +572,28 @@ function initReadVoice(){
             if (response.ok) {
               const result = await response.json();
               console.log('✅ Clova result:', result);
-              const ok = result.success && result.accuracy >= 0.8;
-              setState(false);
-              showResultModal(ok, () => { setState(false); btn.click(); });
+              
+              if (result.success) {
+                // 성공: 재시도 카운트 리셋
+                currentRetryCount = 0;
+                setState(false);
+                showResultModal(true, () => { setState(false); btn.click(); });
+              } else if (result.needRetry && !result.maxRetryReached) {
+                // 재시도 필요: 카운트 증가 후 재시도 버튼 표시
+                currentRetryCount = result.retryCount || (currentRetryCount + 1);
+                console.log('🔄 Retry needed. New retry count:', currentRetryCount);
+                setState(false);
+                showResultModal(false, () => { 
+                  setState(false); 
+                  // 재시도 클릭 시 음성 녹음 다시 시작
+                  setTimeout(() => btn.click(), 100);
+                });
+              } else {
+                // 최대 재시도 도달 또는 기타 실패
+                currentRetryCount = 0; // 리셋
+                setState(false);
+                showResultModal(false, () => setState(false));
+              }
             } else {
               const errorText = await response.text();
               console.error('❌ HTTP Error:', response.status, errorText);
