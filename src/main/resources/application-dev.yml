@@ -8,12 +8,18 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update  # 기존 테이블 업데이트
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
 
-  # 데이터베이스 설정 (Cloud DB)
+  # 데이터베이스 설정 ((Railway PostgreSQL)
   datasource:
-    url: ${DEV_POSTGRESQL_URL}  # NCP DB 엔드포인트로 변경
+    url: ${DEV_POSTGRESQL_URL}  # Railway DB 엔드포인트로 변경
     username: ${DEV_POSTGRESQL_USERNAME}
     password: ${DEV_POSTGRESQL_PASSWORD}
+    hikari:
+      connection-timeout: 30000
+      idle-timeout: 300000
+      max-lifetime: 1200000
 
   # 카카오 로그인 설정 (Sandbox 앱 키 공유, provider는 common에서 상속)
   security:
