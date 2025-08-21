@@ -47,4 +47,4 @@ spring:
   flyway:
     enabled: false
     baseline-on-migrate: true
-    baseline-version: 1
+    baseline-version:

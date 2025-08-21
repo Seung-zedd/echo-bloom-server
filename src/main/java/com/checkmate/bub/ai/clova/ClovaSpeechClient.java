@@ -3,9 +3,9 @@ package com.checkmate.bub.ai.clova;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -13,11 +13,11 @@ import java.util.Map;
 @FeignClient(name = "clova-speech", url = "https://naveropenapi.apigw.ntruss.com/recog/v1/stt")
 public interface ClovaSpeechClient {
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = "application/octet-stream", produces = MediaType.APPLICATION_JSON_VALUE)
     Map<String, Object> recognizeSpeech(
-            @RequestPart("audioFile") MultipartFile audioFile,         // 오디오 데이터 (WAV/MP3 등)
-            @RequestHeader("X-NCP-APIGW-API-KEY-ID") String apiKeyId,  // Speech 전용 API 키 ID
-            @RequestHeader("X-NCP-APIGW-API-KEY") String apiKey,       // Speech 전용 API 키
-            @RequestHeader("X-CLOVASPEECH-LANGUAGE") String language   // "ko-KR" 또는 "en-US"
+            @RequestHeader("X-NCP-APIGW-API-KEY-ID") String apiKeyId,  // 앱 등록 시 발급받은 Client ID
+            @RequestHeader("X-NCP-APIGW-API-KEY") String apiKey,       // 앱 등록 시 발급받은 Client Secret
+            @RequestParam("lang") String language,                      // "Kor" 또는 "Eng"
+            @RequestBody byte[] audioData                               // 오디오 파일 데이터 (application/octet-stream)
     );
 }

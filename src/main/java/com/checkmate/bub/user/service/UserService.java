@@ -25,6 +25,13 @@ public class UserService {
         return userCategoryBridgeRepository.findByUserId(userId);
     }
 
+    // Get user nickname by ID (for JavaScript display)
+    public String getUserNickname(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        return user.getNickname();
+    }
+
     // Update user's selected problems (my-page)
     @Transactional
     public void updateUserProblems(Long userId, List<Long> problemIds) {

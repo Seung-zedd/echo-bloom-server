@@ -4,8 +4,11 @@ import com.checkmate.bub.util.EnvironmentUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -58,9 +61,23 @@ public class GlobalExceptionHandler {
         return createErrorResponse(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.", e.getMessage());
     }
 
+    // 클라이언트 연결 중단 예외 처리 (ClientAbortException)
+    @ExceptionHandler(ClientAbortException.class)
+    public ResponseEntity<Map<String, Object>> handleClientAbort(ClientAbortException e) {
+        log.warn("Client disconnected during request processing: {}", e.getMessage());
+        // 클라이언트가 이미 연결을 끊었으므로 응답을 보낼 수 없지만, 로깅 목적으로 ResponseEntity 반환
+        return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build();
+    }
+
     // 기타 모든 예외 처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception e) {
+        // ClientAbortException의 경우 이미 별도 처리했으므로 로그 레벨 조정
+        if (e instanceof ClientAbortException || e.getCause() instanceof ClientAbortException) {
+            log.warn("Client abort exception in generic handler: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).build();
+        }
+        
         log.error("Unexpected error occurred", e);
         return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", e.getMessage());
     }
@@ -77,7 +94,11 @@ public class GlobalExceptionHandler {
             errorResponse.put("details", details);
         }
 
-        return ResponseEntity.status(status).body(errorResponse);
+        // Content-Type을 명시적으로 application/json으로 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        
+        return ResponseEntity.status(status).headers(headers).body(errorResponse);
     }
 
     /**

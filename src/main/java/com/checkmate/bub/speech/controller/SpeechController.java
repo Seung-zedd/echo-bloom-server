@@ -35,11 +35,16 @@ public class SpeechController {
             @RequestParam("originalSentence") String originalSentence,
             @RequestParam(value = "retryCount", defaultValue = "0") Integer retryCount) {
 
+        long startTime = System.currentTimeMillis();
+        String requestId = java.util.UUID.randomUUID().toString().substring(0, 8);
+        
         try {
-            log.info("음성 인식 요청 - 원본 문장: {}, 재시도: {}", originalSentence, retryCount);
+            log.info("[STT-REQUEST-{}] 음성 인식 요청 시작 - 원본 문장: {}, 재시도: {}, 파일 크기: {}bytes", 
+                    requestId, originalSentence, retryCount, audioFile.getSize());
 
             // 오디오 파일 유효성 검증
             if (audioFile.isEmpty()) {
+                log.warn("[STT-REQUEST-{}] 요청 실패 - 빈 오디오 파일", requestId);
                 return ResponseEntity.badRequest()
                         .body(SpeechRecognitionResponseDto.builder()
                                 .success(false)
@@ -49,6 +54,7 @@ public class SpeechController {
             }
             // 파일 크기 검증 (예: 10MB 제한)
             if (audioFile.getSize() > 10 * 1024 * 1024) {
+                log.warn("[STT-REQUEST-{}] 요청 실패 - 파일 크기 초과: {}bytes", requestId, audioFile.getSize());
                 return ResponseEntity.badRequest()
                         .body(SpeechRecognitionResponseDto.builder()
                                 .success(false)
@@ -59,6 +65,7 @@ public class SpeechController {
             // 파일 형식 검증
             String contentType = audioFile.getContentType();
             if (contentType == null || !contentType.startsWith("audio/")) {
+                log.warn("[STT-REQUEST-{}] 요청 실패 - 잘못된 파일 형식: {}", requestId, contentType);
                 return ResponseEntity.badRequest()
                         .body(SpeechRecognitionResponseDto.builder()
                                 .success(false)
@@ -68,20 +75,30 @@ public class SpeechController {
             }
 
             // 음성 인식 처리
+            log.info("[STT-REQUEST-{}] Clova Speech API 호출 시작", requestId);
             SpeechRecognitionResponseDto response = speechService.recognizeSpeech(
                     audioFile, originalSentence, retryCount);
 
+            long processingTime = System.currentTimeMillis() - startTime;
+            
             // HTTP 상태 코드 결정
             if (response.isSuccess()) {
+                log.info("[STT-REQUEST-{}] 음성 인식 성공 - 처리 시간: {}ms, 정확도: {}%", 
+                        requestId, processingTime, response.getAccuracy() != null ? String.format("%.1f", response.getAccuracy() * 100) : "N/A");
                 return ResponseEntity.ok(response); // 200 OK
             } else if (response.isMaxRetryReached()) {
+                log.warn("[STT-REQUEST-{}] 음성 인식 실패 - 최대 재시도 횟수 도달, 처리 시간: {}ms", 
+                        requestId, processingTime);
                 return ResponseEntity.badRequest().body(response); // 400 Bad Request
             } else {
+                log.info("[STT-REQUEST-{}] 음성 인식 재시도 필요 - 처리 시간: {}ms, 현재 재시도: {}", 
+                        requestId, processingTime, retryCount);
                 return ResponseEntity.ok(response); // 재시도 가능한 경우 200 OK
             }
 
         } catch (Exception e) {
-            log.error("음성 인식 컨트롤러 오류", e);
+            long processingTime = System.currentTimeMillis() - startTime;
+            log.error("[STT-REQUEST-{}] 음성 인식 컨트롤러 오류 - 처리 시간: {}ms", requestId, processingTime, e);
             return ResponseEntity.status(504) // 504 Gateway Timeout
                     .body(SpeechRecognitionResponseDto.builder()
                             .success(false)
@@ -101,18 +118,31 @@ public class SpeechController {
             @RequestParam("audioFile") MultipartFile audioFile,
             @RequestParam("originalSentence") String originalSentence) {
 
+        long startTime = System.currentTimeMillis();
+        String requestId = java.util.UUID.randomUUID().toString().substring(0, 8);
+        
         try {
-            log.info("음성 상세 비교 요청 - 원본: {}", originalSentence);
+            log.info("[STT-COMPARE-{}] 음성 상세 비교 요청 시작 - 원본: {}, 파일 크기: {}bytes", 
+                    requestId, originalSentence, audioFile.getSize());
 
             if (audioFile.isEmpty()) {
+                log.warn("[STT-COMPARE-{}] 요청 실패 - 빈 오디오 파일", requestId);
                 return ResponseEntity.badRequest().build();
             }
 
             SpeechCompareResponseDto response = speechService.compareSpeech(audioFile, originalSentence);
+            
+            long processingTime = System.currentTimeMillis() - startTime;
+            log.info("[STT-COMPARE-{}] 음성 비교 완료 - 처리 시간: {}ms, 정확도: {}%, 편집거리: {}", 
+                    requestId, processingTime, 
+                    response.getAccuracyPercentage() != null ? String.format("%.1f", response.getAccuracyPercentage() * 100) : "N/A",
+                    response.getEditDistance());
+            
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("음성 비교 컨트롤러 오류", e);
+            long processingTime = System.currentTimeMillis() - startTime;
+            log.error("[STT-COMPARE-{}] 음성 비교 컨트롤러 오류 - 처리 시간: {}ms", requestId, processingTime, e);
             return ResponseEntity.status(500).build();
         }
     }

@@ -54,10 +54,10 @@ public class SpeechService {
             
             // ClovaSpeechClient를 통한 STT 변환 (한국어 설정)
             Map<String, Object> sttResult = clovaSpeechClient.recognizeSpeech(
-                    audioFile,
                     clovaClientId,
                     clovaClientSecret,
-                    "ko-KR"
+                    "Kor",
+                    audioFile.getBytes()
             );
             
             // STT 결과에서 텍스트 추출
@@ -135,10 +135,10 @@ public class SpeechService {
             
             // STT 변환
             Map<String, Object> sttResult = clovaSpeechClient.recognizeSpeech(
-                    audioFile,
                     clovaClientId,
                     clovaClientSecret,
-                    "ko-KR"
+                    "Kor",
+                    audioFile.getBytes()
             );
             
             // STT 결과에서 텍스트 추출

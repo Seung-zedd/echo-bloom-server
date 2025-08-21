@@ -15,16 +15,25 @@ function getCookie(name) {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
-function setUsernameFromCookie(){
-  const nameKeys = ['user_name','username','name'];
-  let nameVal = null;
-  for (const k of nameKeys){
-    nameVal = getCookie(k);
-    if (nameVal) break;
-  }
+async function setUsernameFromAPI(){
   const el = document.getElementById('username');
   if (!el) return;
-  el.textContent = (nameVal && nameVal.trim()) ? `${nameVal.trim()}님` : 'USER님';
+  
+  try {
+    const response = await fetch('/api/users/me/info', {
+      credentials: 'same-origin'
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      el.textContent = data.nickname ? `${data.nickname}님` : 'USER님';
+    } else {
+      el.textContent = 'USER님';
+    }
+  } catch (error) {
+    console.error('Failed to fetch user info:', error);
+    el.textContent = 'USER님';
+  }
 }
 
 function setAvatarFromCookie(){
@@ -52,7 +61,7 @@ function setAvatarFromCookie(){
 
 // 초기화(헤더)
 (function initHeader(){
-  setUsernameFromCookie();
+  setUsernameFromAPI();
   setAvatarFromCookie();
 })();
 

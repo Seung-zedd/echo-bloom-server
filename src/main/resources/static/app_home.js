@@ -121,16 +121,25 @@ function getCookie(name) {
   return m ? decodeURIComponent(m[1]) : null;
 }
 
-function setUsernameFromCookie(){
-  const nameKeys = ['user_name','username','name'];
-  let nameVal = null;
-  for (const k of nameKeys){
-    nameVal = getCookie(k);
-    if (nameVal) break;
-  }
+async function setUsernameFromAPI(){
   const el = document.getElementById('username');
   if (!el) return;
-  el.textContent = (nameVal && nameVal.trim()) ? `${nameVal.trim()}님` : 'USER님';
+  
+  try {
+    const response = await fetch('/api/users/me/info', {
+      credentials: 'same-origin'
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      el.textContent = data.nickname ? `${data.nickname}님` : 'USER님';
+    } else {
+      el.textContent = 'USER님';
+    }
+  } catch (error) {
+    console.error('Failed to fetch user info:', error);
+    el.textContent = 'USER님';
+  }
 }
 
 function setAvatarFromCookie(){
@@ -158,7 +167,7 @@ function setAvatarFromCookie(){
 
 // 초기화(헤더)
 (function initHeader(){
-  setUsernameFromCookie();
+  setUsernameFromAPI();
   setAvatarFromCookie();
 })();
 
@@ -510,9 +519,6 @@ function initReadVoice(){
         // 홈으로 (초기 화면 복귀)
         window.location.reload();
       });
-      wrap.querySelector('#modal-close').addEventListener('click', () => {
-        wrap.remove();
-      });
     }
   }
 
@@ -522,9 +528,87 @@ function initReadVoice(){
     if (flower) flower.classList.toggle('glowing', on);
   };
 
-  // ---------- Web Speech API 우선 ----------
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SR) {
+  // ---------- Clova STT API 우선 ----------
+  let mediaRecorder;
+  let audioChunks = [];
+
+  btn.addEventListener('click', async () => {
+    if (!isListening) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        
+        const options = { mimeType: 'audio/webm;codecs=opus' };
+        mediaRecorder = new MediaRecorder(stream, options);
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        
+        mediaRecorder.onstop = async () => {
+          stream.getTracks().forEach(track => track.stop());
+          const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+          
+          console.log('🎤 Audio recorded:', {
+            size: audioBlob.size,
+            type: audioBlob.type,
+            originalSentence: readQuoteRaw,
+            apiEndpoint: ASR_API
+          });
+          
+          try {
+            const formData = new FormData();
+            formData.append('audioFile', audioBlob, 'speech.wav');
+            formData.append('originalSentence', readQuoteRaw);
+            formData.append('currentRetryCount', '0');
+            
+            console.log('📡 Sending to Clova STT...');
+            const response = await fetch(ASR_API, {
+              method: 'POST',
+              body: formData,
+              credentials: 'same-origin'
+            });
+            
+            console.log('📥 Response:', response.status, response.statusText);
+            
+            if (response.ok) {
+              const result = await response.json();
+              console.log('✅ Clova result:', result);
+              const ok = result.success && result.accuracy >= 0.8;
+              setState(false);
+              showResultModal(ok, () => { setState(false); btn.click(); });
+            } else {
+              const errorText = await response.text();
+              console.error('❌ HTTP Error:', response.status, errorText);
+              setState(false);
+              showResultModal(false, () => setState(false));
+            }
+          } catch (error) {
+            console.error('❌ Clova STT failed, trying Web Speech API fallback:', error);
+            tryWebSpeechFallback();
+          }
+        };
+        
+        mediaRecorder.start();
+        setState(true);
+      } catch (error) {
+        console.error('Microphone access failed, trying Web Speech API fallback:', error);
+        tryWebSpeechFallback();
+      }
+    } else {
+      setState(false);
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    }
+  });
+
+  // ---------- 폴백: Web Speech API ----------
+  function tryWebSpeechFallback() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      showResultModal(false, () => setState(false));
+      console.warn('음성 인식을 지원하지 않는 브라우저입니다.');
+      return;
+    }
+
     const recog = new SR();
     recog.lang = 'ko-KR';
     recog.interimResults = true;
@@ -541,38 +625,19 @@ function initReadVoice(){
     };
 
     recog.onend = () => {
-      if (!isListening) {
-        const ok = isMatch(readQuoteRaw, finalText);
-        setState(false);
-        showResultModal(ok, () => { finalText = ''; recog.start(); setState(true); });
-      } else {
-        // 브라우저가 끊었는데 계속 듣는 상태면 재시작
-        try { recog.start(); } catch {}
-      }
+      const ok = isMatch(readQuoteRaw, finalText);
+      setState(false);
+      showResultModal(ok, () => { finalText = ''; tryWebSpeechFallback(); setState(true); });
     };
 
-    btn.addEventListener('click', () => {
-      if (!isListening) { finalText = ''; try { recog.start(); setState(true); } catch {} }
-      else { setState(false); try { recog.stop(); } catch {} }
-    });
-
-    return; // STT 경로 사용
-  }
-
-  // ---------- 폴백: MediaRecorder → /api/asr 필요 없음 ----------
-  // 서버 없이 비교하려면, 폴백에서는 브라우저가 텍스트를 못 만들어서
-  // 클라이언트만으로는 "텍스트 변환"이 불가합니다.
-  // (즉, 폴백을 쓰려면 /api/asr 같은 STT 서버가 필요)
-  // 폴백을 잠시 비활성화하거나 안내를 띄우세요.
-  btn.addEventListener('click', () => {
-    if (!isListening) {
+    try {
+      recog.start();
       setState(true);
+    } catch (error) {
+      console.error('Web Speech API fallback failed:', error);
       showResultModal(false, () => setState(false));
-      console.warn('이 브라우저는 Web Speech API를 지원하지 않아, 클라이언트만으로 텍스트 비교가 어렵습니다.');
-    } else {
-      setState(false);
     }
-  });
+  }
 }
 
 /* ─────────────────────────────────────────────
