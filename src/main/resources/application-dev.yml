@@ -13,9 +13,11 @@ spring:
 
   # 데이터베이스 설정 ((Railway PostgreSQL)
   datasource:
-    url: ${DEV_POSTGRESQL_URL:jdbc:postgresql://localhost:5432/defaultdb}  # Railway DB 엔드포인트로 변경
-    username: ${DEV_POSTGRESQL_USERNAME:postgres}
-    password: ${DEV_POSTGRESQL_PASSWORD:password}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/defaultdb}  # Railway는 DATABASE_URL을 자동으로 JDBC 형식으로 변환
+    # Alternative if auto-conversion doesn't work:
+    # url: jdbc:${DEV_POSTGRESQL_URL:postgresql://localhost:5432/defaultdb}
+    # username: ${DEV_POSTGRESQL_USERNAME:postgres}  
+    # password: ${DEV_POSTGRESQL_PASSWORD:password}
     hikari:
       connection-timeout: 30000
       idle-timeout: 300000
