@@ -1,7 +1,7 @@
 
 spring:
   profiles:
-    default: local # 기본 로컬 활성화
+    default: dev # 배포용 dev로 활성화
     group:
       local: local, common
       dev: dev, common
