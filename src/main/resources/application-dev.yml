@@ -11,13 +11,11 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
-  # 데이터베이스 설정 ((Railway PostgreSQL)
+  # 데이터베이스 설정 (Railway PostgreSQL)
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/defaultdb}  # Railway는 DATABASE_URL을 자동으로 JDBC 형식으로 변환
-    # Alternative if auto-conversion doesn't work:
-    # url: jdbc:${DEV_POSTGRESQL_URL:postgresql://localhost:5432/defaultdb}
-    # username: ${DEV_POSTGRESQL_USERNAME:postgres}  
-    # password: ${DEV_POSTGRESQL_PASSWORD:password}
+    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:defaultdb}
+    username: ${PGUSER:postgres}
+    password: ${PGPASSWORD:password}
     hikari:
       connection-timeout: 30000
       idle-timeout: 300000
@@ -29,6 +27,18 @@ logging:
     com.zaxxer.hikari: DEBUG
     org.hibernate.SQL: DEBUG
     org.springframework.jdbc.datasource: DEBUG
+    org.springframework.core.env: DEBUG
+    org.springframework.boot.context.properties: DEBUG
+
+# Debug - print environment variables
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env,health,info
+  endpoint:
+    env:
+      show-values: always
 
   # 카카오 로그인 설정 (Sandbox 앱 키 공유, provider는 common에서 상속)
   security:
