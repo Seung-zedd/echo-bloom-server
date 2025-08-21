@@ -13,13 +13,20 @@ spring:
 
   # 데이터베이스 설정 ((Railway PostgreSQL)
   datasource:
-    url: ${DEV_POSTGRESQL_URL}  # Railway DB 엔드포인트로 변경
-    username: ${DEV_POSTGRESQL_USERNAME}
-    password: ${DEV_POSTGRESQL_PASSWORD}
+    url: ${DEV_POSTGRESQL_URL:jdbc:postgresql://localhost:5432/defaultdb}  # Railway DB 엔드포인트로 변경
+    username: ${DEV_POSTGRESQL_USERNAME:postgres}
+    password: ${DEV_POSTGRESQL_PASSWORD:password}
     hikari:
       connection-timeout: 30000
       idle-timeout: 300000
       max-lifetime: 1200000
+
+# Logging for debugging database connection
+logging:
+  level:
+    com.zaxxer.hikari: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.springframework.jdbc.datasource: DEBUG
 
   # 카카오 로그인 설정 (Sandbox 앱 키 공유, provider는 common에서 상속)
   security:
