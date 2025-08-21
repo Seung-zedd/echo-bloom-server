@@ -45,6 +45,6 @@ spring:
 
 # Flyway 설정 (추가)
   flyway:
-    enabled: true
+    enabled: false
     baseline-on-migrate: true
     baseline-version: 1

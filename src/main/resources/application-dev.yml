@@ -15,10 +15,6 @@ spring:
     username: ${DEV_POSTGRESQL_USERNAME}
     password: ${DEV_POSTGRESQL_PASSWORD}
 
-  # Flyway DB 마이그레이션
-  flyway:
-    enabled: true
-
   # 카카오 로그인 설정 (Sandbox 앱 키 공유, provider는 common에서 상속)
   security:
     oauth2:
