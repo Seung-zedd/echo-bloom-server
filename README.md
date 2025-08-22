@@ -76,7 +76,7 @@
 
   <br><br>
 
-  🔗자세한 서비스 소개서는 [여기](https://github.com/user-attachments/files/21930390/_compressed.pdf)에에서 확인하실 수 있습니다. 
+  🔗자세한 서비스 소개서는 [여기](https://github.com/user-attachments/files/21930390/_compressed.pdf)에서 확인하실 수 있습니다. 
 
 
 ## 💾 데이터베이스 스키마 (ERD)
