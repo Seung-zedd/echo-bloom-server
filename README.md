@@ -18,6 +18,8 @@
 
 - **소셜 로그인**: 카카오 소셜 로그인을 통해 간편하게 서비스를 시작할 수 있습니다.
 
+  <br><br>
+
 ## 🛠️ 기술 스택
 **Language**: Java 21
 
@@ -33,7 +35,7 @@
 
 **Authentication**: JWT, OAuth 2.0
 
----
+<br><br>
 
 ## 🖼️ 앱 스크린샷
 | 홈 화면 페이지 | 온보딩 1 | 온보딩 2 |
@@ -53,20 +55,19 @@
   
   사용자가 소셜 로그인을 통해 직접 앱 서비스를 사용하거나, 비회원 기능을 통해 간단한 앱 서비스 체험이 가능합니다.
   
-  <br>
 
 - **온보딩**
   
   사용자가 현재 겪고 있는 문제를 최대 3가지까지 선택하실 수 있으며, HyperCLOVA X 모델이 그에 걸맞는 3가지 색다른 톤이 담긴 예시 문구들을 생성해줍니다.
 
-  <br>
+
 
 - **메인 화면**
   
   사용자가 온보딩 단계에서 선택한 문제, 톤을 조합해서 HyperCLOVA X 모델이 긍정 확언 문구 3가지를 만들어줍니다.
   - 오른쪽 초록색 버튼을 눌러서 다른 확언 문구도 확인하실 수 있습니다.
  
-    <br>
+
 
 - **기능 화면**
   
@@ -74,15 +75,20 @@
   
   95% 이상 한국어의 정확성을 가진 Clova Speech Recognition 기술을 활용해 사용자가 성공적으로 읽으면 위의 기능 화면 2를 보여줍니다.
 
-  <br><br>
+  <br>
 
-  🔗자세한 서비스 소개서는 [여기](https://github.com/user-attachments/files/21930390/_compressed.pdf)에서 확인하실 수 있습니다. 
+  🔗자세한 서비스 소개서는 [여기](https://github.com/user-attachments/files/21930390/_compressed.pdf)에서 확인하실 수 있습니다.
+
+  <br>
 
 
 ## 💾 데이터베이스 스키마 (ERD)
 서비스의 전체 데이터베이스 구조는 다음과 같습니다.
+<br>
+
 <img width="804" height="1712" alt="ERD 설계(최종)" src="https://github.com/user-attachments/assets/416f548b-ec46-47bb-98c3-f142d08b670a" />
 
+<br><br>
 
 ## 🚀 시작하기
 프로젝트를 로컬 환경에서 실행하는 방법입니다.
@@ -101,6 +107,8 @@ $ ./gradlew build
 $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 ```
 
+<br><br>
+
 ## 👩‍💻 팀원 소개
 | 이름 | 역할 | GitHub |
 | --- | --- | --- |
@@ -110,6 +118,8 @@ $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 | 정승진 | UI/UX Designer | [SengJinn](https://github.com/SengJinn) |
 | 남도경 | PM |  |
 | 송수연 | PM |  |
+
+<br><br>
 
 ## 📜 라이선스
 이 프로젝트는 MIT 라이선스를 따릅니다.
