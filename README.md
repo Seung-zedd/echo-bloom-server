@@ -104,7 +104,7 @@ $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 | 조승제 | Backend | [Seung-zedd](https://github.com/Seung-zedd) |
 | 노범석 | Backend | [prodigy0831](https://github.com/prodigy0831) |
 | 김도현 | Frontend | [rlaehgus97](https://github.com/rlaehgus97) |
-| 정승진 | UI/UX Designer | [SengJinn](https://https://github.com/SengJinn) |
+| 정승진 | UI/UX Designer | [SengJinn](https:github.com/SengJinn) |
 | 남도경 | PM |  |
 | 송수연 | PM |  |
 
