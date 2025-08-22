@@ -9,8 +9,8 @@
 
 ## 📚목차
 - [🌟주요 기능 (MVP)](#-주요-기능-mvp)
-- [🛠기술 스택](#기술-스택)
-- [🖼앱 스크린샷](#앱-스크린샷)
+- [⚙️기술 스택](#기술-스택)
+- [🎨앱 스크린샷](#앱-스크린샷)
 - [💾데이터베이스 스키마 (ERD)](#-데이터베이스-스키마-erd)
 - [🚀시작하기](#-시작하기)
 - [👩‍💻팀원 소개](#-팀원-소개)
@@ -27,7 +27,7 @@
 
 - **소셜 로그인**: 카카오 소셜 로그인을 통해 간편하게 서비스를 시작할 수 있습니다.
 
-## 🛠 기술 스택
+## ⚙️ 기술 스택
 **Language**: Java 21
 
 **Framework**: Spring Boot 3.x
@@ -44,7 +44,7 @@
 
 ---
 
-## 🖼 앱 스크린샷
+## 🎨 앱 스크린샷
 | 홈 화면 페이지 | 온보딩 1 | 온보딩 2 |
 | :---: | :---: | :---: |
 | <img src="https://github.com/user-attachments/assets/735e0276-574d-4f56-97e2-5de344d446d7" width="250"> | <img src="https://github.com/user-attachments/assets/24e540ce-2407-40e4-977e-de8757d4ea67" width="250"> | <img src="https://github.com/user-attachments/assets/4ff71263-39d7-47f8-a626-0c5719952d41" width="250">
