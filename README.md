@@ -93,6 +93,7 @@
 ## 🏭시스템 아키텍처
 저희 앱 서비스의 전체적인 시스템 아키텍처는 다음과 같습니다.
 <br>
+
 <img width="3513" height="3063" alt="시스템 아키텍처" src="https://github.com/user-attachments/assets/c432f974-b0d1-4f8e-8b37-f51c3eea69ec" />
 
 <br><br>
