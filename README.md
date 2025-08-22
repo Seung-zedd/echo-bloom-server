@@ -76,6 +76,9 @@
 
   <br><br>
 
+  🔗자세한 서비스 소개서는 [여기](https://github.com/user-attachments/files/21930390/_compressed.pdf)에에서 확인하실 수 있습니다. 
+
+
 ## 💾 데이터베이스 스키마 (ERD)
 서비스의 전체 데이터베이스 구조는 다음과 같습니다.
 <img width="804" height="1712" alt="ERD 설계(최종)" src="https://github.com/user-attachments/assets/416f548b-ec46-47bb-98c3-f142d08b670a" />
