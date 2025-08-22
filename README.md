@@ -77,7 +77,11 @@
 
   <br>
 
-  🔗자세한 서비스 소개서는 [여기](https://github.com/user-attachments/files/21930390/_compressed.pdf)에서 확인하실 수 있습니다.
+  🔗 자세한 서비스 소개서는 [여기](https://github.com/user-attachments/files/21930390/_compressed.pdf)에서 확인하실 수 있습니다.
+
+  <br>
+
+  🎥 유튜브 영상으로 [앱 시연 영상](https://youtu.be/mj1EvXkVx1A?si=EPBLd0HrkfUfVaD5)도 확인하실 수 있습니다.
 
   <br>
 
