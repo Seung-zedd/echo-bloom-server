@@ -37,16 +37,6 @@
 
 <br><br>
 
-## 🖼️ 앱 스크린샷
-| 홈 화면 페이지 | 온보딩 1 | 온보딩 2 |
-| :---: | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/735e0276-574d-4f56-97e2-5de344d446d7" width="250"> | <img src="https://github.com/user-attachments/assets/24e540ce-2407-40e4-977e-de8757d4ea67" width="250"> | <img src="https://github.com/user-attachments/assets/4ff71263-39d7-47f8-a626-0c5719952d41" width="250">
-
-| 메인 화면 | 기능 화면 1 | 기능 화면 2 |
-| :---: | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/d66e7522-c64a-4a30-9a87-0eeee7b0e871" width="250"> | <img src="https://github.com/user-attachments/assets/1f432109-4d05-4edb-b8e7-a1a6c41a77b7" width="250"> | <img src="https://github.com/user-attachments/assets/d6787596-3363-47d4-97ca-ca36978b67db" width="250"> |
-
-
 ---
 
 ### 상세 설명
