@@ -37,16 +37,6 @@
 
 <br><br>
 
-## 🖼️ 앱 스크린샷
-| 홈 화면 페이지 | 온보딩 1 | 온보딩 2 |
-| :---: | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/735e0276-574d-4f56-97e2-5de344d446d7" width="250"> | <img src="https://github.com/user-attachments/assets/24e540ce-2407-40e4-977e-de8757d4ea67" width="250"> | <img src="https://github.com/user-attachments/assets/4ff71263-39d7-47f8-a626-0c5719952d41" width="250">
-
-| 메인 화면 | 기능 화면 1 | 기능 화면 2 |
-| :---: | :---: | :---: |
-| <img src="https://github.com/user-attachments/assets/d66e7522-c64a-4a30-9a87-0eeee7b0e871" width="250"> | <img src="https://github.com/user-attachments/assets/1f432109-4d05-4edb-b8e7-a1a6c41a77b7" width="250"> | <img src="https://github.com/user-attachments/assets/d6787596-3363-47d4-97ca-ca36978b67db" width="250"> |
-
-
 ---
 
 ### 상세 설명
@@ -74,14 +64,6 @@
   긍정 확언 문구를 보는 것 뿐만 아니라, 아래의 꽃 버튼을 사용자가 눌러 따라 읽게 유도함으로써 뇌의 변화를 불러일으키게 합니다.
   
   95% 이상 한국어의 정확성을 가진 Clova Speech Recognition 기술을 활용해 사용자가 성공적으로 읽으면 위의 기능 화면 2를 보여줍니다.
-
-  <br>
-
-  🔗 자세한 서비스 소개서는 [여기](https://github.com/user-attachments/files/21930390/_compressed.pdf)에서 확인하실 수 있습니다.
-
-  <br>
-
-  🎥 유튜브 영상으로 [앱 시연 영상](https://youtu.be/mj1EvXkVx1A?si=EPBLd0HrkfUfVaD5)도 확인하실 수 있습니다.
 
   <br>
 
