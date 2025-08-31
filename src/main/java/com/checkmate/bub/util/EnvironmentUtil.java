@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
+// BoilerPlate Class
 public class EnvironmentUtil {
 
     private final Environment environment;

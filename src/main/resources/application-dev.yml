@@ -21,25 +21,6 @@ spring:
       idle-timeout: 300000
       max-lifetime: 1200000
 
-# Logging for debugging database connection
-logging:
-  level:
-    com.zaxxer.hikari: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.springframework.jdbc.datasource: DEBUG
-    org.springframework.core.env: DEBUG
-    org.springframework.boot.context.properties: DEBUG
-
-# Debug - print environment variables
-management:
-  endpoints:
-    web:
-      exposure:
-        include: env,health,info
-  endpoint:
-    env:
-      show-values: always
-
   # 카카오 로그인 설정 (Sandbox 앱 키 공유, provider는 common에서 상속)
   security:
     oauth2:
@@ -73,3 +54,22 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+# Logging for debugging database connection
+logging:
+  level:
+    com.zaxxer.hikari: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.springframework.jdbc.datasource: DEBUG
+    org.springframework.core.env: DEBUG
+    org.springframework.boot.context.properties: DEBUG
+
+# Debug - print environment variables
+management:
+  endpoints:
+    web:
+      exposure:
+        include: env,health,info
+  endpoint:
+    env:
+      show-values: always

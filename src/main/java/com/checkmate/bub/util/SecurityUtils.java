@@ -2,7 +2,7 @@ package com.checkmate.bub.util;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
+// BoilerPlate Class
 public class SecurityUtils {
 
     private SecurityUtils() {}  // 인스턴스화 방지

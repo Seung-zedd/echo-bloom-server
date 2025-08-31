@@ -10,11 +10,6 @@ spring:
     username: test-username  # 더미 값
     password: test-password  # 더미 값
 
-# Disable p6spy completely for tests
-decorator:
-  datasource:
-    enabled: false
-
   # Disable Flyway for tests to avoid migration issues
   flyway:
     enabled: false
@@ -24,7 +19,7 @@ decorator:
     hibernate:
       ddl-auto: create-drop
       naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        physical-strategy: org.springframework.boot.orm.jpa.hibernate
     database-platform: org.hibernate.dialect.H2Dialect  # H2 DB dialect
     show-sql: false
 
@@ -59,3 +54,8 @@ jwt:
 # Clova 설정 (당신 제공 값 유지 – 더미 키)
 clova:
   api-key: your-test-clova-api-key  # 필요 시 'test-clova-key'로 변경
+
+# Disable p6Spy completely for tests
+decorator:
+  datasource:
+    enabled: false

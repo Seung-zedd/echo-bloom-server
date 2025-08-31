@@ -25,6 +25,7 @@ import java.util.Map;
 @ControllerAdvice
 @Slf4j
 @RequiredArgsConstructor
+// BoilerPlate Class
 public class GlobalExceptionHandler {
 
     private final EnvironmentUtil envUtil;

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @Slf4j
+// BoilerPlate Class
 public class ApiController {
 
     @GetMapping("/check-auth")

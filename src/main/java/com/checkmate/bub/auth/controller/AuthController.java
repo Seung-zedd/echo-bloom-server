@@ -19,6 +19,7 @@ import java.time.Duration;
 @RequestMapping("/auth/kakao")
 @RequiredArgsConstructor
 @Slf4j
+// BoilerPlate Class
 public class AuthController {
 
     private final AuthService authService;
