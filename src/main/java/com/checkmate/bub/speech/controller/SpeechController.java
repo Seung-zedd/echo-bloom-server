@@ -1,6 +1,5 @@
 package com.checkmate.bub.speech.controller;
 
-import com.checkmate.bub.speech.dto.SpeechCompareResponseDto;
 import com.checkmate.bub.speech.dto.SpeechRecognitionResponseDto;
 import com.checkmate.bub.speech.service.SpeechService;
 import lombok.RequiredArgsConstructor;
@@ -113,7 +112,7 @@ public class SpeechController {
      * POST /api/v1/speech/compare - 상세 음성 비교 분석
      * Levenshtein 편집 거리 알고리즘 사용
      */
-    @PostMapping(value = "/compare", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    /*@PostMapping(value = "/compare", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SpeechCompareResponseDto> compareSpeech(
             @RequestParam("audioFile") MultipartFile audioFile,
             @RequestParam("originalSentence") String originalSentence) {
@@ -145,7 +144,7 @@ public class SpeechController {
             log.error("[STT-COMPARE-{}] 음성 비교 컨트롤러 오류 - 처리 시간: {}ms", requestId, processingTime, e);
             return ResponseEntity.status(500).build();
         }
-    }
+    }*/
 
     /**
      * GET /api/v1/speech/logs - 사용자 음성 인식 기록 조회
