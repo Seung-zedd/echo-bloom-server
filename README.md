@@ -18,27 +18,7 @@
 
 - **소셜 로그인**: 카카오 소셜 로그인을 통해 간편하게 서비스를 시작할 수 있습니다.
 
-  <br><br>
-
-## 🛠️ 기술 스택
-**Language**: Java 21
-
-**Framework**: Spring Boot 3.x
-
-**Database**: PostgreSQL
-
-**Data Access**: Spring Data JPA, QueryDSL
-
-**API Documentation**: Apidog(Swagger에서 이전)
-- v1/endpoint(커스텀, 북마크 기능 만들기 전): <a href="https://07olkvu7eg.apidog.io">EndPoint</a>
-
-**AI**: Naver CLOVA Studio (HyperCLOVA X), CLOVA Speech Recognition(+STT)
-
-**Authentication**: JWT, OAuth 2.0
-
-<br><br>
-
----
+  <br>
 
 ### 상세 설명
 
@@ -66,8 +46,93 @@
   
   95% 이상 한국어의 정확성을 가진 Clova Speech Recognition 기술을 활용해 사용자가 성공적으로 읽으면 위의 기능 화면 2를 보여줍니다.
 
-  <br>
+  <br><br>  
 
+## 🛠️ 기술 스택
+**Language**: Java 21
+
+**Framework**: Spring Boot 3.x
+
+**Database**: PostgreSQL
+
+**Data Access**: Spring Data JPA, QueryDSL
+
+**API Documentation**: Apidog(Swagger에서 이전)
+- v1/endpoint(커스텀, 북마크 기능 만들기 전): <a href="https://07olkvu7eg.apidog.io">EndPoint</a>
+
+**AI**: Naver CLOVA Studio (HyperCLOVA X), CLOVA Speech Recognition(+STT)
+
+**Authentication**: JWT, OAuth 2.0
+
+<br><br>
+
+## 📂 프로젝트 패키지 구조
+```bash
+echo-bloom-server/
+└── src/
+    └── main/
+        ├── java/
+        │   └── com/
+        │       └── checkmate/
+        │           └── bub/
+        │               ├── affirmation/
+        │               │   ├── controller/
+        │               │   ├── domain/
+        │               │   ├── dto/
+        │               │   └── service/
+        │               ├── ai/
+        │               │   └── clova/
+        │               ├── api/
+        │               │   └── controller/
+        │               ├── auth/
+        │               │   ├── controller/
+        │               │   ├── dto/
+        │               │   └── service/
+        │               ├── bridge/
+        │               │   ├── domain/
+        │               │   └── repository/
+        │               ├── category/
+        │               │   ├── constant/
+        │               │   ├── domain/
+        │               │   ├── init/
+        │               │   └── repository/
+        │               ├── global/
+        │               │   ├── config/
+        │               │   │   ├── audit/
+        │               │   │   ├── feign/
+        │               │   │   ├── security/
+        │               │   │   └── web/
+        │               │   ├── exception/
+        │               │   └── jwt/
+        │               ├── speech/
+        │               │   ├── constant/
+        │               │   ├── controller/
+        │               │   ├── domain/
+        │               │   ├── dto/
+        │               │   ├── repository/
+        │               │   └── service/
+        │               ├── user/
+        │               │   ├── constant/
+        │               │   ├── controller/
+        │               │   ├── domain/
+        │               │   ├── dto/
+        │               │   ├── mapper/
+        │               │   ├── repository/
+        │               │   └── service/
+        │               │       └── helper/
+        │               └── util/
+        └── resources/
+            ├── static/
+            │   ├── .well-known/
+            │   │   └── appspecific/
+            │   ├── img/
+            │   ├── music/
+            │   └── views/
+            └── templates/
+
+```
+
+<br><br>
 
 ## 💾 데이터베이스 스키마 (ERD)
 서비스의 전체 데이터베이스 구조는 다음과 같습니다.
