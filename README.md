@@ -7,6 +7,10 @@
 
 🌻에코블룸(EchoBloom)이 당신의 첫걸음을 도와줘요!
 
+<br>
+
+🌐언어: <a href="https://github.com/Seung-zedd/echo-bloom-server/blob/main/README-en.md">English</a>
+
 <br><br>
 
 ## 🌟 주요 기능 (MVP)
