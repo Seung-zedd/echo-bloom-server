@@ -40,7 +40,7 @@ An AI-based positive affirmation speaking service that helps with emotional reco
 
 **Database**: PostgreSQL
 
-**Data Access**: Spring Data JPA, QueryDSL
+**Data Access**: Spring Data JPA
 
 **API Documentation**: Apidog (migrated from Swagger)
 - v1/endpoint (custom, before implementing bookmark feature): <a href="https://07olkvu7eg.apidog.io">EndPoint</a>
