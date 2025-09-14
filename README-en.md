@@ -60,52 +60,55 @@ echo-bloom-server/
         │   └── com/
         │       └── checkmate/
         │           └── bub/
-        │               ├── affirmation/
-        │               │   ├── controller/
-        │               │   ├── domain/
-        │               │   ├── dto/
-        │               │   └── service/
-        │               ├── ai/
-        │               │   └── clova/
-        │               ├── api/
-        │               │   └── controller/
-        │               ├── auth/
-        │               │   ├── controller/
-        │               │   ├── dto/
-        │               │   └── service/
-        │               ├── bridge/
-        │               │   ├── domain/
-        │               │   └── repository/
-        │               ├── category/
-        │               │   ├── constant/
-        │               │   ├── domain/
-        │               │   ├── init/
-        │               │   └── repository/
-        │               ├── global/
-        │               │   ├── config/
-        │               │   │   ├── audit/
-        │               │   │   ├── feign/
-        │               │   │   ├── security/
-        │               │   │   └── web/
-        │               │   ├── exception/
-        │               │   └── jwt/
-        │               ├── speech/
-        │               │   ├── constant/
-        │               │   ├── controller/
-        │               │   ├── domain/
-        │               │   ├── dto/
-        │               │   ├── repository/
-        │               │   └── service/
-        │               ├── user/
-        │               │   ├── constant/
-        │               │   ├── controller/
-        │               │   ├── domain/
-        │               │   ├── dto/
-        │               │   ├── mapper/
-        │               │   ├── repository/
-        │               │   └── service/
-        │               │       └── helper/
-        │               └── util/
+        │               ├── domain/
+        │               │   ├── affirmation/
+        │               │   │   ├── controller/
+        │               │   │   ├── domain/
+        │               │   │   ├── dto/
+        │               │   │   └── service/
+        │               │   ├── ai/
+        │               │   │   └── clova/
+        │               │   ├── bookmark/
+        │               │   │   ├── controller/
+        │               │   │   ├── domain/
+        │               │   │   └── service/
+        │               │   ├── bridge/
+        │               │   │   ├── domain/
+        │               │   │   └── repository/
+        │               │   ├── category/
+        │               │   │   ├── constant/
+        │               │   │   ├── domain/
+        │               │   │   ├── init/
+        │               │   │   └── repository/
+        │               │   ├── profile/
+        │               │   │   └── member/
+        │               │   │       ├── constant/
+        │               │   │       ├── controller/
+        │               │   │       ├── domain/
+        │               │   │       ├── dto/
+        │               │   │       ├── repository/
+        │               │   │       └── service/
+        │               │   │           └── helper/
+        │               │   └── speech/
+        │               │       ├── constant/
+        │               │       ├── controller/
+        │               │       ├── domain/
+        │               │       ├── dto/
+        │               │       ├── repository/
+        │               │       └── service/
+        │               └── global/
+        │                   ├── auth/
+        │                   │   ├── controller/
+        │                   │   ├── dto/
+        │                   │   └── service/
+        │                   ├── config/
+        │                   │   ├── audit/
+        │                   │   ├── feign/
+        │                   │   ├── security/
+        │                   │   └── web/
+        │                   ├── exception/
+        │                   ├── jwt/
+        │                   └── util/
         └── resources/
             ├── static/
             │   ├── .well-known/
