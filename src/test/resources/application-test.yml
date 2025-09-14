@@ -19,7 +19,7 @@ spring:
     hibernate:
       ddl-auto: create-drop
       naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate
+        physical-strategy: com.checkmate.bub.global.config.CamelCaseToSnakeAndUpperCaseStrategy
     database-platform: org.hibernate.dialect.H2Dialect  # H2 DB dialect
     show-sql: false
 
@@ -54,6 +54,9 @@ jwt:
 # Clova 설정 (당신 제공 값 유지 – 더미 키)
 clova:
   api-key: your-test-clova-api-key  # 필요 시 'test-clova-key'로 변경
+  speech-recognition:
+    client-id: test-clova-client-id
+    client-secret: test-clova-client-secret
 
 # Disable p6Spy completely for tests
 decorator:
