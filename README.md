@@ -59,7 +59,7 @@
 
 **Database**: PostgreSQL
 
-**Data Access**: Spring Data JPA, QueryDSL
+**Data Access**: Spring Data JPA
 
 **API Documentation**: Apidog(Swagger에서 이전)
 - v1/endpoint(커스텀, 북마크 기능 만들기 전): <a href="https://07olkvu7eg.apidog.io">EndPoint</a>
