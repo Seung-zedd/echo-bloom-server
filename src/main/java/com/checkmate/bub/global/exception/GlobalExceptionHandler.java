@@ -1,6 +1,6 @@
 package com.checkmate.bub.global.exception;
 
-import com.checkmate.bub.util.EnvironmentUtil;
+import com.checkmate.bub.global.util.EnvironmentUtil;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
