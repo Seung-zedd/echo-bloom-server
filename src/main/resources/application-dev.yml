@@ -11,15 +11,8 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
 
-  # 데이터베이스 설정 (Railway PostgreSQL)
-  datasource:
-    url: jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:defaultdb}
-    username: ${PGUSER:postgres}
-    password: ${PGPASSWORD:password}
-    hikari:
-      connection-timeout: 30000
-      idle-timeout: 300000
-      max-lifetime: 1200000
+  # 데이터베이스 설정 (AWS RDS PostgreSQL로 설정할 예정)
+
 
   # 카카오 로그인 설정 (Sandbox 앱 키 공유, provider는 common에서 상속)
   security:
