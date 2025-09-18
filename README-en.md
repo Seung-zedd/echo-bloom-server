@@ -143,7 +143,7 @@ How to run the project in your local environment.
 
 ```txt
 # Clone the repository
-$ git clone git clone https://github.com/checkmate-BUB/echo-bloom-server.git
+$ git clone git clone https://github.com/Seung-zedd/echo-bloom-server.git
 
 # Navigate to the project directory
 $ cd echo-bloom-server
