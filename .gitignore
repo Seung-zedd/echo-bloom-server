@@ -10,6 +10,7 @@ build/
 
 ### shell script 파일 ###
 *.sh
+package.json
 
 ### STS ###
 .apt_generated
