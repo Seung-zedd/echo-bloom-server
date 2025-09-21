@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>간단 설문 시작</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+   <style>
+    @font-face { 
+        font-family: 'HakgyoansimNadeuriTTF-B';
+        src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimNadeuriTTF-B.woff2') format('woff2');
+        font-weight: 700; font-style: normal;
+    }
+    :root{
+        --maxw: 420px;
+        --ink:#0f4a24;
+        --accent:#1e7a39;
+        --btn-border: rgba(255,255,255,.65);
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0; font-family:Pretendard,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--text); background:#1a7a29}
+
+/* 모바일 기본 캔버스: 메인과 동일 규격 */
+.screen{
+  position: relative;
+  min-height: 100dvh;                         /* 주소창 변화 대응 */
+  max-width: 420px;                           /* 디자인 기준 폭 */
+  margin: 0 auto;
+  /* 원하는 배경으로 교체 가능 (이미지면 center/cover no-repeat) */
+  background: linear-gradient(
+  180deg,
+  #e7f6e9 0%,
+  #cce8d0 50%,  /* ← 중간에 진한색 */
+  #d8f0dd 100%
+);
+  padding-left:max(20px, env(safe-area-inset-left));
+  padding-right:max(20px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.intro-close{
+  position: absolute; /* fixed → absolute */
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  right: calc(env(safe-area-inset-right, 0px) + 12px);
+  width: 36px; height: 36px;
+  border: 0; background: transparent; cursor: pointer;
+  z-index: 10;
+}
+.intro-close::before,
+.intro-close::after{
+  content:""; position:absolute; left:50%; top:50%;
+  width:22px; height:2px; background:#0f4a24; border-radius:2px; transform-origin:center;
+}
+.intro-close::before{ transform: translate(-50%,-50%) rotate(45deg); }
+.intro-close::after { transform: translate(-50%,-50%) rotate(-45deg); }
+
+    /* 콘텐츠 영역(이 안만 AJAX로 교체) */
+    #stage{
+      width:100%;
+      flex:1;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .view{
+      width:100%;
+      display:flex; flex-direction:column; align-items:center; text-align:center;
+      gap:40px;
+      padding: 24px 8px 0;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .view.entered{ opacity:1; transform: translateY(0); }
+    .view.leaving{ opacity:0; transform: translateY(8px); }
+    .view.entering{ opacity:0; transform: translateY(8px); }
+
+    .title{
+      margin:0;
+      font-weight:800;
+      font-size:clamp(18px,5.2vw,22px);
+      font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+      line-height:1.6;
+      letter-spacing:-.02em;
+      word-break:keep-all;
+      text-shadow:0 1px 0 rgba(255,255,255,.35);
+      color:var(--ink);
+    }
+
+    .cta{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:0 36px;
+      height:54px;
+      border-radius:999px;
+      background:rgba(255,255,255,.85);
+      border:2px solid var(--accent);
+      color:var(--ink);
+      font-size:1.1rem; font-weight:800;
+      font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+      text-decoration:none;
+      cursor:pointer; white-space:nowrap;
+      box-shadow:0 6px 16px rgba(30,122,57,.12);
+      transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .cta:hover {
+      background: var(--accent);  /* 버튼색을 포인트색으로 */
+      color: #fff;                /* 글자색은 흰색으로 */
+      border-color: var(--accent);
+    }
+    .cta:active{ transform:scale(.98); }
+
+    .note{
+      margin:0;
+      text-align:center;
+      font-size:clamp(12px,3.2vw,13px);
+      line-height:1.9;
+      color:rgba(0,0,0,.55);
+      word-break:keep-all;
+    }
+
+    .bottom{
+      width:100%;
+      display:flex; flex-direction:column; align-items:center; gap:40px;
+      margin-bottom:8vh;
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+
+   <button type="button" class="intro-close" id="goBack" aria-label="닫기"></button>
+    <!-- 이 안(#stage)만 AJAX로 바뀜 -->
+    <section id="stage">
+      <div class="view entered" id="view1">
+        <h2 class="title">당신에 대해 알기 위해<br>몇 가지 물어볼게요.</h2>
+
+        <div class="bottom">
+          <a class="cta" id="goSurvey">네, 3분 정도는 괜찮아요.</a>
+          <p class="note">
+            설문의 내용은 AI의 문구 추천을 위해서만 이용되며,<br>
+            개인 정보와 함께 저장되지 않습니다.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="../app2.js"></script> <!-- JS 파일 연결 -->
+</body>
+</html>

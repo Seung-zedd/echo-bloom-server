@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>간단 설문 시작</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+   <style>
+    @font-face { 
+        font-family: 'HakgyoansimNadeuriTTF-B';
+        src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimNadeuriTTF-B.woff2') format('woff2');
+        font-weight: 700; font-style: normal;
+    }
+    :root{
+        --maxw: 420px;
+        --ink:#0f4a24;
+        --accent:#1e7a39;
+        --btn-border: rgba(255,255,255,.65);
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0; font-family:Pretendard,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--text); background:#1a7a29}
+
+/* 모바일 기본 캔버스: 메인과 동일 규격 */
+.screen{
+  position: relative;
+  min-height: 100dvh;                         /* 주소창 변화 대응 */
+  max-width: 420px;                           /* 디자인 기준 폭 */
+  margin: 0 auto;
+  /* 원하는 배경으로 교체 가능 (이미지면 center/cover no-repeat) */
+  background: linear-gradient(
+  180deg,
+  #e7f6e9 0%,
+  #cce8d0 50%,  /* ← 중간에 진한색 */
+  #d8f0dd 100%
+);
+  padding-left:max(20px, env(safe-area-inset-left));
+  padding-right:max(20px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+    /* 콘텐츠 영역(이 안만 AJAX로 교체) */
+    #stage{
+      width:100%;
+      /*flex:1;*/
+      display:flex; align-items:center; justify-content:center;
+      flex: 1 0 auto; 
+    }
+    .view{
+      width:100%;
+      display:flex; flex-direction:column; align-items:center; text-align:center;
+      gap:40px;
+      padding: 24px 8px 0;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .view.entered{ opacity:1; transform: translateY(0); }
+    .view.leaving{ opacity:0; transform: translateY(8px); }
+    .view.entering{ opacity:0; transform: translateY(8px); }
+
+/* 상단 고정 헤더 */
+.screen-header{
+  position:absolute; 
+  top: max(5px, env(safe-area-inset-top));
+  left:0; right:0;
+  height:48px;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none; /* 제목은 클릭 안 받게 */
+}
+.hdr-title{
+  margin:3% 0 0 0; font-size:16px; font-weight:600; color:var(--ink); letter-spacing:-.2px;
+  pointer-events:none; /* 제목은 클릭 안 받게 */
+}
+.hdr-back{
+  position:absolute; left:max(10px, env(safe-area-inset-left));
+  top:50%; transform:translateY(-50%);
+  width:36px; height:36px; border-radius:999px; border:0; background:transparent;
+  font-size:40px; line-height:1; color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; pointer-events:auto;  /* 버튼만 클릭 허용 */
+}
+.hdr-back:active{ transform:translateY(-50%) scale(.98); }
+
+
+      /* 🔒 stage 전용 스코프 */
+  .withdrawal { gap: 28px; padding-top: 8px; }
+  .withdrawal .wd-top { width: 100%; text-align: left; }
+  .withdrawal .wd-title {
+    margin: 0; font-size: 18px; font-weight: 600; color: var(--ink);
+    letter-spacing: -.2px;
+  }
+  .withdrawal .wd-body { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 30px; }
+  .withdrawal .wd-hello {
+    margin: 0; font-size: 22px; line-height: 1.6; color: var(--ink); text-align: center; font-family: 'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif;
+  }
+  .withdrawal .wd-hello strong { font-family: 'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif; font-weight: 700; }
+
+  .withdrawal .wd-illust {
+    width: 140px; height: auto; display: block; margin: 10px 20px -20px 20px;
+    filter: drop-shadow(0 6px 20px rgba(0,0,0,.06));
+  }
+  .screen-footer .wd-check {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; color: rgba(15,74,36,.9);
+    user-select: none;
+  }
+  .screen-footer .wd-check input[type="checkbox"]{
+    appearance: none; width: 18px; height: 18px; border-radius: 4px;
+    border: 1.5px solid rgba(15,74,36,.35); background: #fff; position: relative;
+  }
+  .screen-footer .wd-check input[type="checkbox"]:checked{
+    background: var(--accent); border-color: var(--accent);
+  }
+  .screen-footer .wd-check input[type="checkbox"]:checked::after{
+    content: ""; position: absolute; inset: 0;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M4 9.5l3 3 7-7" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>') center/14px 14px no-repeat;
+  }
+
+/*  .screen-footer .wd-btn{
+    width: min(360px, 88%); height: 48px; border-radius: 999px;
+    font-size: 15px; font-weight: 700; letter-spacing: .2px;
+    border: 1px solid var(--btn-border);
+    background: var(--accent); color: #fff; border-color: transparent; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(30,122,57,.25);
+    transition: all .2s ease;
+  } */
+
+  .wd-btn{
+  display:block;
+   width: min(360px, 88%); height: 48px; line-height:48px; text-align:center;
+  border-radius:999px; font-weight:700; font-size:15px; letter-spacing:.2px;
+  text-decoration:none;                        /* a 밑줄 제거 */
+  color:#fff; background: var(--accent);       /* 기존 변수 사용 */
+  border:1px solid var(--btn-border);
+  box-shadow: 0 6px 18px rgba(30,122,57,.25);
+  transition: transform .12s ease, box-shadow .12s ease, filter .15s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation; cursor:pointer;
+}
+
+/* ⬇️ 누르는 동안 */
+.wd-btn:active{
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(30,122,57,.18);
+}
+  /* 하단 영역(고정 아님) */
+.screen-footer{
+  width:100%;
+  align-self:stretch;              /* .screen의 가로폭 채우기 */
+  margin-top:auto;                 /* 내용이 짧아도 바닥 쪽에 위치 */
+  padding: 12px max(20px, env(safe-area-inset-right))
+           20px  max(20px, env(safe-area-inset-left));
+  display:flex; flex-direction:column; gap:12px; align-items:center;
+  margin-bottom: calc(12px + env(safe-area-inset-bottom)); /* 숫자만 조절해서 취향맞추기 */
+}
+  </style>
+</head>
+<body>
+
+
+<div class="screen">
+  <!-- 🔝 고정 헤더 -->
+  <header class="screen-header">
+    <h1 class="hdr-title">회원 탈퇴</h1>
+  </header>
+
+  <!-- 본문 영역 -->
+  <section id="stage">
+    <div class="view withdrawal">
+      <div class="wd-body">
+        <p class="wd-hello">
+          <strong id="userName">탈퇴를 완료했어요.</strong><br/>변화를 시작하고 싶을 때, 언제든 다시 와주세요.
+        </p>
+
+        <img class="wd-illust" src="../img/flower.png" alt="노란 꽃봉오리">
+
+      </div>
+    </div>
+  </section>
+
+<footer class="screen-footer">
+    <footer class="screen-footer">
+    <a href="../main.html" class="wd-btn" role="button">홈으로</a>
+    </footer>
+</footer>
+
+</div>
+
+
+</body>
+
+
+
+</html>

@@ -1,0 +1,64 @@
+spring:
+  config:
+    activate:
+      on-profile: test  # 테스트 프로파일
+
+  # 데이터베이스 설정 (테스트용 in-memory H2 DB – 실제 DB 대신 사용)
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE  # 메모리 DB
+    username: test-username  # 더미 값
+    password: test-password  # 더미 값
+
+  # Disable Flyway for tests to avoid migration issues
+  flyway:
+    enabled: false
+    
+  # JPA 설정 (테스트에서 테이블 자동 생성)
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+      naming:
+        physical-strategy: com.checkmate.bub.global.config.CamelCaseToSnakeAndUpperCaseStrategy
+    database-platform: org.hibernate.dialect.H2Dialect  # H2 DB dialect
+    show-sql: false
+
+  # 카카오 로그인 설정 (테스트용 더미 값 – 실제 키 대신)
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: test-kakao-client-id  # 더미
+            client-secret: test-kakao-client-secret  # 더미
+            redirect-uri: http://localhost:8080/auth/kakao/callback
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+
+# JWT 설정 (당신 제공 값 유지 – 더미 secret)
+jwt:
+  secret: test-secret-key-for-unit-tests-12345678901234567890123456789012
+  access-token-expiration-in-seconds: 3600  # 1시간
+  refresh-token-expiration-in-seconds: 1209600  # 14일 (당신 값)
+
+# Clova 설정 (당신 제공 값 유지 – 더미 키)
+clova:
+  api-key: your-test-clova-api-key  # 필요 시 'test-clova-key'로 변경
+  speech-recognition:
+    client-id: test-clova-client-id
+    client-secret: test-clova-client-secret
+
+# Disable p6Spy completely for tests
+decorator:
+  datasource:
+    enabled: false

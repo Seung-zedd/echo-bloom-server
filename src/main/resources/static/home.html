@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>에코블룸</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+  @font-face { 
+    font-family: 'HakgyoansimNadeuriTTF-B';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimNadeuriTTF-B.woff2') format('woff2');
+    font-weight: 700; font-style: normal;
+  }
+
+  :root{
+    --maxw: 420px;
+    --accent: #ffcc33;
+    --btn-bg: rgba(255,255,255,.12);
+    --btn-border: rgba(255,255,255,.65);
+    --text: #fff;
+    --sub: rgba(255,255,255,.8);
+    --padL: max(20px, env(safe-area-inset-left));
+    --padR: max(20px, env(safe-area-inset-right));
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Pretendard,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--text);
+    background:#1a7a29;
+  }
+
+  .screen{
+    position:relative;
+    min-height:100vh;
+    max-width:var(--maxw);
+    margin:0 auto;
+    background:url("img/메인 배경.png") center/cover no-repeat;
+    padding-left:var(--padL);
+    padding-right:var(--padR);
+  }
+
+  .bleed-x{
+    margin-left: calc(-1 * var(--padL));
+    margin-right: calc(-1 * var(--padR));
+    width: calc(100% + var(--padL) + var(--padR));
+  }
+
+  .header{
+    position: sticky; top: 0; z-index: 5;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 16px;
+    height:56px;
+    backdrop-filter: blur(6px);
+    background: #fff;
+  }
+  .header .left, .header .right{display:flex; align-items:center; gap:10px}
+  .brand{display:flex; align-items:center; gap:8px; font-weight:600; color:#444;}
+  .brand .logo{
+    width:28px; height:28px; border-radius:50%; background:#ffde5b; display:grid; place-items:center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  }
+  .brand .logo img{ width:100%; height:100%; border-radius:50%; display:block; object-fit:cover; }
+  .ico{width:24px; height:24px; display:inline-block;}
+
+  #app{
+    position:relative; z-index:2;
+    min-height: calc(100vh - 56px);
+    padding: max(6vh,40px) 20px 28px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .leaving{ opacity:0; transform: translateY(6px); }
+  .entering{ opacity:0; transform: translateY(6px); }
+  .entered{ opacity:1; transform: translateY(0); }
+
+/* 기존 .bubble의 position/width/padding 등은 그대로 두고, 레이아웃만 Grid로 */
+.bubble{
+  width:100%;
+  background: rgba(255,255,255,.9);
+  color:#2a2a2a;
+  border-radius:22px;
+  padding:18px 18px 18px 18px;
+  line-height:1.5;
+  box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  position:relative;
+  max-width: 340px;
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* [스페이서] [문구] [버튼] */
+  align-items: center;                  /* 세로 중앙 정렬 */
+  text-align: center;                   /* 문구 중앙 정렬 */
+  /* 나머지 배경/보더/패딩/쉐도우 등은 기존 값 유지 */
+}
+
+/* 왼쪽 스페이서: 오른쪽 버튼과 같은 너비를 차지해 ‘정중앙’ 보장 */
+.bubble::before{
+  content: '';
+  width: 20px;          /* 버튼과 동일하게 */
+  height: 40px;         /* (실제 높이는 중요 X) */
+}
+
+/* 문구는 가운데 칸에 고정 */
+#quoteText{
+  grid-column: 2;
+}
+
+/* next 버튼은 오른쪽 칸에 고정 + 클릭 영역 보이게 */
+.bubble .next{
+  grid-column: 3;
+  width: 20px; height: 40px;          /* 클릭영역 확보 */
+  border: none; background: transparent;
+  color: #2f8a3c; cursor: pointer;
+  display: grid; place-items: center;  /* 아이콘 중앙 배치 */
+  font-size: 2.3rem; line-height: 1;
+  /* 절대위치(top:… right:…) 쓰지 않습니다 */
+}
+
+
+  .sub-links{display:flex; gap:24px; margin-top:0px; font-size:.9rem; color:var(--sub);}
+  .sub-links button{
+    background: none; border: none; color: var(--sub); cursor: pointer;
+    padding: 8px 0; text-decoration: underline dashed rgba(255,255,255,.45);
+    text-underline-offset: 4px;
+  }
+
+  .cta{width:100%; display:flex; justify-content:center; margin-top: 28px;}
+  .cta button{
+    min-width: 180px; height: 48px; border-radius: 999px;
+    border:1.5px solid var(--btn-border);
+    background: var(--btn-bg); color:#fff; font-weight:600; letter-spacing:.02em; cursor:pointer;
+    backdrop-filter: blur(4px);
+  }
+  .cta button:hover {
+  background: rgba(255,255,255,0.2);   /* 기존보다 살짝 밝게 */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transition: all 0.25s ease;
+}
+  .cta button:active{ transform: translateY(1px); }
+  
+a {color:#2a2a2a; text-decoration: none;}
+
+  #app.full { padding:0 !important; overflow:hidden; }
+</style>
+</head>
+<body>
+
+  <div class="screen">
+
+  <header class="header bleed-x" role="banner" aria-label="상단 헤더">
+    <div class="left brand">
+      <span class="logo" id="profileAvatar" aria-hidden="true">🌼</span>
+      <a href="views/mypage.html"><span id="username">USER님</span></a>
+    </div>
+    <div class="right">
+      <button id="musicToggle" aria-label="음악 재생" style="background:none;border:none;cursor:pointer;">
+        <!-- ▶ 재생 아이콘 -->
+        <svg id="musicIcon" class="ico" viewBox="0 0 24 24" fill="black" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="6,4 20,12 6,20" />
+        </svg>
+      </button>
+    </div>
+
+<!-- 숨겨진 오디오 요소 -->
+<audio id="bgMusic" src="music/BGM.mp3" loop></audio>
+
+  </header>
+
+
+    <main id="app" role="main" class="entered">
+      <!-- 홈(첫 화면) -->
+      <section class="hero" aria-label="시작 화면" style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%; margin-top: 5vh;">
+        <div class="bubble">
+          <div id="quoteText" style="font-weight:700; font-family:'HakgyoansimNadeuriTTF-B', Pretendard, sans-serif; font-size:1.05rem;">
+            불러오는 중...
+          </div>
+          <button class="next" type="button" aria-label="다음 문장"><span>›</span></button>
+        </div>
+
+        <div class="sub-links">
+          <button type="button" data-view="bookmark">북마크 문장 읽기</button>
+          <button type="button" data-view="custom">커스텀 문장 읽기</button>
+        </div>
+
+        <div class="cta">
+          <button type="button" data-view="read">읽기 시작!</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+<script src="app_home.js"></script>
+<script src="auth-check.js"></script>
+</body>
+</html>

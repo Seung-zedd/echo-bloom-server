@@ -1,0 +1,50 @@
+
+spring:
+  config:
+    activate:
+      on-profile: common
+
+  # 애플리케이션 이름 설정 (공통)
+  application:
+    name: echo-bloom-server  # 원하는 이름으로 변경 (예: MySpringBootApp)
+
+  # 데이터베이스 드라이버 (공통)
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  # H2 콘솔 비활성화 (모든 환경에서 명시적으로 false 설정)
+  h2:
+    console:
+      enabled: false
+
+  # JPA 설정 (공통: format_sql과 naming strategy)
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      naming:
+        physical-strategy: com.checkmate.bub.global.config.CamelCaseToSnakeAndUpperCaseStrategy
+
+  # kakao 설정
+  security:
+    oauth2:
+      client:
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
+        registration:
+          kakao:
+            scope:
+              - profile_nickname
+              - profile_image
+              - account_email
+
+# Flyway 설정 (추가)
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+    baseline-version:

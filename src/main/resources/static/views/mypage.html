@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Echobloom 마이페이지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+  @font-face { 
+    font-family: 'HakgyoansimNadeuriTTF-B';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimNadeuriTTF-B.woff2') format('woff2');
+    font-weight: 700; font-style: normal;
+  }
+
+  :root{
+    --maxw: 420px;
+    --text:#111;
+    --sub:#f9fafb;
+    --pill:#ffffff;
+    --muted:rgba(255,255,255,.9);
+    --shadow: 0 10px 30px rgba(0,0,0,.18);
+    --radius:22px;
+    --accent:#2f8a3c;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Pretendard,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--text);
+    background:#1a7a29;
+  }
+
+  .screen{
+    position:relative;
+    min-height:100vh;
+    max-width:var(--maxw);
+    margin:0 auto;
+    background:url("../img/메인 배경.png") center/cover no-repeat;
+    padding-left:var(--padL);
+    padding-right:var(--padR);
+  }
+
+  .bleed-x{
+    margin-left: calc(-1 * var(--padL));
+    margin-right: calc(-1 * var(--padR));
+    width: calc(100% + var(--padL) + var(--padR));
+  }
+
+  .header{
+    position: sticky; top: 0; z-index: 5;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 10px 16px;
+    height:56px;
+    backdrop-filter: blur(6px);
+    background: #fff;
+  }
+  .header .left, .header .right{display:flex; align-items:center; gap:10px}
+  .brand{display:flex; align-items:center; gap:8px; font-weight:600; color:#444;}
+  .brand .logo{
+    width:28px; height:28px; border-radius:50%; background:#ffde5b; display:grid; place-items:center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  }
+  .brand .logo img{ width:100%; height:100%; border-radius:50%; display:block; object-fit:cover; }
+/* 아이콘 버튼 공통 스타일 */
+.icon-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:30px; height:30px; border-radius:9999px;
+  color:#444; text-decoration:none; cursor:pointer; 
+}
+.icon-btn:active{ transform:translateY(1px); }
+
+.ico{ width:22px; height:22px; display:block; }
+
+
+  #app{
+    position:relative; z-index:2;
+    min-height: calc(100vh - 56px);
+    padding: max(6vh,40px) 20px 28px;
+    display:flex; flex-direction:column; align-items:center; justify-content: flex-start;         /* 가운데 → 상단 정렬 */
+    transition: opacity .25s ease, transform .25s ease; gap: 14px;
+  }
+  .leaving{ opacity:0; transform: translateY(6px); }
+  .entering{ opacity:0; transform: translateY(6px); }
+  .entered{ opacity:1; transform: translateY(0); }
+
+  /* 제목/소제목 */
+  .heading{
+    width:100%; text-align:center;
+    font-weight:600; line-height:1.25;
+    text-shadow: 0 2px 14px rgba(0,0,0,.35);
+    color:#fff;
+  }
+  .heading .small{font-size:1.1rem; opacity:.95}
+
+  /* 칩(문제 3개) */
+  .chips{ display:flex; gap:10px; justify-content:center; margin:8px 0 22px; flex-wrap:wrap; }
+  .chip{
+    background:var(--pill); color:var(--text);
+    border-radius:9999px; padding:10px 14px; font-weight:800; box-shadow:var(--shadow);
+    min-width:84px; text-align:center;
+  }
+  .muted{ color:var(--muted); font-size:.9rem; text-align:center; margin:6px 0 18px; }
+
+  /* 톤 섹션 */
+  .tone-wrap{ display:flex; flex-direction:column; align-items:center; gap:10px; margin:8px 0 22px; }
+  .tone-chip{
+    background:#fff; color:#111; border-radius:9999px; padding:12px 18px; font-weight:900;
+    box-shadow:var(--shadow); min-width:120px; text-align:center;
+  }
+  .chip,
+.tone-chip{
+  font-family: 'HakgyoansimNadeuriTTF-B', Pretendard, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: .2px;                       /* 가독성 살짝 업 */
+}
+
+  /* 버튼들 */
+  .btn{
+    width:100%;
+    background:#fff; color:#111; border:none;
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:14px 18px; font-size:1rem; font-weight:700; cursor:pointer;
+    display:block; text-align:center; text-decoration:none;
+  }
+
+
+
+/* 공유 카드 v2 */
+.share-card{
+  position: relative;
+  width: 100%;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  min-height: 96px;
+  overflow: hidden;                  
+  display: flex; align-items: center;
+}
+
+.share-card .share-text{
+  z-index: 1;
+  color: #111;
+  font-weight: 800;
+  line-height: 1.35;
+  font-size: 1.2rem;
+  margin-left: 10px;
+  font-family: 'HakgyoansimNadeuriTTF-B', Pretendard, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.share-card .share-flower{
+  position: absolute;
+  right: -6px;                         /* 살짝 바깥으로 */
+  bottom: -20px;
+  width: 120px;                        /* 크기 조절 포인트 */
+  height: auto;
+  pointer-events: none; user-select: none;
+}
+
+/* 카드 클릭 가능 표시 */
+.share-action{ cursor: pointer; }
+.share-action:active{ transform: translateY(1px); }
+
+/* 복사 안내 토스트 */
+.toast{
+  position: fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(10px);
+  background: rgba(0,0,0,.85); color:#fff; padding:10px 14px; border-radius:999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.2); font-weight:700; opacity:0; pointer-events:none;
+  transition: opacity .2s, transform .2s; z-index: 9999;
+}
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.tone-link{ cursor:pointer; text-decoration:none; }
+
+
+@media (max-width: 360px){
+  .share-card .share-flower{ width: 100px; right: -8px; }
+}
+
+  /* 접근성용 로딩 */
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  
+  #app.full { padding:0 !important; overflow:hidden; }
+</style>
+</head>
+<body>
+
+  <div class="screen">
+
+<header class="header bleed-x" role="banner" aria-label="상단 헤더">
+  <div class="left brand">
+    <!-- 뒤로(<) : 홈으로 -->
+    <a href="../home.html" class="icon-btn" aria-label="홈으로 이동">
+      <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor">
+        <path d="M15 6l-6 6 6 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+
+    <span class="logo" id="profileAvatar" aria-hidden="true">🌼</span>
+    안녕하세요,<span id="username">USER님</span>
+  </div>
+
+  <div class="right">
+    <!-- 설정(톱니) : settings 페이지로 -->
+<a href="setting.html" class="icon-btn" aria-label="설정으로 이동">
+<svg class="ico" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 32 32">
+<path d="M 13.1875 3 L 13.03125 3.8125 L 12.4375 6.78125 C 11.484375 7.15625 10.625 7.683594 9.84375 8.3125 L 6.9375 7.3125 L 6.15625 7.0625 L 5.75 7.78125 L 3.75 11.21875 L 3.34375 11.9375 L 3.9375 12.46875 L 6.1875 14.4375 C 6.105469 14.949219 6 15.460938 6 16 C 6 16.539063 6.105469 17.050781 6.1875 17.5625 L 3.9375 19.53125 L 3.34375 20.0625 L 3.75 20.78125 L 5.75 24.21875 L 6.15625 24.9375 L 6.9375 24.6875 L 9.84375 23.6875 C 10.625 24.316406 11.484375 24.84375 12.4375 25.21875 L 13.03125 28.1875 L 13.1875 29 L 18.8125 29 L 18.96875 28.1875 L 19.5625 25.21875 C 20.515625 24.84375 21.375 24.316406 22.15625 23.6875 L 25.0625 24.6875 L 25.84375 24.9375 L 26.25 24.21875 L 28.25 20.78125 L 28.65625 20.0625 L 28.0625 19.53125 L 25.8125 17.5625 C 25.894531 17.050781 26 16.539063 26 16 C 26 15.460938 25.894531 14.949219 25.8125 14.4375 L 28.0625 12.46875 L 28.65625 11.9375 L 28.25 11.21875 L 26.25 7.78125 L 25.84375 7.0625 L 25.0625 7.3125 L 22.15625 8.3125 C 21.375 7.683594 20.515625 7.15625 19.5625 6.78125 L 18.96875 3.8125 L 18.8125 3 Z M 14.8125 5 L 17.1875 5 L 17.6875 7.59375 L 17.8125 8.1875 L 18.375 8.375 C 19.511719 8.730469 20.542969 9.332031 21.40625 10.125 L 21.84375 10.53125 L 22.40625 10.34375 L 24.9375 9.46875 L 26.125 11.5 L 24.125 13.28125 L 23.65625 13.65625 L 23.8125 14.25 C 23.941406 14.820313 24 15.402344 24 16 C 24 16.597656 23.941406 17.179688 23.8125 17.75 L 23.6875 18.34375 L 24.125 18.71875 L 26.125 20.5 L 24.9375 22.53125 L 22.40625 21.65625 L 21.84375 21.46875 L 21.40625 21.875 C 20.542969 22.667969 19.511719 23.269531 18.375 23.625 L 17.8125 23.8125 L 17.6875 24.40625 L 17.1875 27 L 14.8125 27 L 14.3125 24.40625 L 14.1875 23.8125 L 13.625 23.625 C 12.488281 23.269531 11.457031 22.667969 10.59375 21.875 L 10.15625 21.46875 L 9.59375 21.65625 L 7.0625 22.53125 L 5.875 20.5 L 7.875 18.71875 L 8.34375 18.34375 L 8.1875 17.75 C 8.058594 17.179688 8 16.597656 8 16 C 8 15.402344 8.058594 14.820313 8.1875 14.25 L 8.34375 13.65625 L 7.875 13.28125 L 5.875 11.5 L 7.0625 9.46875 L 9.59375 10.34375 L 10.15625 10.53125 L 10.59375 10.125 C 11.457031 9.332031 12.488281 8.730469 13.625 8.375 L 14.1875 8.1875 L 14.3125 7.59375 Z M 16 11 C 13.25 11 11 13.25 11 16 C 11 18.75 13.25 21 16 21 C 18.75 21 21 18.75 21 16 C 21 13.25 18.75 11 16 11 Z M 16 13 C 17.667969 13 19 14.332031 19 16 C 19 17.667969 17.667969 19 16 19 C 14.332031 19 13 17.667969 13 16 C 13 14.332031 14.332031 13 16 13 Z"></path>
+</svg>
+</a>
+
+  </div>
+</header>
+
+
+
+    <main id="app" role="main" class="entered">
+
+  <!-- 1) 문제 -->
+  <section aria-labelledby="probTitle" style="width:100%;">
+    <h2 id="probTitle" class="heading">
+      <div class="small">지금 우리는 이런 문제를 해결하고 있어요.</div>
+    </h2>
+
+    <div class="chips" id="problemChips" aria-live="polite">
+      <!-- JS가 칩 3개 채움 -->
+    </div>
+    <div class="muted">
+      <a href="change_problems.html" id="goChangeProblem" class="muted tone-link">✎ 다른 문제를 해결하고 싶어요.</a>
+    </div>
+  </section>
+
+  <!-- 2) 톤 -->
+  <section aria-labelledby="toneTitle" style="width:100%;">
+    <h2 id="toneTitle" class="heading">
+      <div class="small">지금 이런 톤으로 이야기하고 있어요.</div>
+    </h2>
+
+    <div class="tone-wrap" aria-live="polite">
+      <div id="toneChip" class="tone-chip">로딩 중…</div>
+      <a href="change_tone.html" id="goChangeTone" class="muted tone-link">✎ 톤을 바꾸고 싶어요.</a>
+    </div>
+  </section>
+
+  <!-- 3) CTA 버튼 -->
+  <a class="btn" href="bookmark_list.html">북마크 문장 관리하기</a>
+  <a class="btn" href="custom_list.html?mock=1">읽고 싶은 문장 직접 입력하기</a>
+
+<!-- 4) 공유 카드 -->
+<div class="share-card share-action" id="shareCard"
+     role="button" tabindex="0" aria-label="링크 공유하기">
+  <div class="share-text">
+    친구들에게<br/>에코블룸을 알려주세요
+  </div>
+  <img src="../img/flower.png" alt="" class="share-flower" loading="lazy">
+</div>
+<!-- 복사 완료 안내 토스트 -->
+<div id="toast" class="toast" aria-live="polite"></div>
+
+  <span id="live" class="sr-only" aria-live="polite"></span>
+
+    </main>
+  </div>
+
+<script src="../app_mypage.js"></script>
+<script src="../auth-check.js"></script>
+
+</body>
+</html>
