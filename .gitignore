@@ -8,9 +8,10 @@ build/
 ### 더미 데이터 파일 무시 (SQL 스크립트 등)
 /src/main/resources/data.sql
 
-### shell script 파일 ###
+### shell script 및 기타 파일 ###
 *.sh
 package.json
+temp/
 
 ### STS ###
 .apt_generated
