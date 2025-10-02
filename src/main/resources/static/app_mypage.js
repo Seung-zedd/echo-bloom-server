@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 마이페이지 데이터 로딩
  * - 서버에서 problems(배열), tone(문자열) 가져옴
  * - 실패 시 폴백 표시
@@ -65,16 +65,17 @@ function setAvatarFromCookie(){
   setAvatarFromCookie();
 })();
 
+const MAX_PROBLEM_SLOTS = 3;
+const EMPTY_PROBLEM_LABEL = '미선택';
+const DEFAULT_TONE = '단호한 톤';
 
 async function initMyPage(){
-  const DEFAULT_PROBLEMS = ['문제1', '문제2', '문제3'];   // <- 실패 시 임시 단어
-  const DEFAULT_TONE     = '단호한 톤';                   // <- 실패 시 임시 톤
-
   const chipsEl = document.getElementById('problemChips');
   const toneEl  = document.getElementById('toneChip');
 
-  // 로딩 상태
-  renderProblems(chipsEl, ['로딩','중입','니다']); // 임시
+  if (!chipsEl || !toneEl) return;
+
+  renderProblems(chipsEl, [{ label: '로딩 중…', isActive: false }]);
   toneEl.textContent = '로딩 중…';
 
   try{
@@ -83,13 +84,14 @@ async function initMyPage(){
     if(!res.ok) throw new Error('HTTP '+res.status);
     const data = await res.json();
 
-    const probs = normalizeProblems(
-      Array.isArray(data?.problems)
-        ? data.problems.map(item => item?.name).filter(Boolean)
-        : [],
-      DEFAULT_PROBLEMS
+    const selectedProblems = Array.isArray(data?.problems)
+      ? data.problems.map(item => item?.name).filter(Boolean)
+      : [];
+
+    renderProblems(
+      chipsEl,
+      buildProblemChips(selectedProblems)
     );
-    renderProblems(chipsEl, probs);
 
     const toneName = typeof data?.tone?.name === 'string'
       ? data.tone.name.trim()
@@ -97,28 +99,58 @@ async function initMyPage(){
     toneEl.textContent = toneName || DEFAULT_TONE;
 
   }catch(err){
-    // 실패 → 폴백
-    renderProblems(chipsEl, DEFAULT_PROBLEMS);
+    renderProblems(
+      chipsEl,
+      buildProblemChips([])
+    );
     toneEl.textContent = DEFAULT_TONE;
     console.warn('[mypage] load failed, using fallback:', err);
   }
 }
 
-/* 배열 정제: 최소 3개로 보정하고, 문자열만 추림 */
-function normalizeProblems(list, fallback){
-  const arr = Array.isArray(list) ? list.filter(v => typeof v === 'string' && v.trim()) : [];
-  const out = arr.slice(0,3);
-  while(out.length < 3) out.push(fallback[out.length] ?? '문제');
-  return out;
+/* 문제 칩 데이터 구성: 선택된 항목 + 미선택 자리 표시 */
+function buildProblemChips(list, limit = MAX_PROBLEM_SLOTS, options = {}){
+  const emptyLabel = typeof options.emptyLabel === 'string' ? options.emptyLabel : EMPTY_PROBLEM_LABEL;
+  const cleaned = Array.isArray(list)
+    ? list.filter(v => typeof v === 'string' && v.trim())
+    : [];
+
+  const chips = cleaned.slice(0, limit).map(name => ({
+    label: name.trim(),
+    isActive: true
+  }));
+
+  while (chips.length < limit) {
+    chips.push({ label: emptyLabel, isActive: false });
+  }
+
+  return chips;
 }
 
 /* 칩 렌더: 4글자 + … 요약 */
 function renderProblems(container, problems){
+  if (!container) return;
+
   container.innerHTML = '';
-  problems.slice(0,3).forEach(p => {
+  const items = Array.isArray(problems) ? problems : [];
+  if (items.length === 0) return;
+
+  items.slice(0, MAX_PROBLEM_SLOTS).forEach(item => {
+    const entry = typeof item === 'string'
+      ? { label: item, isActive: true }
+      : {
+          label: typeof item?.label === 'string' && item.label.trim()
+            ? item.label.trim()
+            : EMPTY_PROBLEM_LABEL,
+          isActive: Boolean(item?.isActive)
+        };
+
     const chip = document.createElement('div');
-    chip.className = 'chip';
-    chip.textContent = summarize(p, 4);
+    chip.className = 'chip' + (entry.isActive ? '' : ' chip--inactive');
+    chip.textContent = summarize(entry.label, 4);
+    if (!entry.isActive) {
+      chip.setAttribute('aria-disabled', 'true');
+    }
     container.appendChild(chip);
   });
 }
@@ -186,4 +218,3 @@ function summarize(str, limit){
     window.__toastTimer = setTimeout(()=> toast.classList.remove('show'), 1800);
   }
 })();
-
