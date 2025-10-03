@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderList(items.map(x => ({
         id: x.id ?? x.bookmarkId ?? x._id ?? null,
         text: x.text ?? x.content ?? '',
-        bookmarked: x.bookmarked ?? true
+        bookmarked: x.bookmarked ?? false
       })));
     } catch (e) {
       console.warn('bookmark load failed:', e);

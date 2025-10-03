@@ -727,7 +727,14 @@ async function checkBookmark(text){
   const url = BOOKMARK_EXISTS_API + encodeURIComponent(text);
   try {
     const data = await fetchJSONWithAuth(url, { method: 'GET' });
-    return !!data; // 백엔드에서 boolean 직접 반환
+
+    if (typeof data === 'boolean') return data;
+    if (data && typeof data === 'object') {
+      if (typeof data.isBookmarked === 'boolean') return data.isBookmarked;
+      if (typeof data.bookmarked === 'boolean') return data.bookmarked;
+      if (typeof data.exists === 'boolean') return data.exists;
+    }
+    return false;
   } catch (e) {
     console.error('checkBookmark failed:', e);
     return false; // 실패 시 기본값
@@ -794,6 +801,10 @@ function initCorrectView(){
   const quotePlain = (target?.innerText || '').trim();
   const toggleBtn = app.querySelector('#bookmarkToggle');
   if (!toggleBtn || !quotePlain) return;
+
+  // 기본은 해제 상태로 표시
+  toggleBtn.setAttribute('aria-pressed', 'false');
+  setBookmarkIcon(false);
 
   // 초기 상태 체크
   (async () => {
@@ -1019,4 +1030,3 @@ function initCustomView(){
   }
   */
 }
-
