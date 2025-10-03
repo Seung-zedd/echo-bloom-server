@@ -1,4 +1,4 @@
-package com.checkmate.bub.domain.speech.dto;
+package com.checkmate.bub.domain.bookmark.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,9 +1,9 @@
 package com.checkmate.bub.domain.bookmark.controller;
 
-import com.checkmate.bub.domain.speech.dto.BookmarkRequestDto;
-import com.checkmate.bub.domain.speech.dto.BookmarkResponseDto;
-import com.checkmate.bub.domain.bookmark.domain.BookmarkEntity;
-import com.checkmate.bub.domain.speech.service.BookmarkService;
+import com.checkmate.bub.domain.bookmark.dto.BookmarkRequestDto;
+import com.checkmate.bub.domain.bookmark.dto.BookmarkResponseDto;
+import com.checkmate.bub.domain.bookmark.domain.Bookmark;
+import com.checkmate.bub.domain.bookmark.service.BookmarkService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class BookmarkController {
         try {
             log.info("북마크 추가 요청 - 문장: {}", request.getSentence());
             
-            BookmarkEntity bookmark = bookmarkService.addBookmark(
+            Bookmark bookmark = bookmarkService.addBookmark(
                     request.getSentence(), 
                     request.getTone());
             

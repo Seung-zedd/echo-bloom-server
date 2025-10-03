@@ -5,6 +5,10 @@
    전역 엘리먼트 / 기본 설정
 ========================== */
 const app = document.getElementById('app');
+let currentView = 'home';
+if (app) {
+  app.dataset.currentView = 'home';
+}
 
 // 엔드포인트 (백엔드 실제 API와 매칭)
 const QUOTE_API = '/api/v1/affirmations/main';  // 문제와 톤을 바탕으로 생성한 '읽을 문구'를 이 서버에서 불러옴
@@ -49,6 +53,7 @@ function viewToUrl(viewName){
 }
 
 async function loadView(viewName){
+  const targetView = viewName || 'home';
   await transitionOut();
 
   const url = viewToUrl(viewName);
@@ -58,6 +63,9 @@ async function loadView(viewName){
     const html = await res.text();
 
     app.innerHTML = html;
+
+    currentView = targetView;
+    app.dataset.currentView = targetView;
 
     
     // read 화면: 문장 주입 + 음성 인식 초기화
@@ -75,6 +83,8 @@ async function loadView(viewName){
         <div class="bubble">뷰 <b>${viewName}</b>를 불러오는 중 오류가 발생했어요.</div>
       </section>`;
     console.error('Load failed:', err);
+    currentView = targetView;
+    app.dataset.currentView = targetView;
   }
 
 // app.innerHTML = html; 다음에 분기 추가
@@ -225,7 +235,7 @@ function showNextAffirmation(){
   setQuote(quotes[affirmationIdx]);
   affirmationIdx = (affirmationIdx + 1) % quotes.length;
 }
-function fetchWithTimeout(url, opts={}, ms=5000){
+function fetchWithTimeout(url, opts={}, ms=10000){
   return Promise.race([
     fetch(url, opts),
     new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))
@@ -331,6 +341,7 @@ async function loadNextQuote(btn){
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('button.next');
   if (!btn) return;
+  if (currentView !== 'home') return;
   loadNextQuote(btn);
 });
 
@@ -845,6 +856,25 @@ function initCorrectView(){
   });
 }
 
+function normalizeBookmarkEntry(entry) {
+  if (!entry) {
+    return { sentence: '', tone: 'normal', id: null };
+  }
+
+  if (typeof entry === 'string') {
+    return { sentence: entry.trim(), tone: 'normal', id: null };
+  }
+
+  if (typeof entry === 'object') {
+    const sentence = String(entry.sentence ?? entry.text ?? entry.content ?? entry.quote ?? '').trim();
+    const toneValue = typeof entry.tone === 'string' && entry.tone.trim().length ? entry.tone : 'normal';
+    const idValue = entry.id ?? entry.bookmarkId ?? entry._id ?? null;
+    return { sentence, tone: toneValue, id: idValue };
+  }
+
+  return { sentence: String(entry ?? '').trim(), tone: 'normal', id: null };
+}
+
 function initBookmarkView(){
   const quoteEl = app.querySelector('#quoteText');      // 북마크 문장을 표시할 곳
   const nextBtn = app.querySelector('.bubble .next');   // 다음 북마크
@@ -854,7 +884,7 @@ function initBookmarkView(){
   if (!quoteEl) return;
 
   // 상태
-  let bookmarks = []; // 문자열 배열
+  let bookmarks = []; // 북마크 항목 배열
   let idx = 0;
 
   // 렌더
@@ -874,15 +904,18 @@ function initBookmarkView(){
 
     if (nextBtn) nextBtn.disabled = (bookmarks.length <= 1);
 
-    const text = String(bookmarks[idx] ?? '').trim();
-    quoteEl.innerHTML = text.replace(/\n/g, '<br/>');
+    const current = bookmarks[idx] ?? null;
+    const text = current && typeof current.sentence === 'string' ? current.sentence.trim() : '';
+    quoteEl.innerHTML = text ? text.replace(/\n/g, '<br/>') : '';
 
-    // 👉 북마크가 있으면 다시 읽기 버튼으로 복원
-    if (ctaEl) {
-      ctaEl.innerHTML = `
-        <button type="button" data-view="read">읽기 시작!</button>
-      `;
-    }
+      // 👉 저장된 북마크가 있으면 읽기/홈 버튼으로 복원
+      if (ctaEl) {
+        ctaEl.innerHTML = `
+          <button type="button" data-view="read" style="padding:8px 12px;">읽기 시작!</button>
+          <button type="button" onclick="location.href='home.html'" style="padding:8px 12px;">홈으로</button>
+        `;
+      }
+
   };
 
   // 북마크 불러오기
@@ -890,20 +923,26 @@ function initBookmarkView(){
     quoteEl.innerHTML = '불러오는 중…';
 
     try {
-      let data;
       const token = getJwtToken();
+      const fallbackUid = getCookie('user_id') || getCookie('uid') || getCookie('id');
+      const requestOptions = { method: 'GET' };
+
+      if (!token && !fallbackUid) {
+        bookmarks = [];
+        return;
+      }
+
+      let data = null;
       if (token) {
-        data = await fetchJSONWithAuth(BOOKMARK_LIST_ME_API, { method: 'GET' });
-      } else {
-        const uid = getCookie('user_id') || getCookie('uid') || getCookie('id');
-        if (!uid) throw new Error('NO_ID');
-        data = await fetchJSONWithAuth(BOOKMARK_LIST_BYID_API(uid), { method: 'GET' });
+        data = await fetchJSONWithAuth(BOOKMARK_LIST_ME_API, requestOptions);
+      } else if (fallbackUid) {
+        data = await fetchJSONWithAuth(BOOKMARK_LIST_BYID_API(fallbackUid), requestOptions);
       }
 
       if (Array.isArray(data)) {
-        bookmarks = data.map(String);
+        bookmarks = data.map(normalizeBookmarkEntry).filter(entry => entry.sentence.length);
       } else if (Array.isArray(data?.items)) {
-        bookmarks = data.items.map(x => String(x.text ?? x.content ?? ''));
+        bookmarks = data.items.map(normalizeBookmarkEntry).filter(entry => entry.sentence.length);
       } else {
         bookmarks = [];
       }
@@ -917,7 +956,8 @@ function initBookmarkView(){
 
   // 다음 버튼: 북마크 순환
   if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
       if (!bookmarks.length) return;
       idx = (idx + 1) % bookmarks.length;
       render();
@@ -985,14 +1025,24 @@ function initCustomView(){
   (async () => {
     quoteEl.innerHTML = '불러오는 중…';
     try {
-      let data;
-      const token = getJwtToken?.() || null;
+      let data = null;
+      const token = typeof getJwtToken === 'function' ? getJwtToken() : null;
+      const requestOptions = { method: 'GET' };
+
       if (token) {
-        data = await fetchJSONWithAuth(CUSTOM_LIST_ME_API, { method: 'GET' });
+        data = await fetchJSONWithAuth(CUSTOM_LIST_ME_API, requestOptions);
       } else {
-        const uid = getCookie?.('user_id') || getCookie?.('uid') || getCookie?.('id');
-        if (!uid) throw new Error('NO_ID');
-        data = await fetchJSONWithAuth(CUSTOM_LIST_BYID_API(uid), { method: 'GET' });
+        try {
+          data = await fetchJSONWithAuth(CUSTOM_LIST_ME_API, requestOptions);
+        } catch (authError) {
+          const uid = getCookie?.('user_id') || getCookie?.('uid') || getCookie?.('id');
+          if (uid) {
+            data = await fetchJSONWithAuth(CUSTOM_LIST_BYID_API(uid), requestOptions);
+          } else {
+            console.warn('custom list load skipped: unauthenticated', authError);
+            customs = [];
+          }
+        }
       }
 
       // 응답 정규화
@@ -1000,6 +1050,8 @@ function initCustomView(){
         customs = data.map(String);
       } else if (Array.isArray(data?.items)) {
         customs = data.items.map(x => String(x.text ?? x.content ?? ''));
+      } else if (data === null) {
+        customs = Array.isArray(customs) ? customs : [];
       } else {
         customs = [];
       }
@@ -1013,7 +1065,8 @@ function initCustomView(){
 
   // 다음 문장
   if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
       if (!customs.length) return;
       idx = (idx + 1) % customs.length;
       render();
@@ -1030,3 +1083,4 @@ function initCustomView(){
   }
   */
 }
+

@@ -2,14 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
   /* =========================
      설정: API 베이스 & 엔드포인트
   ========================= */
-  // 같은 도메인이면 '' 유지, 다른 도메인이면 'https://api.example.com' 등으로 교체
   const API_BASE = '';
   const ENDPOINTS = {
-    LIST:   API_BASE + '/api/bookmarks/me',     // GET
-    TOGGLE: API_BASE + '/api/bookmarks/toggle', // POST {id} 또는 {text}
+    LIST: `${API_BASE}/api/v1/bookmarks`,
+    ADD: `${API_BASE}/api/v1/bookmarks/add`,
+    REMOVE: `${API_BASE}/api/v1/bookmarks/remove`,
   };
+  const BOOKMARK_TONE_DEFAULT = 'normal';
 
-  const bmRoot  = document.getElementById('bmList');
+  const bmRoot = document.getElementById('bmList');
   if (!bmRoot) { console.warn('#bmList 컨테이너 없음'); return; }
 
   const isFile  = location.protocol === 'file:';
@@ -51,19 +52,53 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>`;
   }
 
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"]/g, (ch) => {
+      switch (ch) {
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        default: return ch;
+      }
+    }).replace(/'/g, '&#39;');
+  }
+
+  function normalizeSentence(entry) {
+    if (entry == null) return '';
+    if (typeof entry === 'string') return entry;
+    if (typeof entry === 'object') {
+      if (typeof entry.sentence === 'string') return entry.sentence;
+      if (typeof entry.text === 'string') return entry.text;
+      if (typeof entry.content === 'string') return entry.content;
+    }
+    return String(entry ?? '');
+  }
+
   function renderList(items){
     if (!items?.length) { renderEmpty(); return; }
-    const lis = items.map(it => `
-      <li class="bm-item" data-id="${it.id ?? ''}">
-        <div class="bm-text">${String(it.text || '').replace(/\n/g,'<br/>')}</div>
-        <button class="bm-star" type="button" aria-label="북마크 토글" data-on="${!!it.bookmarked}">
+
+    const lis = items.map(it => {
+      const id = it.id ?? '';
+      const sentence = String(it.sentence ?? '').trim();
+      const tone = (it.tone ?? BOOKMARK_TONE_DEFAULT) || BOOKMARK_TONE_DEFAULT;
+      const bookmarked = !!(it.bookmarked ?? true);
+      const encodedSentence = encodeURIComponent(sentence);
+      const encodedTone = encodeURIComponent(tone);
+      const safeSentenceHtml = escapeHtml(sentence).replace(/\n/g,'<br/>');
+
+      return `
+      <li class="bm-item" data-id="${id}" data-sentence="${encodedSentence}" data-tone="${encodedTone}">
+        <div class="bm-text">${safeSentenceHtml}</div>
+        <button class="bm-star" type="button" aria-label="북마크 토글" data-on="${bookmarked ? 'true' : 'false'}">
           ${starSVG()}
         </button>
       </li>
-    `).join('');
+      `;
+    }).join('');
+
     bmRoot.innerHTML = `<ul class="bm-ul">${lis}</ul>`;
 
-    // 초기 시각 상태 반영
     bmRoot.querySelectorAll('.bm-star').forEach(btn => {
       applyStarVisual(btn, btn.dataset.on === 'true');
     });
@@ -84,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const token = getJwtToken();
     if (token && !h.has('Authorization')) h.set('Authorization', 'Bearer ' + token);
 
-    const init = { method, headers:h, cache:'no-store', credentials:'same-origin' };
+    const init = { method, headers:h, cache:'no-store', credentials:'include' };
     if (body && typeof body === 'object' && !(body instanceof FormData)) {
       h.set('Content-Type','application/json'); init.body = JSON.stringify(body);
     } else if (body) { init.body = body; }
@@ -100,30 +135,31 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadBookmarks(){
     bmRoot.innerHTML = `<div class="bm-empty" style="opacity:.8;">불러오는 중…</div>`;
 
-    // 파일로 직접 열었고 mock이 아니면 네트워크 없음 → 빈 상태
     if (isFile && !useMock) { renderEmpty(); return; }
 
-    // 모크 모드: 샘플 데이터
     if (useMock) {
       const sample = [
-        { id:'s1', text:'“어려워도 괜찮아, 나는 희망을 찾을 수 있을 거야.”', bookmarked:true },
-        { id:'s2', text:'“천천히 가도 돼, 멈추지만 않으면 돼.”', bookmarked:true },
+        { id:'s1', sentence:'“어려워도 괜찮아, 나는 희망을 찾을 수 있을 거야.”', tone: 'hope', bookmarked:true },
+        { id:'s2', sentence:'“천천히 가도 돼, 멈추지만 않으면 돼.”', tone: 'calm', bookmarked:true },
       ];
       renderList(sample);
       return;
     }
 
-    // 실제 API
     try {
       const data = await fetchJSONWithAuth(ENDPOINTS.LIST, { method:'GET' });
       const items = Array.isArray(data?.items) ? data.items
                   : Array.isArray(data)        ? data
                   : [];
-      renderList(items.map(x => ({
+
+      const normalized = items.map(x => ({
         id: x.id ?? x.bookmarkId ?? x._id ?? null,
-        text: x.text ?? x.content ?? '',
-        bookmarked: x.bookmarked ?? false
-      })));
+        sentence: normalizeSentence(x),
+        tone: typeof x.tone === 'string' && x.tone.trim().length ? x.tone : BOOKMARK_TONE_DEFAULT,
+        bookmarked: x.isBookmarked ?? x.bookmarked ?? true,
+      })).filter(entry => entry.sentence.length);
+
+      renderList(normalized);
     } catch (e) {
       console.warn('bookmark load failed:', e);
       renderEmpty();
@@ -138,25 +174,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!btn) return;
 
     const item = btn.closest('.bm-item');
-    const id   = item?.dataset.id || null;
-    const text = item?.querySelector('.bm-text')?.innerText?.trim() || '';
+    if (!item) return;
 
-    // 상태 토글(낙관적)
+    const sentenceEncoded = item.dataset.sentence || '';
+    const toneEncoded = item.dataset.tone || '';
+    const sentence = sentenceEncoded ? decodeURIComponent(sentenceEncoded) : '';
+    const tone = toneEncoded ? decodeURIComponent(toneEncoded) : BOOKMARK_TONE_DEFAULT;
+
     const next = !(btn.dataset.on === 'true');
     btn.dataset.on = String(next);
     applyStarVisual(btn, next);
 
-    // 모크 모드면 여기서 종료(로컬 UI만)
     if (useMock) return;
 
-    // 실제 API 호출
     try {
-      await fetchJSONWithAuth(ENDPOINTS.TOGGLE, {
-        method:'POST',
-        body: id ? { id } : { text }
-      });
+      if (next) {
+        await fetchJSONWithAuth(ENDPOINTS.ADD, {
+          method:'POST',
+          body: { sentence, tone: tone || BOOKMARK_TONE_DEFAULT }
+        });
+      } else {
+        const removeUrl = `${ENDPOINTS.REMOVE}?sentence=${encodeURIComponent(sentence)}`;
+        await fetchJSONWithAuth(removeUrl, { method:'DELETE' });
+      }
+
+      await loadBookmarks();
     } catch (err) {
-      // 실패 롤백
       console.error('toggle failed:', err);
       btn.dataset.on = String(!next);
       applyStarVisual(btn, !next);
