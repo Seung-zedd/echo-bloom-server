@@ -11,10 +11,6 @@
 
 🌐언어: <a href="https://github.com/Seung-zedd/echo-bloom-server/blob/main/README-en.md">English</a>
 
-<br>
-
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/Seung-zedd/echo-bloom-server?utm_source=oss&utm_medium=github&utm_campaign=Seung-zedd%2Fecho-bloom-server&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
-
 <br><br>
 
 ## 🌟 주요 기능 (MVP)
