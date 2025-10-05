@@ -1,4 +1,6 @@
 # 🗣️🌸 EchoBloom - AI Positive Affirmation Speaking Service
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/Seung-zedd/echo-bloom-server?utm_source=oss&utm_medium=github&utm_campaign=Seung-zedd%2Fecho-bloom-server&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 An AI-based positive affirmation speaking service that helps with emotional recovery, self-affirmation, and behavioral change by speaking one positive phrase a day in your own voice.
  
 > A single phrase to move you from just thinking to acting. Are you trapped in these thoughts every day? Have you ever spent a whole day hesitating, wondering, 'Can I do it...?' Days when anxiety doesn't fade, no matter how many times you tell yourself, 'It's okay, it's okay.' Do you want to break free from the cycle of negative thoughts like, 'I'm always like this'? For you, who are tired of just thinking and not acting.
