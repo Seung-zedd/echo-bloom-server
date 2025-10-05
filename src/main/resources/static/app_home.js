@@ -5,6 +5,13 @@
    전역 엘리먼트 / 기본 설정
 ========================== */
 const app = document.getElementById('app');
+let currentView = 'home';
+let homeHTML = ''; // Store initial home HTML
+if (app) {
+  app.dataset.currentView = 'home';
+  // Save the initial home view HTML
+  homeHTML = app.innerHTML;
+}
 
 // 엔드포인트 (백엔드 실제 API와 매칭)
 const QUOTE_API = '/api/v1/affirmations/main';  // 문제와 톤을 바탕으로 생성한 '읽을 문구'를 이 서버에서 불러옴
@@ -49,18 +56,32 @@ function viewToUrl(viewName){
 }
 
 async function loadView(viewName){
+  const targetView = viewName || 'home';
   await transitionOut();
 
-  const url = viewToUrl(viewName);
   try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const html = await res.text();
+    let html;
+
+    // 'home' view: restore saved HTML instead of fetching
+    if (viewName === 'home' || !viewName) {
+      html = homeHTML;
+    } else {
+      // Other views: fetch from URL
+      const url = viewToUrl(viewName);
+      if (!url) {
+        throw new Error('Invalid view name: ' + viewName);
+      }
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      html = await res.text();
+    }
 
     app.innerHTML = html;
 
-    
-    // read 화면: 문장 주입 + 음성 인식 초기화
+    currentView = targetView;
+    app.dataset.currentView = targetView;
+
+    // 각 뷰별 초기화
     if (viewName === 'read') {
       const saved = localStorage.getItem('currentQuote');
       const target = app.querySelector('#readQuote');
@@ -69,29 +90,37 @@ async function loadView(viewName){
       }
       initReadVoice();
     }
+    if (viewName === 'bookmark') {
+      initBookmarkView();
+    }
+    if (viewName === 'custom') {
+      initCustomView();
+    }
+    if (viewName === 'correct') {
+      initCorrectView();
+    }
+    if (viewName === 'home' || !viewName) {
+      // Restore current affirmation display
+      const quoteEl = document.getElementById('quoteText');
+      if (quoteEl && GENERATED_AFFIRMATIONS.length > 0) {
+        const currentIdx = affirmationIdx > 0 ? affirmationIdx - 1 : GENERATED_AFFIRMATIONS.length - 1;
+        quoteEl.innerHTML = GENERATED_AFFIRMATIONS[currentIdx % GENERATED_AFFIRMATIONS.length].replace(/\n/g, '<br/>');
+      }
+    }
+
+    transitionIn();
   } catch (err) {
     app.innerHTML = `
       <section style="padding:24px">
-        <div class="bubble">뷰 <b>${viewName}</b>를 불러오는 중 오류가 발생했어요.</div>
+        <div class="bubble">
+          뷰 <b>${viewName}</b>를 불러오는 중 오류가 발생했어요.
+        </div>
       </section>`;
     console.error('Load failed:', err);
+    currentView = targetView;
+    app.dataset.currentView = targetView;
+    transitionIn();
   }
-
-// app.innerHTML = html; 다음에 분기 추가
-if (viewName === 'bookmark') {
-  initBookmarkView(); // ✅ 북마크 화면 초기화
-}
-
-// app.innerHTML = html; 다음 분기들 사이에 추가
-if (viewName === 'custom') {
-  initCustomView();
-}
-
-if (viewName === 'correct') {
-  initCorrectView(); // ✅ 아래 함수
-}
-
-  transitionIn();
 }
 
 function transitionOut(){
@@ -141,7 +170,6 @@ async function setUsernameFromAPI(){
     el.textContent = 'USER님';
   }
 }
-
 function setAvatarFromCookie(){
   const avatarKeys = ['user_avatar','profileImage','avatar'];
   let url = null;
@@ -224,8 +252,13 @@ function showNextAffirmation(){
   const quotes = GENERATED_AFFIRMATIONS.length > 0 ? GENERATED_AFFIRMATIONS : FALLBACK_QUOTES;
   setQuote(quotes[affirmationIdx]);
   affirmationIdx = (affirmationIdx + 1) % quotes.length;
+
+  // Save current index to sessionStorage
+  if (GENERATED_AFFIRMATIONS.length > 0) {
+    sessionStorage.setItem('affirmation_idx', String(affirmationIdx));
+  }
 }
-function fetchWithTimeout(url, opts={}, ms=5000){
+function fetchWithTimeout(url, opts={}, ms=10000){
   return Promise.race([
     fetch(url, opts),
     new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))
@@ -235,8 +268,27 @@ function fetchWithTimeout(url, opts={}, ms=5000){
 // ✅ 초기 진입 시 자동으로 한 번 불러오기
 async function loadInitialQuote(){
   console.log('loadInitialQuote() called'); // Debug log
-  
-  // (옵션) 로딩 표시
+
+  // 먼저 sessionStorage에서 캐시된 affirmations 확인
+  const cached = sessionStorage.getItem('generated_affirmations');
+  const cachedIdx = sessionStorage.getItem('affirmation_idx');
+
+  if (cached) {
+    try {
+      GENERATED_AFFIRMATIONS = JSON.parse(cached);
+      affirmationIdx = cachedIdx ? parseInt(cachedIdx, 10) : 0;
+
+      if (GENERATED_AFFIRMATIONS.length > 0) {
+        setQuote(GENERATED_AFFIRMATIONS[affirmationIdx % GENERATED_AFFIRMATIONS.length]);
+        console.log('Loaded cached affirmations:', GENERATED_AFFIRMATIONS); // Debug log
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to parse cached affirmations:', e);
+    }
+  }
+
+  // 캐시가 없으면 API 호출
   setQuote('불러오는 중…');
 
   try {
@@ -248,19 +300,23 @@ async function loadInitialQuote(){
     });
     if (!res.ok) throw new Error('bad-status ' + res.status);
     const data = await res.json().catch(() => ({}));
-    
+
     // Extract the 3 generated affirmations from MainAffirmationResponseDto
     console.log('API response:', data); // Debug log
-    
+
     if (data && (data.affirmation1 || data.affirmation2 || data.affirmation3)) {
       GENERATED_AFFIRMATIONS = [
         data.affirmation1,
-        data.affirmation2, 
+        data.affirmation2,
         data.affirmation3
       ].filter(Boolean); // Remove any null/undefined values
-      
+
+      // sessionStorage에 저장
+      sessionStorage.setItem('generated_affirmations', JSON.stringify(GENERATED_AFFIRMATIONS));
+      sessionStorage.setItem('affirmation_idx', '0');
+
       console.log('Generated affirmations:', GENERATED_AFFIRMATIONS); // Debug log
-      
+
       // Set the first affirmation
       if (GENERATED_AFFIRMATIONS.length > 0) {
         setQuote(GENERATED_AFFIRMATIONS[0]);
@@ -269,7 +325,7 @@ async function loadInitialQuote(){
         return;
       }
     }
-    
+
     // Fallback if no affirmations in response
     showNextAffirmation();
   } catch (e) {
@@ -306,13 +362,17 @@ async function loadNextQuote(btn){
     if (data && (data.affirmation1 || data.affirmation2 || data.affirmation3)) {
       GENERATED_AFFIRMATIONS = [
         data.affirmation1,
-        data.affirmation2, 
+        data.affirmation2,
         data.affirmation3
       ].filter(Boolean);
-      
+
+      // sessionStorage에 저장
+      sessionStorage.setItem('generated_affirmations', JSON.stringify(GENERATED_AFFIRMATIONS));
+
       if (GENERATED_AFFIRMATIONS.length > 0) {
         setQuote(GENERATED_AFFIRMATIONS[0]);
         affirmationIdx = 1;
+        sessionStorage.setItem('affirmation_idx', '1');
         return;
       }
     }
@@ -331,6 +391,7 @@ async function loadNextQuote(btn){
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('button.next');
   if (!btn) return;
+  if (currentView !== 'home') return;
   loadNextQuote(btn);
 });
 
@@ -410,10 +471,6 @@ async function sendTranscript({ text, is_final, quote, extra }){
 }
 
 /* ==========================
-   read 전용: 음성 인식 초기화
-   (꽃 아이콘 버튼 반짝임: #micToggle.blink .mic-flower { animation: ... })
-========================== */
-/* ==========================
    read 전용: 음성 인식 초기화 (클라이언트 비교 + 분기)
 ========================== */
 function initReadVoice(){
@@ -424,12 +481,16 @@ function initReadVoice(){
   if (!btn) return;
 
   let isListening = false;
+  let currentRetryCount = 0;
+  let mediaRecorder;
+  let audioChunks = [];
+  let activeStream = null;
 
   // ---------- 유틸: 텍스트 정규화 & 유사도 ----------
   const normalize = (s) => {
     if (!s) return '';
     return s
-      .replace(/[“”"']/g, '')        // 따옴표 제거
+      .replace(/["""']/g, '')        // 따옴표 제거
       .replace(/<br\s*\/?>/gi, ' ')  // (예방적) BR 제거
       .replace(/\s+/g, ' ')          // 공백 정리
       .replace(/[.,!?;:()\[\]{}~\-_/\\]/g, '') // 구두점 제거(필요시 조정)
@@ -528,23 +589,62 @@ function initReadVoice(){
     if (flower) flower.classList.toggle('glowing', on);
   };
 
-  // ---------- Clova STT API 우선 ----------
-  let mediaRecorder;
-  let audioChunks = [];
-  let currentRetryCount = 0; // 재시도 횟수 추적
+  // ---------- 폴백: Web Speech API ----------
+  function tryWebSpeechFallback() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      showResultModal(false, () => setState(false));
+      console.warn('음성 인식을 지원하지 않는 브라우저입니다.');
+      return;
+    }
 
+    const recog = new SR();
+    recog.lang = 'ko-KR';
+    recog.interimResults = true;
+    recog.continuous = true;
+
+    let finalText = '';
+
+    recog.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t + ' ';
+      }
+      if (transcriptEl) transcriptEl.textContent = finalText.trim();
+    };
+
+    recog.onend = () => {
+      const ok = isMatch(readQuoteRaw, finalText);
+      setState(false);
+      showResultModal(ok, () => { finalText = ''; tryWebSpeechFallback(); setState(true); });
+    };
+
+    try {
+      recog.start();
+      setState(true);
+    } catch (error) {
+      console.error('Web Speech API fallback failed:', error);
+      showResultModal(false, () => setState(false));
+    }
+  }
+
+  // ---------- Clova STT API 우선 ----------
   btn.addEventListener('click', async () => {
     if (!isListening) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        activeStream = stream;
         audioChunks = [];
-        
+
         const options = { mimeType: 'audio/webm;codecs=opus' };
         mediaRecorder = new MediaRecorder(stream, options);
         mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-        
+
         mediaRecorder.onstop = async () => {
-          stream.getTracks().forEach(track => track.stop());
+          if (activeStream) {
+            activeStream.getTracks().forEach(track => track.stop());
+            activeStream = null;
+          }
           const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
           
           console.log('🎤 Audio recorded:', {
@@ -605,7 +705,15 @@ function initReadVoice(){
             tryWebSpeechFallback();
           }
         };
-        
+
+        mediaRecorder.onerror = (e) => {
+          console.error('MediaRecorder error:', e);
+          if (activeStream) {
+            activeStream.getTracks().forEach(track => track.stop());
+            activeStream = null;
+          }
+          setState(false);
+        };        
         mediaRecorder.start();
         setState(true);
       } catch (error) {
@@ -619,45 +727,6 @@ function initReadVoice(){
       }
     }
   });
-
-  // ---------- 폴백: Web Speech API ----------
-  function tryWebSpeechFallback() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      showResultModal(false, () => setState(false));
-      console.warn('음성 인식을 지원하지 않는 브라우저입니다.');
-      return;
-    }
-
-    const recog = new SR();
-    recog.lang = 'ko-KR';
-    recog.interimResults = true;
-    recog.continuous = true;
-
-    let finalText = '';
-
-    recog.onresult = (e) => {
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) finalText += t + ' ';
-      }
-      if (transcriptEl) transcriptEl.textContent = finalText.trim();
-    };
-
-    recog.onend = () => {
-      const ok = isMatch(readQuoteRaw, finalText);
-      setState(false);
-      showResultModal(ok, () => { finalText = ''; tryWebSpeechFallback(); setState(true); });
-    };
-
-    try {
-      recog.start();
-      setState(true);
-    } catch (error) {
-      console.error('Web Speech API fallback failed:', error);
-      showResultModal(false, () => setState(false));
-    }
-  }
 }
 
 /* ─────────────────────────────────────────────
@@ -727,7 +796,14 @@ async function checkBookmark(text){
   const url = BOOKMARK_EXISTS_API + encodeURIComponent(text);
   try {
     const data = await fetchJSONWithAuth(url, { method: 'GET' });
-    return !!data; // 백엔드에서 boolean 직접 반환
+
+    if (typeof data === 'boolean') return data;
+    if (data && typeof data === 'object') {
+      if (typeof data.isBookmarked === 'boolean') return data.isBookmarked;
+      if (typeof data.bookmarked === 'boolean') return data.bookmarked;
+      if (typeof data.exists === 'boolean') return data.exists;
+    }
+    return false;
   } catch (e) {
     console.error('checkBookmark failed:', e);
     return false; // 실패 시 기본값
@@ -782,10 +858,13 @@ function initCorrectView(){
   const encEl = app.querySelector('#encourageText');
   if (encEl) encEl.textContent = pickRandomEncourage();
 
-  // 3) 홈으로
+  // 3) 홈으로 - 읽기 성공 후 새 affirmations 생성
   const homeBtn = app.querySelector('#goHome');
   if (homeBtn) {
     homeBtn.addEventListener('click', () => {
+      // Clear sessionStorage to force new affirmation generation
+      sessionStorage.removeItem('generated_affirmations');
+      sessionStorage.removeItem('affirmation_idx');
       window.location.reload();
     });
   }
@@ -794,6 +873,10 @@ function initCorrectView(){
   const quotePlain = (target?.innerText || '').trim();
   const toggleBtn = app.querySelector('#bookmarkToggle');
   if (!toggleBtn || !quotePlain) return;
+
+  // 기본은 해제 상태로 표시
+  toggleBtn.setAttribute('aria-pressed', 'false');
+  setBookmarkIcon(false);
 
   // 초기 상태 체크
   (async () => {
@@ -834,6 +917,17 @@ function initCorrectView(){
   });
 }
 
+function normalizeSentence(entry) {
+  if (entry == null) return '';
+  if (typeof entry === 'string') return entry;
+  if (typeof entry === 'object') {
+    if (typeof entry.sentence === 'string') return entry.sentence;
+    if (typeof entry.text === 'string') return entry.text;
+    if (typeof entry.content === 'string') return entry.content;
+  }
+  return String(entry ?? '');
+}
+
 function initBookmarkView(){
   const quoteEl = app.querySelector('#quoteText');      // 북마크 문장을 표시할 곳
   const nextBtn = app.querySelector('.bubble .next');   // 다음 북마크
@@ -843,7 +937,7 @@ function initBookmarkView(){
   if (!quoteEl) return;
 
   // 상태
-  let bookmarks = []; // 문자열 배열
+  let bookmarks = []; // 북마크 항목 배열
   let idx = 0;
 
   // 렌더
@@ -855,7 +949,7 @@ function initBookmarkView(){
       // 👉 읽기 버튼 대신 홈 버튼 표시
       if (ctaEl) {
         ctaEl.innerHTML = `
-          <button type="button" onclick="location.href='home.html'">홈으로</button>
+          <button type="button" data-view="home">홈으로</button>
         `;
       }
       return;
@@ -863,15 +957,18 @@ function initBookmarkView(){
 
     if (nextBtn) nextBtn.disabled = (bookmarks.length <= 1);
 
-    const text = String(bookmarks[idx] ?? '').trim();
-    quoteEl.innerHTML = text.replace(/\n/g, '<br/>');
+    const current = bookmarks[idx] ?? null;
+    const text = current && typeof current.sentence === 'string' ? current.sentence.trim() : '';
+    quoteEl.innerHTML = text ? text.replace(/\n/g, '<br/>') : '';
 
-    // 👉 북마크가 있으면 다시 읽기 버튼으로 복원
-    if (ctaEl) {
-      ctaEl.innerHTML = `
-        <button type="button" data-view="read">읽기 시작!</button>
-      `;
-    }
+      // 👉 저장된 북마크가 있으면 읽기/홈 버튼으로 복원
+      if (ctaEl) {
+        ctaEl.innerHTML = `
+          <button type="button" data-view="read" style="padding:8px 12px;">읽기 시작!</button>
+          <button type="button" data-view="home" style="padding:8px 12px; margin-left:8px;">홈으로</button>
+        `;
+      }
+
   };
 
   // 북마크 불러오기
@@ -879,23 +976,18 @@ function initBookmarkView(){
     quoteEl.innerHTML = '불러오는 중…';
 
     try {
-      let data;
-      const token = getJwtToken();
-      if (token) {
-        data = await fetchJSONWithAuth(BOOKMARK_LIST_ME_API, { method: 'GET' });
-      } else {
-        const uid = getCookie('user_id') || getCookie('uid') || getCookie('id');
-        if (!uid) throw new Error('NO_ID');
-        data = await fetchJSONWithAuth(BOOKMARK_LIST_BYID_API(uid), { method: 'GET' });
-      }
+      const data = await fetchJSONWithAuth(BOOKMARK_LIST_ME_API, { method: 'GET' });
+      const items = Array.isArray(data?.items) ? data.items
+                  : Array.isArray(data)        ? data
+                  : [];
 
-      if (Array.isArray(data)) {
-        bookmarks = data.map(String);
-      } else if (Array.isArray(data?.items)) {
-        bookmarks = data.items.map(x => String(x.text ?? x.content ?? ''));
-      } else {
-        bookmarks = [];
-      }
+      bookmarks = items.map(x => ({
+        id: x.id ?? x.bookmarkId ?? x._id ?? null,
+        sentence: normalizeSentence(x),
+        tone: typeof x.tone === 'string' && x.tone.trim().length ? x.tone : 'normal',
+        bookmarked: (x.isBookmarked === true) || (x.bookmarked === true),
+      })).filter(entry => entry.sentence.length);
+
     } catch (e) {
       console.error('bookmark load failed:', e);
       bookmarks = [];
@@ -906,7 +998,8 @@ function initBookmarkView(){
 
   // 다음 버튼: 북마크 순환
   if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
       if (!bookmarks.length) return;
       idx = (idx + 1) % bookmarks.length;
       render();
@@ -926,11 +1019,10 @@ function initBookmarkView(){
 }
 
 // ===== 북마크/커스텀문장 API 엔드포인트 =====
-const BOOKMARK_LIST_ME_API = '/api/v1/bookmarks';                     // JWT 인증
-const BOOKMARK_LIST_BYID_API = (uid) => `/api/v1/bookmarks`;          // 쿠키 id 기반
-const CUSTOM_LIST_ME_API    = '/api/v1/bookmarks';                    // JWT 인증 (북마크와 동일)
-const CUSTOM_LIST_BYID_API  = (uid) => `/api/v1/bookmarks`;           // 쿠키 id 기반
-
+const BOOKMARK_LIST_ME_API   = '/api/v1/bookmarks';  // JWT 인증
+const BOOKMARK_LIST_BYID_API = (uid) => `/api/v1/bookmarks?userId=${uid}`;  // 쿠키 id 기반
+const CUSTOM_LIST_ME_API     = '/api/v1/bookmarks';  // JWT 인증 (북마크와 동일)
+const CUSTOM_LIST_BYID_API   = (uid) => `/api/v1/bookmarks?userId=${uid}`;  // 쿠키 id 기반
 function initCustomView(){
   const quoteEl = app.querySelector('#quoteText');       // 커스텀 문장 표시 영역
   const nextBtn = app.querySelector('.bubble .next');    // 다음 문장
@@ -951,7 +1043,7 @@ function initCustomView(){
       // 👉 읽기 시작! 대신 홈 버튼 노출
       if (ctaEl) {
         ctaEl.innerHTML = `
-          <button type="button" onclick="location.href='home.html'">홈으로</button>
+          <button type="button" data-view="home">홈으로</button>
         `;
       }
       return;
@@ -974,14 +1066,24 @@ function initCustomView(){
   (async () => {
     quoteEl.innerHTML = '불러오는 중…';
     try {
-      let data;
-      const token = getJwtToken?.() || null;
+      let data = null;
+      const token = typeof getJwtToken === 'function' ? getJwtToken() : null;
+      const requestOptions = { method: 'GET' };
+
       if (token) {
-        data = await fetchJSONWithAuth(CUSTOM_LIST_ME_API, { method: 'GET' });
+        data = await fetchJSONWithAuth(CUSTOM_LIST_ME_API, requestOptions);
       } else {
-        const uid = getCookie?.('user_id') || getCookie?.('uid') || getCookie?.('id');
-        if (!uid) throw new Error('NO_ID');
-        data = await fetchJSONWithAuth(CUSTOM_LIST_BYID_API(uid), { method: 'GET' });
+        try {
+          data = await fetchJSONWithAuth(CUSTOM_LIST_ME_API, requestOptions);
+        } catch (authError) {
+          const uid = getCookie?.('user_id') || getCookie?.('uid') || getCookie?.('id');
+          if (uid) {
+            data = await fetchJSONWithAuth(CUSTOM_LIST_BYID_API(uid), requestOptions);
+          } else {
+            console.warn('custom list load skipped: unauthenticated', authError);
+            customs = [];
+          }
+        }
       }
 
       // 응답 정규화
@@ -989,6 +1091,8 @@ function initCustomView(){
         customs = data.map(String);
       } else if (Array.isArray(data?.items)) {
         customs = data.items.map(x => String(x.text ?? x.content ?? ''));
+      } else if (data === null) {
+        customs = Array.isArray(customs) ? customs : [];
       } else {
         customs = [];
       }
@@ -1002,7 +1106,8 @@ function initCustomView(){
 
   // 다음 문장
   if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
+    nextBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
       if (!customs.length) return;
       idx = (idx + 1) % customs.length;
       render();

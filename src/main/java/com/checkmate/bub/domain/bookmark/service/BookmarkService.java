@@ -1,7 +1,7 @@
-package com.checkmate.bub.domain.speech.service;
+package com.checkmate.bub.domain.bookmark.service;
 
-import com.checkmate.bub.domain.bookmark.domain.BookmarkEntity;
-import com.checkmate.bub.domain.speech.repository.BookmarkRepository;
+import com.checkmate.bub.domain.bookmark.domain.Bookmark;
+import com.checkmate.bub.domain.bookmark.repository.BookmarkRepository;
 import com.checkmate.bub.global.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class BookmarkService {
      * AR-ADMIN-005: 개인화된 문장 저장
      */
     @Transactional
-    public BookmarkEntity addBookmark(String sentence, String tone) {
+    public Bookmark addBookmark(String sentence, String tone) {
         String userNickname = SecurityUtils.getCurrentNickname();
         
         boolean alreadyBookmarked = bookmarkRepository.existsByUserNicknameAndSentence(userNickname, sentence);
@@ -34,7 +34,7 @@ public class BookmarkService {
             throw new IllegalArgumentException("이미 북마크에 추가된 문장입니다.");
         }
         
-        BookmarkEntity bookmark = BookmarkEntity.builder()
+        Bookmark bookmark = Bookmark.builder()
                 .userNickname(userNickname)
                 .sentence(sentence)
                 .tone(tone)
@@ -62,7 +62,7 @@ public class BookmarkService {
     /**
      * 사용자의 모든 북마크 조회
      */
-    public List<BookmarkEntity> getUserBookmarks() {
+    public List<Bookmark> getUserBookmarks() {
         String userNickname = SecurityUtils.getCurrentNickname();
         return bookmarkRepository.findByUserNicknameOrderByCreatedAtDesc(userNickname);
     }
