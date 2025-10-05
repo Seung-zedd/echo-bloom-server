@@ -67,8 +67,8 @@ async function loadView(viewName){
     currentView = targetView;
     app.dataset.currentView = targetView;
 
-    
-    // read 화면: 문장 주입 + 음성 인식 초기화
+
+    // 각 뷰별 초기화
     if (viewName === 'read') {
       const saved = localStorage.getItem('currentQuote');
       const target = app.querySelector('#readQuote');
@@ -77,30 +77,28 @@ async function loadView(viewName){
       }
       initReadVoice();
     }
+    if (viewName === 'bookmark') {
+      initBookmarkView();
+    }
+    if (viewName === 'custom') {
+      initCustomView();
+    }
+    if (viewName === 'correct') {
+      initCorrectView();
+    }
+
+    transitionIn();
   } catch (err) {
     app.innerHTML = `
       <section style="padding:24px">
-        <div class="bubble">뷰 <b>${viewName}</b>를 불러오는 중 오류가 발생했어요.</div>
+        <div class="bubble">
+          뷰 <b>${viewName}</b>를 불러오는 중 오류가 발생했어요.
+        </div>
       </section>`;
     console.error('Load failed:', err);
     currentView = targetView;
     app.dataset.currentView = targetView;
   }
-
-// app.innerHTML = html; 다음에 분기 추가
-if (viewName === 'bookmark') {
-  initBookmarkView(); // ✅ 북마크 화면 초기화
-}
-
-// app.innerHTML = html; 다음 분기들 사이에 추가
-if (viewName === 'custom') {
-  initCustomView();
-}
-
-if (viewName === 'correct') {
-  initCorrectView(); // ✅ 아래 함수
-}
-
   transitionIn();
 }
 
@@ -151,7 +149,6 @@ async function setUsernameFromAPI(){
     el.textContent = 'USER님';
   }
 }
-
 function setAvatarFromCookie(){
   const avatarKeys = ['user_avatar','profileImage','avatar'];
   let url = null;
@@ -421,10 +418,6 @@ async function sendTranscript({ text, is_final, quote, extra }){
 }
 
 /* ==========================
-   read 전용: 음성 인식 초기화
-   (꽃 아이콘 버튼 반짝임: #micToggle.blink .mic-flower { animation: ... })
-========================== */
-/* ==========================
    read 전용: 음성 인식 초기화 (클라이언트 비교 + 분기)
 ========================== */
 function initReadVoice(){
@@ -435,12 +428,16 @@ function initReadVoice(){
   if (!btn) return;
 
   let isListening = false;
+  let currentRetryCount = 0;
+  let mediaRecorder;
+  let audioChunks = [];
+  let activeStream = null;
 
   // ---------- 유틸: 텍스트 정규화 & 유사도 ----------
   const normalize = (s) => {
     if (!s) return '';
     return s
-      .replace(/[“”"']/g, '')        // 따옴표 제거
+      .replace(/["""']/g, '')        // 따옴표 제거
       .replace(/<br\s*\/?>/gi, ' ')  // (예방적) BR 제거
       .replace(/\s+/g, ' ')          // 공백 정리
       .replace(/[.,!?;:()\[\]{}~\-_/\\]/g, '') // 구두점 제거(필요시 조정)
@@ -539,23 +536,62 @@ function initReadVoice(){
     if (flower) flower.classList.toggle('glowing', on);
   };
 
-  // ---------- Clova STT API 우선 ----------
-  let mediaRecorder;
-  let audioChunks = [];
-  let currentRetryCount = 0; // 재시도 횟수 추적
+  // ---------- 폴백: Web Speech API ----------
+  function tryWebSpeechFallback() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      showResultModal(false, () => setState(false));
+      console.warn('음성 인식을 지원하지 않는 브라우저입니다.');
+      return;
+    }
 
+    const recog = new SR();
+    recog.lang = 'ko-KR';
+    recog.interimResults = true;
+    recog.continuous = true;
+
+    let finalText = '';
+
+    recog.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t + ' ';
+      }
+      if (transcriptEl) transcriptEl.textContent = finalText.trim();
+    };
+
+    recog.onend = () => {
+      const ok = isMatch(readQuoteRaw, finalText);
+      setState(false);
+      showResultModal(ok, () => { finalText = ''; tryWebSpeechFallback(); setState(true); });
+    };
+
+    try {
+      recog.start();
+      setState(true);
+    } catch (error) {
+      console.error('Web Speech API fallback failed:', error);
+      showResultModal(false, () => setState(false));
+    }
+  }
+
+  // ---------- Clova STT API 우선 ----------
   btn.addEventListener('click', async () => {
     if (!isListening) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        activeStream = stream;
         audioChunks = [];
-        
+
         const options = { mimeType: 'audio/webm;codecs=opus' };
         mediaRecorder = new MediaRecorder(stream, options);
         mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-        
+
         mediaRecorder.onstop = async () => {
-          stream.getTracks().forEach(track => track.stop());
+          if (activeStream) {
+            activeStream.getTracks().forEach(track => track.stop());
+            activeStream = null;
+          }
           const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
           
           console.log('🎤 Audio recorded:', {
@@ -616,7 +652,15 @@ function initReadVoice(){
             tryWebSpeechFallback();
           }
         };
-        
+
+        mediaRecorder.onerror = (e) => {
+          console.error('MediaRecorder error:', e);
+          if (activeStream) {
+            activeStream.getTracks().forEach(track => track.stop());
+            activeStream = null;
+          }
+          setState(false);
+        };        
         mediaRecorder.start();
         setState(true);
       } catch (error) {
@@ -630,45 +674,6 @@ function initReadVoice(){
       }
     }
   });
-
-  // ---------- 폴백: Web Speech API ----------
-  function tryWebSpeechFallback() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      showResultModal(false, () => setState(false));
-      console.warn('음성 인식을 지원하지 않는 브라우저입니다.');
-      return;
-    }
-
-    const recog = new SR();
-    recog.lang = 'ko-KR';
-    recog.interimResults = true;
-    recog.continuous = true;
-
-    let finalText = '';
-
-    recog.onresult = (e) => {
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) finalText += t + ' ';
-      }
-      if (transcriptEl) transcriptEl.textContent = finalText.trim();
-    };
-
-    recog.onend = () => {
-      const ok = isMatch(readQuoteRaw, finalText);
-      setState(false);
-      showResultModal(ok, () => { finalText = ''; tryWebSpeechFallback(); setState(true); });
-    };
-
-    try {
-      recog.start();
-      setState(true);
-    } catch (error) {
-      console.error('Web Speech API fallback failed:', error);
-      showResultModal(false, () => setState(false));
-    }
-  }
 }
 
 /* ─────────────────────────────────────────────
@@ -977,11 +982,10 @@ function initBookmarkView(){
 }
 
 // ===== 북마크/커스텀문장 API 엔드포인트 =====
-const BOOKMARK_LIST_ME_API = '/api/v1/bookmarks';                     // JWT 인증
-const BOOKMARK_LIST_BYID_API = (uid) => `/api/v1/bookmarks`;          // 쿠키 id 기반
-const CUSTOM_LIST_ME_API    = '/api/v1/bookmarks';                    // JWT 인증 (북마크와 동일)
-const CUSTOM_LIST_BYID_API  = (uid) => `/api/v1/bookmarks`;           // 쿠키 id 기반
-
+const BOOKMARK_LIST_ME_API   = '/api/v1/bookmarks';  // JWT 인증
+const BOOKMARK_LIST_BYID_API = '/api/v1/bookmarks';  // 쿠키 id 기반 (현재 uid 미사용)
+const CUSTOM_LIST_ME_API     = '/api/v1/bookmarks';  // JWT 인증 (북마크와 동일)
+const CUSTOM_LIST_BYID_API   = '/api/v1/bookmarks';  // 쿠키 id 기반 (현재 uid 미사용)
 function initCustomView(){
   const quoteEl = app.querySelector('#quoteText');       // 커스텀 문장 표시 영역
   const nextBtn = app.querySelector('.bubble .next');    // 다음 문장
