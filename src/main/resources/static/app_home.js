@@ -6,8 +6,11 @@
 ========================== */
 const app = document.getElementById('app');
 let currentView = 'home';
+let homeHTML = ''; // Store initial home HTML
 if (app) {
   app.dataset.currentView = 'home';
+  // Save the initial home view HTML
+  homeHTML = app.innerHTML;
 }
 
 // 엔드포인트 (백엔드 실제 API와 매칭)
@@ -56,17 +59,27 @@ async function loadView(viewName){
   const targetView = viewName || 'home';
   await transitionOut();
 
-  const url = viewToUrl(viewName);
   try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const html = await res.text();
+    let html;
+
+    // 'home' view: restore saved HTML instead of fetching
+    if (viewName === 'home' || !viewName) {
+      html = homeHTML;
+    } else {
+      // Other views: fetch from URL
+      const url = viewToUrl(viewName);
+      if (!url) {
+        throw new Error('Invalid view name: ' + viewName);
+      }
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      html = await res.text();
+    }
 
     app.innerHTML = html;
 
     currentView = targetView;
     app.dataset.currentView = targetView;
-
 
     // 각 뷰별 초기화
     if (viewName === 'read') {
@@ -86,6 +99,14 @@ async function loadView(viewName){
     if (viewName === 'correct') {
       initCorrectView();
     }
+    if (viewName === 'home' || !viewName) {
+      // Restore current affirmation display
+      const quoteEl = document.getElementById('quoteText');
+      if (quoteEl && GENERATED_AFFIRMATIONS.length > 0) {
+        const currentIdx = affirmationIdx > 0 ? affirmationIdx - 1 : GENERATED_AFFIRMATIONS.length - 1;
+        quoteEl.innerHTML = GENERATED_AFFIRMATIONS[currentIdx % GENERATED_AFFIRMATIONS.length].replace(/\n/g, '<br/>');
+      }
+    }
 
     transitionIn();
   } catch (err) {
@@ -98,8 +119,8 @@ async function loadView(viewName){
     console.error('Load failed:', err);
     currentView = targetView;
     app.dataset.currentView = targetView;
+    transitionIn();
   }
-  transitionIn();
 }
 
 function transitionOut(){
@@ -231,6 +252,11 @@ function showNextAffirmation(){
   const quotes = GENERATED_AFFIRMATIONS.length > 0 ? GENERATED_AFFIRMATIONS : FALLBACK_QUOTES;
   setQuote(quotes[affirmationIdx]);
   affirmationIdx = (affirmationIdx + 1) % quotes.length;
+
+  // Save current index to sessionStorage
+  if (GENERATED_AFFIRMATIONS.length > 0) {
+    sessionStorage.setItem('affirmation_idx', String(affirmationIdx));
+  }
 }
 function fetchWithTimeout(url, opts={}, ms=10000){
   return Promise.race([
@@ -242,8 +268,27 @@ function fetchWithTimeout(url, opts={}, ms=10000){
 // ✅ 초기 진입 시 자동으로 한 번 불러오기
 async function loadInitialQuote(){
   console.log('loadInitialQuote() called'); // Debug log
-  
-  // (옵션) 로딩 표시
+
+  // 먼저 sessionStorage에서 캐시된 affirmations 확인
+  const cached = sessionStorage.getItem('generated_affirmations');
+  const cachedIdx = sessionStorage.getItem('affirmation_idx');
+
+  if (cached) {
+    try {
+      GENERATED_AFFIRMATIONS = JSON.parse(cached);
+      affirmationIdx = cachedIdx ? parseInt(cachedIdx, 10) : 0;
+
+      if (GENERATED_AFFIRMATIONS.length > 0) {
+        setQuote(GENERATED_AFFIRMATIONS[affirmationIdx % GENERATED_AFFIRMATIONS.length]);
+        console.log('Loaded cached affirmations:', GENERATED_AFFIRMATIONS); // Debug log
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to parse cached affirmations:', e);
+    }
+  }
+
+  // 캐시가 없으면 API 호출
   setQuote('불러오는 중…');
 
   try {
@@ -255,19 +300,23 @@ async function loadInitialQuote(){
     });
     if (!res.ok) throw new Error('bad-status ' + res.status);
     const data = await res.json().catch(() => ({}));
-    
+
     // Extract the 3 generated affirmations from MainAffirmationResponseDto
     console.log('API response:', data); // Debug log
-    
+
     if (data && (data.affirmation1 || data.affirmation2 || data.affirmation3)) {
       GENERATED_AFFIRMATIONS = [
         data.affirmation1,
-        data.affirmation2, 
+        data.affirmation2,
         data.affirmation3
       ].filter(Boolean); // Remove any null/undefined values
-      
+
+      // sessionStorage에 저장
+      sessionStorage.setItem('generated_affirmations', JSON.stringify(GENERATED_AFFIRMATIONS));
+      sessionStorage.setItem('affirmation_idx', '0');
+
       console.log('Generated affirmations:', GENERATED_AFFIRMATIONS); // Debug log
-      
+
       // Set the first affirmation
       if (GENERATED_AFFIRMATIONS.length > 0) {
         setQuote(GENERATED_AFFIRMATIONS[0]);
@@ -276,7 +325,7 @@ async function loadInitialQuote(){
         return;
       }
     }
-    
+
     // Fallback if no affirmations in response
     showNextAffirmation();
   } catch (e) {
@@ -313,13 +362,17 @@ async function loadNextQuote(btn){
     if (data && (data.affirmation1 || data.affirmation2 || data.affirmation3)) {
       GENERATED_AFFIRMATIONS = [
         data.affirmation1,
-        data.affirmation2, 
+        data.affirmation2,
         data.affirmation3
       ].filter(Boolean);
-      
+
+      // sessionStorage에 저장
+      sessionStorage.setItem('generated_affirmations', JSON.stringify(GENERATED_AFFIRMATIONS));
+
       if (GENERATED_AFFIRMATIONS.length > 0) {
         setQuote(GENERATED_AFFIRMATIONS[0]);
         affirmationIdx = 1;
+        sessionStorage.setItem('affirmation_idx', '1');
         return;
       }
     }
@@ -805,10 +858,13 @@ function initCorrectView(){
   const encEl = app.querySelector('#encourageText');
   if (encEl) encEl.textContent = pickRandomEncourage();
 
-  // 3) 홈으로
+  // 3) 홈으로 - 읽기 성공 후 새 affirmations 생성
   const homeBtn = app.querySelector('#goHome');
   if (homeBtn) {
     homeBtn.addEventListener('click', () => {
+      // Clear sessionStorage to force new affirmation generation
+      sessionStorage.removeItem('generated_affirmations');
+      sessionStorage.removeItem('affirmation_idx');
       window.location.reload();
     });
   }
@@ -893,7 +949,7 @@ function initBookmarkView(){
       // 👉 읽기 버튼 대신 홈 버튼 표시
       if (ctaEl) {
         ctaEl.innerHTML = `
-          <button type="button" onclick="location.href='home.html'">홈으로</button>
+          <button type="button" data-view="home">홈으로</button>
         `;
       }
       return;
@@ -909,7 +965,7 @@ function initBookmarkView(){
       if (ctaEl) {
         ctaEl.innerHTML = `
           <button type="button" data-view="read" style="padding:8px 12px;">읽기 시작!</button>
-          <button type="button" onclick="location.href='home.html'" style="padding:8px 12px;">홈으로</button>
+          <button type="button" data-view="home" style="padding:8px 12px; margin-left:8px;">홈으로</button>
         `;
       }
 
@@ -987,7 +1043,7 @@ function initCustomView(){
       // 👉 읽기 시작! 대신 홈 버튼 노출
       if (ctaEl) {
         ctaEl.innerHTML = `
-          <button type="button" onclick="location.href='home.html'">홈으로</button>
+          <button type="button" data-view="home">홈으로</button>
         `;
       }
       return;
