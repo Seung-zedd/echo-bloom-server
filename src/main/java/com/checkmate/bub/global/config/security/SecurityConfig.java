@@ -98,18 +98,34 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // CORS 세부 설정 (허용 origin, method 등)
+    // CORS 세부 설정 (허용 origin, method 등) - 환경별 분리
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // setAllowedOrigins() 대신 setAllowedOriginPatterns() 사용 (와일드카드 포트 지원)
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",           // 모든 localhost 포트 허용
-                "http://127.0.0.1:*",           // 127.0.0.1도 추가 (선택사항)
-                "http://echobloom.co.kr",
-                "https://echobloom.co.kr"
-        ));
+        // 환경별 허용 origin 설정
+        List<String> allowedOrigins = new ArrayList<>();
+        List<String> allowedOriginPatterns = new ArrayList<>();
+
+        if ("dev".equals(activeProfile) || "local".equals(activeProfile)) {
+            // 개발 환경: localhost 와일드카드 패턴 허용
+            allowedOriginPatterns.add("http://localhost:*");
+            allowedOriginPatterns.add("http://127.0.0.1:*");
+            // 개발 서버가 있다면 추가
+            // allowedOrigins.add("https://dev.echobloom.co.kr");
+        } else {
+            // 프로덕션 환경: HTTPS만 허용 (HTTP 제거)
+            allowedOrigins.add("https://echobloom.co.kr");
+            allowedOrigins.add("https://www.echobloom.co.kr");
+        }
+
+        // 설정 적용
+        if (!allowedOrigins.isEmpty()) {
+            configuration.setAllowedOrigins(allowedOrigins);
+        }
+        if (!allowedOriginPatterns.isEmpty()) {
+            configuration.setAllowedOriginPatterns(allowedOriginPatterns);
+        }
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(List.of("*"));              // 모든 헤더 허용
