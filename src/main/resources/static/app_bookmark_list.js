@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const safeSentenceHtml = escapeHtml(sentence).replace(/\n/g,'<br/>');
 
       return `
-      <li class="bm-item" data-id="${id}" data-sentence="${encodedSentence}" data-tone="${encodedTone}">
+      <li class="bm-item" data-id="${escapeHtml(id)}" data-sentence="${encodedSentence}" data-tone="${encodedTone}">
         <div class="bm-text">${safeSentenceHtml}</div>
         <button class="bm-star" type="button" aria-label="북마크 토글" data-on="${bookmarked ? 'true' : 'false'}">
           ${starSVG()}
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         id: x.id ?? x.bookmarkId ?? x._id ?? null,
         sentence: normalizeSentence(x),
         tone: typeof x.tone === 'string' && x.tone.trim().length ? x.tone : BOOKMARK_TONE_DEFAULT,
-        bookmarked: x.isBookmarked ?? x.bookmarked ?? true,
+          bookmarked: (x.isBookmarked === true) || (x.bookmarked === true),
       })).filter(entry => entry.sentence.length);
 
       renderList(normalized);

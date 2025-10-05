@@ -861,23 +861,15 @@ function initCorrectView(){
   });
 }
 
-function normalizeBookmarkEntry(entry) {
-  if (!entry) {
-    return { sentence: '', tone: 'normal', id: null };
-  }
-
-  if (typeof entry === 'string') {
-    return { sentence: entry.trim(), tone: 'normal', id: null };
-  }
-
+function normalizeSentence(entry) {
+  if (entry == null) return '';
+  if (typeof entry === 'string') return entry;
   if (typeof entry === 'object') {
-    const sentence = String(entry.sentence ?? entry.text ?? entry.content ?? entry.quote ?? '').trim();
-    const toneValue = typeof entry.tone === 'string' && entry.tone.trim().length ? entry.tone : 'normal';
-    const idValue = entry.id ?? entry.bookmarkId ?? entry._id ?? null;
-    return { sentence, tone: toneValue, id: idValue };
+    if (typeof entry.sentence === 'string') return entry.sentence;
+    if (typeof entry.text === 'string') return entry.text;
+    if (typeof entry.content === 'string') return entry.content;
   }
-
-  return { sentence: String(entry ?? '').trim(), tone: 'normal', id: null };
+  return String(entry ?? '');
 }
 
 function initBookmarkView(){
@@ -928,29 +920,18 @@ function initBookmarkView(){
     quoteEl.innerHTML = '불러오는 중…';
 
     try {
-      const token = getJwtToken();
-      const fallbackUid = getCookie('user_id') || getCookie('uid') || getCookie('id');
-      const requestOptions = { method: 'GET' };
+      const data = await fetchJSONWithAuth(BOOKMARK_LIST_ME_API, { method: 'GET' });
+      const items = Array.isArray(data?.items) ? data.items
+                  : Array.isArray(data)        ? data
+                  : [];
 
-      if (!token && !fallbackUid) {
-        bookmarks = [];
-        return;
-      }
+      bookmarks = items.map(x => ({
+        id: x.id ?? x.bookmarkId ?? x._id ?? null,
+        sentence: normalizeSentence(x),
+        tone: typeof x.tone === 'string' && x.tone.trim().length ? x.tone : 'normal',
+        bookmarked: (x.isBookmarked === true) || (x.bookmarked === true),
+      })).filter(entry => entry.sentence.length);
 
-      let data = null;
-      if (token) {
-        data = await fetchJSONWithAuth(BOOKMARK_LIST_ME_API, requestOptions);
-      } else if (fallbackUid) {
-        data = await fetchJSONWithAuth(BOOKMARK_LIST_BYID_API(fallbackUid), requestOptions);
-      }
-
-      if (Array.isArray(data)) {
-        bookmarks = data.map(normalizeBookmarkEntry).filter(entry => entry.sentence.length);
-      } else if (Array.isArray(data?.items)) {
-        bookmarks = data.items.map(normalizeBookmarkEntry).filter(entry => entry.sentence.length);
-      } else {
-        bookmarks = [];
-      }
     } catch (e) {
       console.error('bookmark load failed:', e);
       bookmarks = [];
@@ -983,9 +964,9 @@ function initBookmarkView(){
 
 // ===== 북마크/커스텀문장 API 엔드포인트 =====
 const BOOKMARK_LIST_ME_API   = '/api/v1/bookmarks';  // JWT 인증
-const BOOKMARK_LIST_BYID_API = '/api/v1/bookmarks';  // 쿠키 id 기반 (현재 uid 미사용)
+const BOOKMARK_LIST_BYID_API = (uid) => `/api/v1/bookmarks?userId=${uid}`;  // 쿠키 id 기반
 const CUSTOM_LIST_ME_API     = '/api/v1/bookmarks';  // JWT 인증 (북마크와 동일)
-const CUSTOM_LIST_BYID_API   = '/api/v1/bookmarks';  // 쿠키 id 기반 (현재 uid 미사용)
+const CUSTOM_LIST_BYID_API   = (uid) => `/api/v1/bookmarks?userId=${uid}`;  // 쿠키 id 기반
 function initCustomView(){
   const quoteEl = app.querySelector('#quoteText');       // 커스텀 문장 표시 영역
   const nextBtn = app.querySelector('.bubble .next');    // 다음 문장
