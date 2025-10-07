@@ -159,6 +159,14 @@ function iconDel(){
     }
   });
 
+  // Enter 키로 문구 저장
+  input?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      btnCreate?.click();
+    }
+  });
+
   // 위임: 수정/삭제
   root.addEventListener('click', async (e) => {
     const editBtn = e.target.closest('.act-edit');
@@ -202,7 +210,18 @@ function iconDel(){
           <button class="icon-btn act-save"   type="button" aria-label="저장">${iconSave()}</button>
           <button class="icon-btn act-cancel" type="button" aria-label="취소">${iconCancel()}</button>
         </div>`;
-      li.querySelector('.cs-input-inline')?.focus();
+
+      const inlineInput = li.querySelector('.cs-input-inline');
+      inlineInput?.focus();
+
+      // Enter 키로 수정 저장
+      inlineInput?.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          li.querySelector('.act-save')?.click();
+        }
+      });
+
       return;
     }
 
