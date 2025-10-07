@@ -189,5 +189,16 @@ $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 
 <br><br>
 
+## 📒릴리스 노트
+### v1.1.0 (2025-10-08)
+#### ✨ 개선 사항
+- 더 나은 사용자 경험을 위해 **커스텀 문장 입력 및 수정할 때 Enter 키** 추가
+- 북마크와 커스텀 문장 기능의 차별성을 두기 위해 **커스텀 문장은 북마크 기능 비활성화**
+
+#### 🔧 기술적 변경
+- sessionStorage의 캐싱 기능을 활용하여 API refetching을 방지함으로써 latency 대폭 하락📉
+
+<br><br>
+
 ## 📜 라이선스
 이 프로젝트는 MIT 라이선스를 따릅니다.
