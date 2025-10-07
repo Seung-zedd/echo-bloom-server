@@ -4,6 +4,7 @@ import com.checkmate.bub.domain.bridge.domain.UserCategoryBridge;
 import com.checkmate.bub.domain.bridge.repository.UserCategoryBridgeRepository;
 import com.checkmate.bub.domain.category.constant.CategoryType;
 import com.checkmate.bub.domain.profile.member.domain.User;
+import com.checkmate.bub.domain.profile.member.dto.CategorySelectionDto;
 import com.checkmate.bub.domain.profile.member.repository.UserRepository;
 import com.checkmate.bub.domain.profile.member.service.helper.UserCategoryBridgeHelper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,21 @@ public class UserService {
 
     public List<UserCategoryBridge> getUserCategories(Long userId) {
         return userCategoryBridgeRepository.findByUserId(userId);
+    }
+
+    public List<CategorySelectionDto> getUserProblems(Long userId) {
+        return userCategoryBridgeRepository.findByUserIdAndCategoryType(userId, CategoryType.PROBLEM)
+                .stream()
+                .map(bridge -> new CategorySelectionDto(bridge.getCategory().getId(), bridge.getCategory().getName()))
+                .toList();
+    }
+
+    public CategorySelectionDto getUserTone(Long userId) {
+        return userCategoryBridgeRepository.findByUserIdAndCategoryType(userId, CategoryType.TONE)
+                .stream()
+                .findFirst()
+                .map(bridge -> new CategorySelectionDto(bridge.getCategory().getId(), bridge.getCategory().getName()))
+                .orElse(null);
     }
 
     // Get user nickname by ID (for JavaScript display)
@@ -53,10 +69,10 @@ public class UserService {
     public void withdrawUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-                
+
         // 사용자와 연관된 데이터 삭제
         userCategoryBridgeRepository.deleteByUserId(userId);
-        
+
         // 사용자 삭제
         userRepository.delete(user);
     }

@@ -101,6 +101,13 @@
     border-radius:9999px; padding:10px 14px; font-weight:800; box-shadow:var(--shadow);
     min-width:84px; text-align:center;
   }
+  .chip--inactive{
+    background: rgba(255,255,255,.65);
+    color: rgba(17,17,17,.45);
+    box-shadow: none;
+    border: 1px dashed rgba(17,17,17,.2);
+    pointer-events: none;
+  }
   .muted{ color:var(--muted); font-size:.9rem; text-align:center; margin:6px 0 18px; }
 
   /* 톤 섹션 */
@@ -243,7 +250,7 @@
 
   <!-- 3) CTA 버튼 -->
   <a class="btn" href="bookmark_list.html">북마크 문장 관리하기</a>
-  <a class="btn" href="custom_list.html?mock=1">읽고 싶은 문장 직접 입력하기</a>
+  <a class="btn" href="custom_list.html">읽고 싶은 문장 직접 입력하기</a>
 
 <!-- 4) 공유 카드 -->
 <div class="share-card share-action" id="shareCard"

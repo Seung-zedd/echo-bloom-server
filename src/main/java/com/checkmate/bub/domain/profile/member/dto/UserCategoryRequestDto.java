@@ -14,7 +14,7 @@ import java.util.List;
 public class UserCategoryRequestDto {
 
     @NotNull(message = "카테고리 ID 목록은 필수입니다.")
-    @Size(min = 1, message = "최소 1개 이상의 카테고리를 선택해야 합니다.")
+    @Size(min = 1, max = 3, message = "카테고리는 1개 이상 3개 이하로 선택해야 합니다.")
     private List<Long> categoryIds;
 
 }

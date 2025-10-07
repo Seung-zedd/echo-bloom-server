@@ -2,6 +2,8 @@ package com.checkmate.bub.domain.profile.member.controller;
 
 import com.checkmate.bub.domain.affirmation.dto.MainAffirmationResponseDto;
 import com.checkmate.bub.domain.affirmation.service.AffirmationService;
+import com.checkmate.bub.domain.profile.member.dto.CategorySelectionDto;
+import com.checkmate.bub.domain.profile.member.dto.MyPageCategoryResponseDto;
 import com.checkmate.bub.domain.profile.member.dto.ToneUpdateRequestDto;
 import com.checkmate.bub.domain.profile.member.dto.UserCategoryRequestDto;
 import com.checkmate.bub.domain.profile.member.service.UserService;
@@ -12,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -36,10 +39,13 @@ public class UserController {
 
     // (1) 안녕하세요, {이름} 님 페이지 - 카테고리 조회
     @GetMapping("/categories")
-    public ResponseEntity<?> getUserCategories(Authentication authentication) {
+    public ResponseEntity<MyPageCategoryResponseDto> getUserCategories(Authentication authentication) {
         Long userId = Long.valueOf(authentication.getName());
-        var userCategories = userService.getUserCategories(userId);
-        return ResponseEntity.ok(userCategories);
+        List<CategorySelectionDto> problems = userService.getUserProblems(userId);
+        List<CategorySelectionDto> limitedProblems = problems.stream().limit(3).toList();
+        CategorySelectionDto tone = userService.getUserTone(userId);
+        MyPageCategoryResponseDto response = new MyPageCategoryResponseDto(limitedProblems, tone);
+        return ResponseEntity.ok(response);
     }
 
     // (2) 문제 수정하기 - 문제 선택 및 저장

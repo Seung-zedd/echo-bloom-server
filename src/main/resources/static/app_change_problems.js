@@ -5,11 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextBtn   = document.getElementById('toNext');
   const MAX       = 3;
 
-  // 서버 엔드포인트 & 성공 후 이동 경로 (원하는 값으로 교체)
-  const ENDPOINT  = '/api/problems';     // ← 백엔드 URL (예: /api/mypage/problems)
-  const NEXT_URL  = 'mypage.html';       // ← 저장 성공 후 이동할 페이지
+  const FETCH_ENDPOINT = '/api/users/me/categories';
+  const SAVE_ENDPOINT  = '/api/users/me/categories/problems';
+  const NEXT_URL       = 'mypage.html';
 
-  // 선택 토글(최대 3개)
+  loadCurrentSelections();
+
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.classList.contains('selected')) {
@@ -17,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         const picked = list.querySelectorAll('.opt.selected').length;
         if (picked >= MAX) {
-          // 가벼운 피드백(선택 초과)
           btn.animate([{transform:'scale(1)'},{transform:'scale(0.98)'},{transform:'scale(1)'}], {duration:150});
           return;
         }
@@ -39,36 +39,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 다음 → 서버 전송
+  async function loadCurrentSelections(){
+    try {
+      const res = await fetch(FETCH_ENDPOINT, { credentials: 'include' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const selectedIds = Array.isArray(data?.problems)
+        ? data.problems.map(item => String(item?.id)).filter(Boolean)
+        : [];
+      buttons.forEach(btn => {
+        if (selectedIds.includes(btn.dataset.value)) {
+          btn.classList.add('selected');
+        }
+      });
+      updateState();
+    } catch (err) {
+      console.warn('Failed to load current problem selections:', err);
+    }
+  }
+
   nextBtn.addEventListener('click', async () => {
     if (nextBtn.classList.contains('is-disabled')) return;
 
-    const values = Array.from(list.querySelectorAll('.opt.selected')).map(b => b.dataset.value);
-    if (values.length === 0) { alert('최소 1개 이상 선택해주세요.'); return; }
+    const values = Array.from(list.querySelectorAll('.opt.selected')).map(b => Number(b.dataset.value));
+    const filtered = values.filter((value, index, arr) => !Number.isNaN(value) && arr.indexOf(value) === index);
 
-    nextBtn.classList.add('is-disabled'); nextBtn.setAttribute('aria-disabled','true');
+    if (filtered.length === 0) { alert('최소 1개 이상 선택해주세요.'); return; }
 
-    // CSRF 토큰을 쓰는 경우(선택): <meta name="csrf-token" content="...">
+    nextBtn.classList.add('is-disabled');
+    nextBtn.setAttribute('aria-disabled','true');
+
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.content;
 
     try{
-      const res = await fetch(ENDPOINT, {
-        method: 'POST',
+      const res = await fetch(SAVE_ENDPOINT, {
+        method: 'PUT',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
           ...(CSRF ? {'X-CSRF-Token': CSRF} : {})
         },
-        body: JSON.stringify({ problems: values })  // ← 서버에서 이 필드명에 맞춰 받기
+        body: JSON.stringify({ categoryIds: filtered })
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
 
-      location.href = NEXT_URL;  // 성공 이동
+      location.href = NEXT_URL;
     } catch (err) {
       console.error('submit failed:', err);
       alert('저장에 실패했어요. 네트워크 상태를 확인하고 다시 시도해주세요.');
-      nextBtn.classList.remove('is-disabled'); nextBtn.removeAttribute('aria-disabled');
+      nextBtn.classList.remove('is-disabled');
+      nextBtn.removeAttribute('aria-disabled');
     }
   });
 });
