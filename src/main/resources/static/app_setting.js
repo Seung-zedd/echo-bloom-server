@@ -83,8 +83,13 @@ document.getElementById('goNotice')?.addEventListener('click', async (e) => {
     try {
       // 지우고 싶은 쿠키들 이름 예시(프로젝트에 맞춰 수정)
       ['auth_token','member_id','mb_id','ck_mb_id','ck_auto'].forEach(deleteCookie);
-      // 로컬 저장소 정리(필요한 key만 지우세요)
+
+      // JWT 토큰 정리
+      localStorage.removeItem('jwt');
+      localStorage.removeItem('access_token');
       localStorage.removeItem('auth');
+
+      // sessionStorage 전체 정리
       sessionStorage.clear();
     } catch(_) {}
 
