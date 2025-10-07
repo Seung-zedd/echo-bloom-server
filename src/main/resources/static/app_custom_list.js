@@ -4,10 +4,10 @@
   ========================= */
   const API_BASE = ''; // 같은 도메인이면 '' 유지, 분리 배포면 'https://api.example.com'
   const ENDPOINTS = {
-    LIST:   API_BASE + '/api/custom-sentences/me',     // GET
-    CREATE: API_BASE + '/api/custom-sentences',        // POST {text}
-    UPDATE: (id) => API_BASE + `/api/custom-sentences/${id}`, // PUT {text}
-    DELETE: (id) => API_BASE + `/api/custom-sentences/${id}`, // DELETE
+    LIST:   API_BASE + '/api/v1/custom-sentences',     // GET
+    CREATE: API_BASE + '/api/v1/custom-sentences',     // POST {sentence}
+    UPDATE: (id) => API_BASE + `/api/v1/custom-sentences/${id}`, // PUT {sentence}
+    DELETE: (id) => API_BASE + `/api/v1/custom-sentences/${id}`, // DELETE
   };
 
   const root  = document.getElementById('csList');
@@ -62,7 +62,7 @@ function iconDel(){
     const src = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
     return src.map((x,i)=>({
       id: x.id ?? x._id ?? i,
-      text: String(x.text ?? x.content ?? '').trim()
+      text: String(x.sentence ?? x.text ?? x.content ?? '').trim()
     })).filter(x => x.text);
   }
 
@@ -145,7 +145,7 @@ function iconDel(){
     if (useMock) return;
 
     try{
-      const res = await fetchJSONWithAuth(ENDPOINTS.CREATE, { method:'POST', body:{ text: t } });
+      const res = await fetchJSONWithAuth(ENDPOINTS.CREATE, { method:'POST', body:{ sentence: t } });
       const newId = res?.id;
       if (newId){
         const li = root.querySelector(`.cs-item[data-id="${tempId}"]`);
@@ -238,7 +238,7 @@ function iconDel(){
       if (useMock) return;
 
       try{
-        await fetchJSONWithAuth(ENDPOINTS.UPDATE(id), { method:'PUT', body:{ text: v } });
+        await fetchJSONWithAuth(ENDPOINTS.UPDATE(id), { method:'PUT', body:{ sentence: v } });
       }catch(e){
         alert('수정에 실패했어요. 잠시 후 다시 시도해 주세요.');
       }

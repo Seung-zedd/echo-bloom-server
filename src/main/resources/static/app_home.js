@@ -1021,26 +1021,31 @@ function initBookmarkView(){
 // ===== 북마크/커스텀문장 API 엔드포인트 =====
 const BOOKMARK_LIST_ME_API   = '/api/v1/bookmarks';  // JWT 인증
 const BOOKMARK_LIST_BYID_API = (uid) => `/api/v1/bookmarks?userId=${uid}`;  // 쿠키 id 기반
-const CUSTOM_LIST_ME_API     = '/api/v1/bookmarks';  // JWT 인증 (북마크와 동일)
-const CUSTOM_LIST_BYID_API   = (uid) => `/api/v1/bookmarks?userId=${uid}`;  // 쿠키 id 기반
-function initCustomView(){
-  const quoteEl = app.querySelector('#quoteText');       // 커스텀 문장 표시 영역
-  const nextBtn = app.querySelector('.bubble .next');    // 다음 문장
-  const ctaEl   = app.querySelector('.cta');             // 버튼 영역
+const CUSTOM_SENTENCE_API    = '/api/v1/custom-sentences';  // JWT 인증
+
+/**
+ * UR-USER-028: 커스텀 문장 읽기 뷰 초기화
+ * 북마크 읽기와 동일한 패턴: 문장을 하나씩 표시하고 순환
+ */
+function initCustomView() {
+  const quoteEl = app.querySelector('#quoteText');      // 커스텀 문장을 표시할 곳
+  const nextBtn = app.querySelector('.bubble .next');   // 다음 커스텀 문장
+  const ctaEl   = app.querySelector('.cta');            // 버튼 영역
   const readBtn = app.querySelector('[data-view="read"]');
+
   if (!quoteEl) return;
 
   // 상태
-  let customs = []; // 문자열 배열
+  let customSentences = []; // 커스텀 문장 배열
   let idx = 0;
 
-  // 렌더러
+  // 렌더
   const render = () => {
-    if (!customs.length) {
+    if (!customSentences.length) {
       quoteEl.innerHTML = '저장된 커스텀 문장이 없어요.';
       if (nextBtn) nextBtn.disabled = true;
 
-      // 👉 읽기 시작! 대신 홈 버튼 노출
+      // 읽기 버튼 대신 홈 버튼 표시
       if (ctaEl) {
         ctaEl.innerHTML = `
           <button type="button" data-view="home">홈으로</button>
@@ -1049,79 +1054,51 @@ function initCustomView(){
       return;
     }
 
-    if (nextBtn) nextBtn.disabled = (customs.length <= 1);
+    if (nextBtn) nextBtn.disabled = (customSentences.length <= 1);
 
-    const text = String(customs[idx] ?? '').trim();
-    quoteEl.innerHTML = text.replace(/\n/g, '<br/>');
+    const current = customSentences[idx] ?? null;
+    const text = current && typeof current.sentence === 'string' ? current.sentence.trim() : '';
+    quoteEl.innerHTML = text ? text.replace(/\n/g, '<br/>') : '';
 
-    // 👉 커스텀 문장이 있으면 읽기 시작! 버튼 복원
+    // 저장된 커스텀 문장이 있으면 읽기/홈 버튼으로 복원
     if (ctaEl) {
       ctaEl.innerHTML = `
-        <button type="button" data-view="read">읽기 시작!</button>
+        <button type="button" data-view="read" style="padding:8px 12px;">읽기 시작!</button>
+        <button type="button" data-view="home" style="padding:8px 12px; margin-left:8px;">홈으로</button>
       `;
     }
   };
 
-  // 데이터 로드
+  // 커스텀 문장 불러오기
   (async () => {
     quoteEl.innerHTML = '불러오는 중…';
+
     try {
-      let data = null;
-      const token = typeof getJwtToken === 'function' ? getJwtToken() : null;
-      const requestOptions = { method: 'GET' };
+      const data = await fetchJSONWithAuth(CUSTOM_SENTENCE_API, { method: 'GET' });
+      const items = Array.isArray(data) ? data : [];
 
-      if (token) {
-        data = await fetchJSONWithAuth(CUSTOM_LIST_ME_API, requestOptions);
-      } else {
-        try {
-          data = await fetchJSONWithAuth(CUSTOM_LIST_ME_API, requestOptions);
-        } catch (authError) {
-          const uid = getCookie?.('user_id') || getCookie?.('uid') || getCookie?.('id');
-          if (uid) {
-            data = await fetchJSONWithAuth(CUSTOM_LIST_BYID_API(uid), requestOptions);
-          } else {
-            console.warn('custom list load skipped: unauthenticated', authError);
-            customs = [];
-          }
-        }
-      }
+      customSentences = items.map(x => ({
+        id: x.id ?? x._id ?? null,
+        sentence: typeof x.sentence === 'string' ? x.sentence : String(x.text ?? x.content ?? '').trim()
+      })).filter(entry => entry.sentence.length);
 
-      // 응답 정규화
-      if (Array.isArray(data)) {
-        customs = data.map(String);
-      } else if (Array.isArray(data?.items)) {
-        customs = data.items.map(x => String(x.text ?? x.content ?? ''));
-      } else if (data === null) {
-        customs = Array.isArray(customs) ? customs : [];
-      } else {
-        customs = [];
-      }
     } catch (e) {
-      console.error('custom list load failed:', e);
-      customs = [];
+      console.error('커스텀 문장 로드 실패:', e);
+      customSentences = [];
     } finally {
       render();
     }
   })();
 
-  // 다음 문장
+  // 다음 버튼: 커스텀 문장 순환
   if (nextBtn) {
     nextBtn.addEventListener('click', (event) => {
       event.stopPropagation();
-      if (!customs.length) return;
-      idx = (idx + 1) % customs.length;
+      if (!customSentences.length) return;
+      idx = (idx + 1) % customSentences.length;
       render();
     });
   }
-
-  // 읽기 시작! 저장 후 read로 이동하는 별도 처리 필요 없으면 주석 유지 (전역 핸들러가 처리)
-  /*
-  if (readBtn) {
-    readBtn.addEventListener('click', () => {
-      localStorage.setItem('currentQuote', quoteEl.innerHTML);
-      loadView('read');
-    });
-  }
-  */
+  // 읽기 시작! → 기존 전역 핸들러가 #quoteText.innerHTML을 localStorage에 저장하고 read.html 로드
 }
 
