@@ -170,5 +170,16 @@ $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 
 <br><br>
 
+## 📒 Release Notes
+### v1.1.0 (2025-10-08)
+#### ✨ Improvements
+- **Added Enter key** support for inputting and editing custom sentences to enhance user experience
+- **Disabled bookmark functionality** for custom sentences to maintain clear distinction between bookmark and custom sentence features
+
+#### 🔧 Technical Changes
+- Leveraged sessionStorage caching to prevent API refetching, significantly reducing latency 📉
+
+<br><br>
+
 ## 📜 License
 This project is licensed under the MIT License.
