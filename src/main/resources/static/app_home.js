@@ -34,6 +34,11 @@ document.addEventListener('click', (e) => {
     if (currentQuoteEl) {
       localStorage.setItem('currentQuote', currentQuoteEl.innerHTML);
     }
+
+    // Track sentence source: custom sentences don't need bookmark button
+    const source = app.dataset.currentView || 'home';
+    localStorage.setItem('sentenceSource', source);
+
     loadView('read');
     return;
   }
@@ -870,8 +875,19 @@ function initCorrectView(){
   }
 
   // 4) 북마크 초기 상태 + 토글
-  const quotePlain = (target?.innerText || '').trim();
+  // ⚠️ Custom sentences don't need bookmark button (already saved)
+  const sentenceSource = localStorage.getItem('sentenceSource') || 'home';
   const toggleBtn = app.querySelector('#bookmarkToggle');
+
+  if (sentenceSource === 'custom') {
+    // Hide bookmark button entirely for custom sentences
+    if (toggleBtn) {
+      toggleBtn.style.display = 'none';
+    }
+    return; // Exit early - no bookmark logic needed
+  }
+
+  const quotePlain = (target?.innerText || '').trim();
   if (!toggleBtn || !quotePlain) return;
 
   // 기본은 해제 상태로 표시
