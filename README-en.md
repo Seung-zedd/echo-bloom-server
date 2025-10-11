@@ -45,7 +45,7 @@ An AI-based positive affirmation speaking service that helps with emotional reco
 **Data Access**: Spring Data JPA
 
 **API Documentation**: Apidog (migrated from Swagger)
-- v1/endpoint (custom, before implementing bookmark feature): <a href="https://07olkvu7eg.apidog.io">EndPoint</a>
+- v1/endpoint (after implementing bookmark, custom feature): <a href="https://07olkvu7eg.apidog.io/">EndPoint</a>
 
 **AI**: Naver CLOVA Studio (HyperCLOVA X), CLOVA Speech Recognition (+STT)
 
