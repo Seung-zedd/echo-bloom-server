@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>에코블룸</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+<style>
+  @font-face {
+    font-family: 'HakgyoansimNadeuriTTF-B';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimNadeuriTTF-B.woff2') format('woff2');
+    font-weight: 700; font-style: normal;
+  }
+  :root{
+    --maxw: 420px;
+    --accent: #ffcc33; --btn-bg: rgba(255,255,255,.12);
+    --btn-border: rgba(255,255,255,.65);
+    --text: #fff; --sub: rgba(255,255,255,.8);
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0; font-family:Pretendard,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--text); background:#1a7a29}
+
+  .screen{
+    position:relative;
+    min-height:100vh;
+    max-width:420px;
+    margin:0 auto;
+    background:url("img/메인 배경.png") center/cover no-repeat;
+    padding-left:max(20px, env(safe-area-inset-left));
+    padding-right:max(20px, env(safe-area-inset-right));
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.35);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  #app{
+    position:relative;
+    z-index:2;
+    min-height:100vh;
+    padding: max(6vh,40px) 20px 28px;
+    display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .leaving{ opacity:0; transform: translateY(6px); }
+  .entering{ opacity:0; transform: translateY(6px); }
+  .entered{ opacity:1; transform: translateY(0); }
+
+  #app.full {
+    padding: 0 !important;
+    overflow:hidden;
+  }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <main id="app" role="main" class="entered">
+      <!-- intro.html will be loaded here by app.js -->
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Auto-load intro.html when page loads
+    if (typeof loadView === 'function') {
+      loadView('views/intro.html');
+    }
+  </script>
+</body>
+</html>

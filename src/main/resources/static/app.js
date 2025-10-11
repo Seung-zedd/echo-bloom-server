@@ -79,6 +79,14 @@ function bindLocalEvents() {
   const goDeeper3 = app.querySelector('#goDeeper3');
   goDeeper3 && goDeeper3.addEventListener('click', () => loadView('views/intro4.html'));
 
+  const startLoginKakao = app.querySelector('#startLoginKakao');
+  if (startLoginKakao) {
+    startLoginKakao.addEventListener('click', (e) => {
+      e.preventDefault();
+      location.href = 'views/search.html';
+    });
+  }
+
   const goBack = app.querySelector('#goBack');
   if (goBack) {
     goBack.addEventListener('click', (e) => {
@@ -90,19 +98,19 @@ function bindLocalEvents() {
 
 // 초기 메인 화면 버튼 이벤트
 document.getElementById('startKakao')?.addEventListener('click', async () => {
+  // Trigger Kakao OAuth login
   try {
-    // 백엔드에서 카카오 로그인 URL 받아오기
     const response = await fetch('/auth/kakao/login-url');
     if (!response.ok) throw new Error('Failed to get login URL');
-    
-    const loginUrl = await response.text();
-    window.location.href = loginUrl;
+    const kakaoLoginUrl = await response.text();
+    // Redirect to Kakao OAuth login page
+    window.location.href = kakaoLoginUrl;
   } catch (error) {
-    console.error('카카오 로그인 URL 생성 실패:', error);
-    alert('로그인 준비 중 오류가 발생했습니다. 다시 시도해주세요.');
+    console.error('Failed to start Kakao login:', error);
+    alert('카카오 로그인을 시작할 수 없습니다. 잠시 후 다시 시도해주세요.');
   }
 });
 document.getElementById('skipLink')?.addEventListener('click', (e) => {
   e.preventDefault();
-  loadView('main.html'); // 오버레이 필요 없으면 data-overlay 생략
+  loadView('landing_page.html'); // 오버레이 필요 없으면 data-overlay 생략
 });

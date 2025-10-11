@@ -79,11 +79,11 @@ public class SecurityConfig {
 
                     authorize
                             // 익명 사용자용 리소스 (메인 랜딩 페이지용만)
-                            .requestMatchers("/", "/main.html", "/app.js", "/*.css", "/img/**",
+                            .requestMatchers("/", "/main.html", "/landing_page.html", "/app.js", "/*.css", "/img/**",
                                     "/music/**", "/css/**", "/error", "/favicon.ico").permitAll()
 
                             // 인증된 사용자용 리소스 (로그인 후 접근 가능)
-                            .requestMatchers("/home.html", "/app_*.js", "/views/**").authenticated()
+                            .requestMatchers("/intro_start.html", "/home.html", "/app_*.js", "/views/**").authenticated()
 
                             // .well-known 경로 허용 추가 (에러 방지)
                             .requestMatchers("/.well-known/**").permitAll()

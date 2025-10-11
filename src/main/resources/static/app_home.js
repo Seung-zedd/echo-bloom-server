@@ -86,6 +86,31 @@ async function loadView(viewName){
     currentView = targetView;
     app.dataset.currentView = targetView;
 
+    // Auto-pause background music during speech recognition to avoid interference
+    if (bgMusic && musicIcon && musicToggle) {
+      if (viewName === 'read') {
+        // Save current music state before pausing
+        const wasPlaying = !bgMusic.paused;
+        sessionStorage.setItem('musicWasPlaying', wasPlaying ? 'true' : 'false');
+
+        // Pause music when entering read view (recording voice)
+        bgMusic.pause();
+        musicIcon.innerHTML = `<polygon points="6,4 20,12 6,20" />`;
+        musicToggle.setAttribute('aria-label', '음악 재생');
+      } else if (viewName === 'home' || !viewName) {
+        // Restore music state when returning to home
+        const wasPlaying = sessionStorage.getItem('musicWasPlaying') === 'true';
+        if (wasPlaying) {
+          bgMusic.play().catch(err => console.log('Music autoplay prevented:', err));
+          musicIcon.innerHTML = `
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          `;
+          musicToggle.setAttribute('aria-label', '음악 일시정지');
+        }
+      }
+    }
+
     // 각 뷰별 초기화
     if (viewName === 'read') {
       const saved = localStorage.getItem('currentQuote');
@@ -207,10 +232,15 @@ function setAvatarFromCookie(){
 /* ==========================
    음악 재생/일시정지 토글
 ========================== */
-// <audio id="bgMusic" src="music/music.mp4" loop></audio> 필요
+// Background music: Nature sounds (birds chirping, stream flowing, etc.)
 const musicToggle = document.getElementById('musicToggle');
 const musicIcon = document.getElementById('musicIcon');
 const bgMusic = document.getElementById('bgMusic');
+
+// Set background music volume to 50% for pleasant ambiance
+if (bgMusic) {
+  bgMusic.volume = 0.5;
+}
 
 if (musicToggle && musicIcon && bgMusic) {
   musicToggle.addEventListener('click', () => {

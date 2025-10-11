@@ -56,7 +56,7 @@ public class AuthController {
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
         // 신규 사용자인지 기존 사용자인지에 따라 다른 페이지로 리다이렉트
-        String redirectPath = authResponse.isNewUser() ? "/views/search.html" : "/home.html";
+        String redirectPath = authResponse.isNewUser() ? "/intro_start.html" : "/home.html";
         log.info("Redirecting to {} (isNewUser: {})", redirectPath, authResponse.isNewUser());
         
         URI redirectUri = ServletUriComponentsBuilder.fromCurrentContextPath()
