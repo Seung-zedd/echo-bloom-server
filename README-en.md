@@ -182,4 +182,4 @@ $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 <br><br>
 
 ## 📜 License
-This project is licensed under the MIT License.
+This project is licensed under the Proprietary License.
