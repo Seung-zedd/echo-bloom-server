@@ -84,6 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (!res.ok) throw new Error('HTTP ' + res.status);
 
+      // Clear cached affirmations so new ones are generated based on updated problems
+      sessionStorage.removeItem('generated_affirmations');
+      sessionStorage.removeItem('affirmation_idx');
+
       location.href = NEXT_URL;
     } catch (err) {
       console.error('submit failed:', err);
