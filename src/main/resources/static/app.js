@@ -112,5 +112,5 @@ document.getElementById('startKakao')?.addEventListener('click', async () => {
 });
 document.getElementById('skipLink')?.addEventListener('click', (e) => {
   e.preventDefault();
-  loadView('landing_page.html'); // 오버레이 필요 없으면 data-overlay 생략
+  window.location.href = '/landing_page.html';
 });
