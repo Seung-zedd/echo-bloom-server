@@ -62,6 +62,13 @@ function viewToUrl(viewName){
 
 async function loadView(viewName){
   const targetView = viewName || 'home';
+
+  // Save music state when leaving home view (for ALL non-home destinations)
+  if (bgMusic && currentView === 'home' && viewName !== 'home' && viewName) {
+    const wasPlaying = !bgMusic.paused;
+    sessionStorage.setItem('musicWasPlaying', wasPlaying ? 'true' : 'false');
+  }
+
   await transitionOut();
 
   try {
@@ -89,10 +96,6 @@ async function loadView(viewName){
     // Auto-pause background music during speech recognition to avoid interference
     if (bgMusic && musicIcon && musicToggle) {
       if (viewName === 'read') {
-        // Save current music state before pausing
-        const wasPlaying = !bgMusic.paused;
-        sessionStorage.setItem('musicWasPlaying', wasPlaying ? 'true' : 'false');
-
         // Pause music when entering read view (recording voice)
         bgMusic.pause();
         musicIcon.innerHTML = `<polygon points="6,4 20,12 6,20" />`;
@@ -104,7 +107,7 @@ async function loadView(viewName){
           bgMusic.play().catch(err => console.log('Music autoplay prevented:', err));
           musicIcon.innerHTML = `
             <rect x="6" y="4" width="4" height="16"></rect>
-            <rect x="14" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="16"></rect>
           `;
           musicToggle.setAttribute('aria-label', '음악 일시정지');
         }
@@ -130,11 +133,18 @@ async function loadView(viewName){
       initCorrectView();
     }
     if (viewName === 'home' || !viewName) {
-      // Restore current affirmation display
-      const quoteEl = document.getElementById('quoteText');
-      if (quoteEl && GENERATED_AFFIRMATIONS.length > 0) {
-        const currentIdx = affirmationIdx > 0 ? affirmationIdx - 1 : GENERATED_AFFIRMATIONS.length - 1;
-        quoteEl.innerHTML = GENERATED_AFFIRMATIONS[currentIdx % GENERATED_AFFIRMATIONS.length].replace(/\n/g, '<br/>');
+      // Check if affirmations cache was cleared (e.g., after completing a reading)
+      const cached = sessionStorage.getItem('generated_affirmations');
+      if (!cached) {
+        // Cache was cleared, fetch new affirmations
+        loadInitialQuote();
+      } else {
+        // Restore current affirmation display
+        const quoteEl = document.getElementById('quoteText');
+        if (quoteEl && GENERATED_AFFIRMATIONS.length > 0) {
+          const currentIdx = affirmationIdx > 0 ? affirmationIdx - 1 : GENERATED_AFFIRMATIONS.length - 1;
+          quoteEl.innerHTML = GENERATED_AFFIRMATIONS[currentIdx % GENERATED_AFFIRMATIONS.length].replace(/\n/g, '<br/>');
+        }
       }
     }
 
@@ -900,7 +910,8 @@ function initCorrectView(){
       // Clear sessionStorage to force new affirmation generation
       sessionStorage.removeItem('generated_affirmations');
       sessionStorage.removeItem('affirmation_idx');
-      window.location.reload();
+      // Use loadView instead of reload to preserve music state
+      loadView('home');
     });
   }
 
