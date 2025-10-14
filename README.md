@@ -201,4 +201,4 @@ $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 <br><br>
 
 ## 📜 라이선스
-이 프로젝트는 MIT 라이선스를 따릅니다.
+이 프로젝트는 독점 라이선스(Proprietary License)를 따릅니다.
