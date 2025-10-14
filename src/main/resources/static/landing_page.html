@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>에코블룸 - 당신의 목소리로 피우는 긍정의 씨앗</title>
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/seung-zedd/echo-bloom-server/main/src/main/resources/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 사용자 정의 스타일 및 Tailwind CSS 구성 */
+        body {
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+        }
+        :root {
+            --brand-green-light: #F0FFF4;
+            --brand-green-medium: #86C8BC;
+            --brand-green-dark: #3E8B7B;
+            --brand-yellow: #FFD700;
+            --text-primary: #2C3E50;
+            --text-secondary: #7F8C8D;
+        }
+        .bg-brand-green-light { background-color: var(--brand-green-light); }
+        .bg-brand-green-medium { background-color: var(--brand-green-medium); }
+        .text-brand-green-dark { color: var(--brand-green-dark); }
+        .text-brand-yellow { color: var(--brand-yellow); }
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .btn-primary {
+            background-color: var(--brand-green-dark);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #317265;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(62, 139, 123, 0.3);
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* 데모 섹션 애니메이션 */
+        #plant-svg {
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .step-content {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-brand-green-light text-primary">
+
+<!-- 네비게이션 바 -->
+<header class="fixed top-0 left-0 right-0 bg-brand-green-light/80 backdrop-blur-sm z-50 shadow-sm">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <!-- 앱 로고 이미지로 교체 -->
+            <img src="https://raw.githubusercontent.com/seung-zedd/echo-bloom-server/main/src/main/resources/static/img/flower.png" alt="에코블룸 로고" class="w-7 h-7">
+            <span class="text-2xl font-bold text-brand-green-dark">에코블룸</span>
+        </div>
+        <a href="#cta" class="btn-primary font-semibold py-2 px-6 rounded-full hidden md:inline-block">
+            지금 시작하기
+        </a>
+    </div>
+</header>
+
+<!-- 히어로 섹션 -->
+<main class="pt-24">
+    <section class="container mx-auto px-6 py-16 md:py-24 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-bold leading-tight text-primary fade-in hero-title" style="transition-delay: 0s;">
+                당신의 목소리로 피우는<br>
+                <span class="text-brand-green-dark">긍정의 씨앗</span>
+            </h1>
+            <p class="mt-6 text-lg md:text-xl text-secondary max-w-2xl mx-auto fade-in hero-subtitle" style="transition-delay: 0.2s;">
+                하루 단 1분, AI가 건네는 따뜻한 문장을 따라 말해보세요.<br>
+                마음속 작은 씨앗이 싹트고, 당신의 하루가 활짝 피어납니다.
+            </p>
+        </div>
+    </section>
+
+    <!-- 앱 경험 소개 섹션 -->
+    <section class="py-16 md:py-24">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="relative w-full max-w-sm mx-auto fade-in">
+                    <!-- Phone Mockup -->
+                    <div class="relative aspect-[9/19] bg-white rounded-[40px] shadow-2xl p-4 border-8 border-gray-800">
+                        <div class="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-4 bg-gray-800 rounded-full"></div>
+                        <div class="h-full w-full bg-brand-green-light rounded-[28px] flex flex-col items-center justify-center p-4 text-center overflow-hidden">
+                            <div class="relative w-full h-full flex flex-col items-center justify-center">
+                                <div class="absolute top-0 w-full p-4">
+                                    <p class="text-sm text-brand-green-dark font-semibold">김에코님</p>
+                                </div>
+                                <div class="bg-white/80 p-4 rounded-xl shadow-md">
+                                    <p class="text-primary text-base leading-relaxed">수많은 실수가 쌓여 지금의<br> 내가 되었듯, 앞으로의 나는<br> 더욱 빛날 거야.</p>
+                                </div>
+                                <div class="mt-8">
+                                    <div class="w-20 h-20 bg-brand-green-dark rounded-full flex items-center justify-center text-white">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-4 text-center">
+                                    <p class="text-sm font-bold text-brand-green-dark">정확해요! 잘했어요 ☀️</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center md:text-left">
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary leading-snug fade-in">스스로를 다독이는<br>가장 확실한 방법</h2>
+                    <p class="mt-4 text-lg text-secondary fade-in">자신의 목소리로 직접 말하는 긍정의 말은 뇌에 가장 강력하게 각인됩니다. 에코블룸은 과학적 원리를 기반으로 당신의 정서적 회복과 성장을 돕습니다.</p>
+                    <div class="mt-8 space-y-6 fade-in">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-green-100 text-brand-green-dark rounded-full flex-shrink-0 flex items-center justify-center">🌱</div>
+                            <div>
+                                <h3 class="font-bold text-lg text-primary">AI 맞춤 문장</h3>
+                                <p class="text-secondary">나의 고민에 맞춰 AI가 매일 새로운 긍정 확언을 추천해줘요.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-yellow-100 text-yellow-600 rounded-full flex-shrink-0 flex items-center justify-center">🗣️</div>
+                            <div>
+                                <h3 class="font-bold text-lg text-primary">목소리 녹음과 피드백</h3>
+                                <p class="text-secondary">직접 문장을 녹음하고, 정확도에 따라 피드백을 받으며 성취감을 느껴보세요.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex-shrink-0 flex items-center justify-center">🌸</div>
+                            <div>
+                                <h3 class="font-bold text-lg text-primary">긍정의 씨앗 키우기</h3>
+                                <p class="text-secondary">매일의 실천으로 당신만의 작은 씨앗이 아름다운 꽃으로 피어나는 과정을 지켜보세요.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 인터랙티브 데모 섹션 -->
+    <section id="interactive-demo" class="py-16 md:py-24 bg-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary fade-in">에코블룸, 이렇게 쉬워요</h2>
+            <p class="mt-4 text-lg text-secondary max-w-2xl mx-auto fade-in">3가지 간단한 단계로 당신의 하루에 긍정을 더해보세요.</p>
+
+            <div class="mt-12 max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 fade-in">
+                <!-- 단계 설명 -->
+                <div class="w-full md:w-1/2 text-left space-y-4">
+                    <div id="step1-content" class="step-content">
+                        <h3 class="text-2xl font-bold text-brand-green-dark">1. 지금 어떤 마음인가요?</h3>
+                        <p class="text-secondary">현재 당신의 마음 상태와 가장 가까운 감정을 선택해주세요. 당신에게 꼭 필요한 문장을 찾아드릴게요.</p>
+                    </div>
+                    <div id="step2-content" class="step-content opacity-0" style="transform: translateY(20px);">
+                        <h3 class="text-2xl font-bold text-brand-green-dark">2. 문장을 따라 말해보세요</h3>
+                        <p class="text-secondary">AI가 추천한 문장이에요. 마이크 버튼을 누르고 당신의 목소리로 천천히, 그리고 선명하게 말해보세요.</p>
+                    </div>
+                    <div id="step3-content" class="step-content opacity-0" style="transform: translateY(20px);">
+                        <h3 class="text-2xl font-bold text-brand-green-dark">3. 긍정의 씨앗이 자라나요!</h3>
+                        <p class="text-secondary">잘했어요! 당신의 목소리가 긍정의 씨앗에 좋은 에너지를 주었어요. 매일 꾸준히 말할수록 씨앗은 무럭무럭 자라날 거예요.</p>
+                    </div>
+                </div>
+
+                <!-- 인터랙션 영역 -->
+                <div class="w-full md:w-1/2 bg-brand-green-light p-6 rounded-2xl shadow-lg relative h-96 flex flex-col justify-center items-center">
+                    <div id="demo-step-1" class="w-full">
+                        <p class="font-semibold mb-4 text-primary">지금 어떤 고민이 있나요?</p>
+                        <div class="space-y-3">
+                            <button class="demo-choice w-full bg-white p-3 rounded-lg shadow-sm hover:bg-yellow-50 transition" data-affirmation="나는 계획을 끝내지 못하는 나를 용서하고, 작은 성공부터 다시 시작할 거야.">계획을 끝내지 못하고 행동력이 떨어져요.</button>
+                            <button class="demo-choice w-full bg-white p-3 rounded-lg shadow-sm hover:bg-yellow-50 transition" data-affirmation="사소한 걱정은 잠시 내려놓고, 지금 이 순간의 평온함을 온전히 느낄 거야.">걱정이 많고 불안해요.</button>
+                            <button class="demo-choice w-full bg-white p-3 rounded-lg shadow-sm hover:bg-yellow-50 transition" data-affirmation="스스로가 부족하게 느껴질 때도 괜찮아. 나는 나만의 속도로 성장하고 있어.">스스로가 부족하게 느껴지고 자신감이 없어요.</button>
+                        </div>
+                    </div>
+
+                    <div id="demo-step-2" class="w-full hidden">
+                        <div id="affirmation-text" class="bg-white p-4 rounded-lg shadow-inner text-primary text-lg leading-relaxed mb-6"></div>
+                        <button id="speak-button" class="w-20 h-20 bg-brand-green-dark rounded-full flex items-center justify-center text-white mx-auto transition-transform hover:scale-110">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                        </button>
+                        <p id="speak-feedback" class="mt-4 font-semibold text-brand-green-dark opacity-0 transition-opacity"></p>
+                    </div>
+
+                    <div id="plant-container" class="absolute bottom-4 left-1/2 -translate-x-1/2">
+                        <svg id="plant-svg" width="80" height="80" viewBox="0 0 100 100" style="transform: scale(0.5);">
+                            <!-- 땅 -->
+                            <path d="M 0 90 Q 50 80, 100 90 L 100 100 L 0 100 Z" fill="#A0522D" opacity="0.4"/>
+                            <!-- 줄기 -->
+                            <path id="stem" d="M 50 90 V 60" stroke="#3E8B7B" stroke-width="5" stroke-linecap="round"/>
+                            <!-- 잎 1 -->
+                            <path id="leaf1" d="M 50 75 C 30 70, 35 50, 50 60" fill="#86C8BC" class="opacity-0"/>
+                            <!-- 잎 2 -->
+                            <path id="leaf2" d="M 50 75 C 70 70, 65 50, 50 60" fill="#86C8BC" class="opacity-0"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 최종 CTA 섹션 -->
+    <section id="cta" class="py-16 md:py-24 bg-brand-green-light">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-primary fade-in">당신만의 긍정의 정원을<br>지금 바로 가꾸어보세요.</h2>
+            <p class="mt-4 text-lg text-secondary max-w-xl mx-auto fade-in">에코블룸이 당신의 매일을 응원할게요.</p>
+            <div class="mt-8 fade-in">
+                <a href="#" class="btn-primary text-lg font-bold py-4 px-10 rounded-full inline-block">
+                    앱 다운로드하기
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- 푸터 -->
+<footer class="bg-white border-t">
+    <div class="container mx-auto px-6 py-8 text-center text-secondary text-sm">
+        <p>&copy; 2025 에코블룸. All rights reserved.</p>
+        <div class="mt-4 flex justify-center gap-6">
+            <a href="#" class="hover:text-brand-green-dark">이용약관</a>
+            <a href="#" class="hover:text-brand-green-dark">개인정보처리방침</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Hero 섹션 즉시 애니메이션 (페이지 로드 시)
+        setTimeout(() => {
+            document.querySelector('.hero-title')?.classList.add('visible');
+            document.querySelector('.hero-subtitle')?.classList.add('visible');
+        }, 100);
+
+        // Fade-in 애니메이션 관찰자 (스크롤 시)
+        const faders = document.querySelectorAll('.fade-in:not(.hero-title):not(.hero-subtitle)');
+        const appearOptions = {
+            threshold: 0.2,
+            rootMargin: "0px 0px -50px 0px"
+        };
+        const appearOnScroll = new IntersectionObserver(function(entries, appearOnScroll) {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    return;
+                } else {
+                    entry.target.classList.add('visible');
+                    appearOnScroll.unobserve(entry.target);
+                }
+            });
+        }, appearOptions);
+
+        faders.forEach(fader => {
+            appearOnScroll.observe(fader);
+        });
+
+        // 인터랙티브 데모 로직
+        const step1 = document.getElementById('demo-step-1');
+        const step2 = document.getElementById('demo-step-2');
+
+        const step1Content = document.getElementById('step1-content');
+        const step2Content = document.getElementById('step2-content');
+        const step3Content = document.getElementById('step3-content');
+
+        const choiceButtons = document.querySelectorAll('.demo-choice');
+        const affirmationText = document.getElementById('affirmation-text');
+        const speakButton = document.getElementById('speak-button');
+        const speakFeedback = document.getElementById('speak-feedback');
+
+        const plantSVG = document.getElementById('plant-svg');
+        const leaf1 = document.getElementById('leaf1');
+        const leaf2 = document.getElementById('leaf2');
+
+        let currentStep = 1;
+
+        const goToStep = (step) => {
+            step1Content.style.opacity = '0';
+            step2Content.style.opacity = '0';
+            step3Content.style.opacity = '0';
+
+            step1Content.style.transform = 'translateY(20px)';
+            step2Content.style.transform = 'translateY(20px)';
+            step3Content.style.transform = 'translateY(20px)';
+
+            if (step === 1) {
+                step1.classList.remove('hidden');
+                step2.classList.add('hidden');
+                step1Content.style.opacity = '1';
+                step1Content.style.transform = 'translateY(0)';
+                plantSVG.style.transform = 'scale(0.5)';
+                leaf1.classList.add('opacity-0');
+                leaf2.classList.add('opacity-0');
+                currentStep = 1;
+            } else if (step === 2) {
+                step1.classList.add('hidden');
+                step2.classList.remove('hidden');
+                speakFeedback.innerText = '';
+                speakFeedback.style.opacity = '0';
+                step2Content.style.opacity = '1';
+                step2Content.style.transform = 'translateY(0)';
+                plantSVG.style.transform = 'scale(0.8)';
+                currentStep = 2;
+            } else if (step === 3) {
+                step3Content.style.opacity = '1';
+                step3Content.style.transform = 'translateY(0)';
+                plantSVG.style.transform = 'scale(1.2)';
+                leaf1.classList.remove('opacity-0');
+                leaf2.classList.remove('opacity-0');
+                currentStep = 3;
+            }
+        }
+
+        choiceButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const affirmation = e.target.getAttribute('data-affirmation');
+                affirmationText.innerText = affirmation;
+                goToStep(2);
+            });
+        });
+
+        speakButton.addEventListener('click', () => {
+            if(currentStep !== 2) return;
+
+            speakFeedback.innerText = '듣고 있어요...';
+            speakFeedback.style.opacity = '1';
+
+            speakButton.style.transform = 'scale(1.1)';
+            speakButton.classList.add('animate-pulse');
+
+            setTimeout(() => {
+                speakFeedback.innerText = '정확해요! 잘했어요 ☀️';
+                speakButton.style.transform = 'scale(1)';
+                speakButton.classList.remove('animate-pulse');
+
+                setTimeout(() => {
+                    goToStep(3);
+                    setTimeout(() => goToStep(1), 4000);
+                }, 1500);
+
+            }, 2000);
+        });
+    });
+</script>
+</body>
+</html>
+
