@@ -179,6 +179,15 @@ $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 #### 🔧 Technical Changes
 - Leveraged sessionStorage caching to prevent API refetching, significantly reducing latency 📉
 
+### v1.1.1 (2025-10-14)
+#### ✨ Improvements
+- Modified BGM state persistence to maintain previous BGM settings even after positive phrase playback when users toggle BGM on/off
+- Added intro page after clicking "Start with Kakao" button
+- Added landing page after clicking "Start without login" button
+
+#### 🔧 Technical Changes
+- Fixed bug where previous sessionStorage data persisted when returning to home.html after changing questions or tones in My Page, causing outdated phrases to display
+
 <br><br>
 
 ## 📜 License
