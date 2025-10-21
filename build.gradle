@@ -7,6 +7,11 @@ plugins {
 group = 'com.checkmate'
 version = '0.0.1-SNAPSHOT'
 
+// plain.jar 생성 안 하기
+jar {
+    enabled = false
+}
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
