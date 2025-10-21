@@ -3,6 +3,7 @@ package com.checkmate.bub.global.auth.controller;
 import com.checkmate.bub.global.auth.dto.AuthResponseDto;
 import com.checkmate.bub.global.auth.service.AuthService;
 import com.checkmate.bub.global.util.EnvironmentUtil;
+import com.checkmate.bub.global.util.helper.CookieHelper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final EnvironmentUtil envUtil;
+    private final CookieHelper cookieHelper;
 
     @GetMapping("/callback")
     public ResponseEntity<Void> kakaoCallback(@RequestParam("code") String code, HttpServletResponse response) {
@@ -68,28 +70,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response) {
-        // 쿠키 삭제를 위해 만료시간을 0으로 설정
-        // Consistent with kakaoCallback: use isHttpEnvironment() for secure flag
-        boolean cookieSecure = !envUtil.isHttpEnvironment();
-
-        ResponseCookie expiredAccessCookie = ResponseCookie.from("accessToken", "")
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(0)
-                .build();
-        response.addHeader("Set-Cookie", expiredAccessCookie.toString());
-
-        ResponseCookie expiredRefreshCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(cookieSecure)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(0)
-                .build();
-        response.addHeader("Set-Cookie", expiredRefreshCookie.toString());
-
+        // 쿠키 삭제 (CookieHelper 사용)
+        cookieHelper.clearAuthCookies(response);
         return ResponseEntity.ok("Logout successful");
     }
     

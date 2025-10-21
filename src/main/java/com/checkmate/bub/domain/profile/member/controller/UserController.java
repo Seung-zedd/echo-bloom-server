@@ -7,6 +7,8 @@ import com.checkmate.bub.domain.profile.member.dto.MyPageCategoryResponseDto;
 import com.checkmate.bub.domain.profile.member.dto.ToneUpdateRequestDto;
 import com.checkmate.bub.domain.profile.member.dto.UserCategoryRequestDto;
 import com.checkmate.bub.domain.profile.member.service.UserService;
+import com.checkmate.bub.global.util.helper.CookieHelper;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ public class UserController {
 
     private final UserService userService;
     private final AffirmationService affirmationService;
+    private final CookieHelper cookieHelper;
 
     // 현재 로그인된 사용자 정보 조회 (JavaScript에서 사용)
     @GetMapping("/info")
@@ -83,9 +86,15 @@ public class UserController {
 
     // 회원 탈퇴
     @DeleteMapping("/withdraw")
-    public ResponseEntity<String> withdrawUser(Authentication authentication) {
+    public ResponseEntity<String> withdrawUser(Authentication authentication, HttpServletResponse response) {
         Long userId = Long.valueOf(authentication.getName());
+
+        // 1. 사용자 데이터 삭제 (UserService에서 처리)
         userService.withdrawUser(userId);
+
+        // 2. JWT 쿠키 삭제 (CookieHelper 사용)
+        cookieHelper.clearAuthCookies(response);
+
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 }
