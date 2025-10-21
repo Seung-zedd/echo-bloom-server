@@ -198,6 +198,16 @@ $ java -jar build/libs/echo-bloom-server-0.0.1-SNAPSHOT.jar
 #### 🔧 기술적 변경
 - sessionStorage의 캐싱 기능을 활용하여 API refetching을 방지함으로써 latency 대폭 하락📉
 
+### v1.1.1 (2025-10-14)
+#### ✨ 개선 사항
+- 사용자가 BGM을 키거나 끄면 긍정 문구를 발화한 이후에도 이전의 BGM 상태 유지하도록 변경
+- 카카오로 시작하기 버튼 클릭 -> intro 페이지 추가
+- "로그인 없이 시작할게요." 버튼 클릭 -> 랜딩 페이지 추가
+
+#### 🔧 기술적 변경
+- 마이 페이지에서 문제 또는 톤을 변경한 이후에 home.html로 돌아갈 때 이전의 sessionStorage에 데이터가 남아있어서 변경 전의 문구가 남아있는 부분 버그 개선
+
+
 <br><br>
 
 ## 📜 라이선스
