@@ -111,8 +111,9 @@ public class SecurityConfig {
             // 개발 환경: localhost 와일드카드 패턴 허용
             allowedOriginPatterns.add("http://localhost:*");
             allowedOriginPatterns.add("http://127.0.0.1:*");
-            // 개발 서버가 있다면 추가
-            // allowedOrigins.add("https://dev.echobloom.co.kr");
+            // AWS Lightsail 배포용 HTTPS origin 추가 (dev 프로필)
+            allowedOrigins.add("https://echobloom.co.kr");
+            allowedOrigins.add("https://www.echobloom.co.kr");
         } else {
             // 프로덕션 환경: HTTPS만 허용 (HTTP 제거)
             allowedOrigins.add("https://echobloom.co.kr");

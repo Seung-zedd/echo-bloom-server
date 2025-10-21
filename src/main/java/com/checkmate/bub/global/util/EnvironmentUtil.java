@@ -24,8 +24,9 @@ public class EnvironmentUtil {
 
 
     public boolean isHttpEnvironment() {
-        return Arrays.asList(environment.getActiveProfiles()).contains("local") ||
-               Arrays.asList(environment.getActiveProfiles()).contains("dev");
+        // Only local environment uses HTTP
+        // dev profile is now deployed on AWS Lightsail with HTTPS
+        return Arrays.asList(environment.getActiveProfiles()).contains("local");
     }
 
 }

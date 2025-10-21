@@ -165,7 +165,7 @@ function summarize(str, limit){
 /* ================= 링크 공유 관련 함수 =================== */
 (function(){
   // ★ 원하는 링크로 바꾸세요
-  const SHARE_URL = 'http://www.echobloom.co.kr';
+  const SHARE_URL = 'https://www.echobloom.co.kr';
 
   const card = document.getElementById('shareCard');
   const toast = document.getElementById('toast');
