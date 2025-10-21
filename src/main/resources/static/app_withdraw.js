@@ -27,8 +27,8 @@
         });
         if (!res.ok) throw new Error('탈퇴 요청 실패');
         
-        alert('탈퇴가 완료되었습니다.');
-        location.href = 'withdraw_done.html';
+        // Redirect to goodbye page (cookies already cleared by backend)
+        location.href = './withdraw_done.html';
       } catch (err) {
         alert('잠시 후 다시 시도해 주세요.');
         console.error(err);

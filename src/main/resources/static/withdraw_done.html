@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>간단 설문 시작</title>
+  <title>회원 탈퇴 완료</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
    <style>
-    @font-face { 
+    @font-face {
         font-family: 'HakgyoansimNadeuriTTF-B';
         src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimNadeuriTTF-B.woff2') format('woff2');
         font-weight: 700; font-style: normal;
@@ -44,7 +44,7 @@
       width:100%;
       /*flex:1;*/
       display:flex; align-items:center; justify-content:center;
-      flex: 1 0 auto; 
+      flex: 1 0 auto;
     }
     .view{
       width:100%;
@@ -59,7 +59,7 @@
 
 /* 상단 고정 헤더 */
 .screen-header{
-  position:absolute; 
+  position:absolute;
   top: max(5px, env(safe-area-inset-top));
   left:0; right:0;
   height:48px;
@@ -115,15 +115,6 @@
     background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M4 9.5l3 3 7-7" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>') center/14px 14px no-repeat;
   }
 
-/*  .screen-footer .wd-btn{
-    width: min(360px, 88%); height: 48px; border-radius: 999px;
-    font-size: 15px; font-weight: 700; letter-spacing: .2px;
-    border: 1px solid var(--btn-border);
-    background: var(--accent); color: #fff; border-color: transparent; cursor: pointer;
-    box-shadow: 0 6px 18px rgba(30,122,57,.25);
-    transition: all .2s ease;
-  } */
-
   .wd-btn{
   display:block;
    width: min(360px, 88%); height: 48px; line-height:48px; text-align:center;
@@ -171,23 +162,26 @@
           <strong id="userName">탈퇴를 완료했어요.</strong><br/>변화를 시작하고 싶을 때, 언제든 다시 와주세요.
         </p>
 
-        <img class="wd-illust" src="../img/flower.png" alt="노란 꽃봉오리">
+        <img class="wd-illust" src="./img/flower.png" alt="노란 꽃봉오리">
 
       </div>
     </div>
   </section>
 
 <footer class="screen-footer">
-    <footer class="screen-footer">
-    <a href="../main.html" class="wd-btn" role="button">홈으로</a>
-    </footer>
+    <a href="./main.html" class="wd-btn" role="button">홈으로</a>
 </footer>
 
 </div>
 
+<script>
+  // Auto-redirect to main.html after 4 seconds
+  // User data is already deleted by backend, cookies cleared
+  setTimeout(() => {
+    window.location.href = './main.html';
+  }, 4000);
+</script>
 
 </body>
-
-
 
 </html>

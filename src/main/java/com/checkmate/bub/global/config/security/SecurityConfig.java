@@ -80,7 +80,7 @@ public class SecurityConfig {
                     authorize
                             // 익명 사용자용 리소스 (메인 랜딩 페이지용만)
                             .requestMatchers("/", "/main.html", "/landing_page.html", "/app.js", "/*.css", "/img/**",
-                                    "/music/**", "/css/**", "/error", "/favicon.ico").permitAll()
+                                    "/music/**", "/css/**", "/error", "/favicon.ico", "/withdraw_done.html").permitAll()
 
                             // 인증된 사용자용 리소스 (로그인 후 접근 가능)
                             .requestMatchers("/intro_start.html", "/home.html", "/app_*.js", "/views/**").authenticated()
