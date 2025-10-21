@@ -101,11 +101,24 @@ public class AuthController {
 
     private String buildKakaoLogoutUrl() {
         String baseUrl = "https://kauth.kakao.com/oauth/logout";
-        // Build the full base URL for the logout redirect (main.html)
-        String logoutRedirectUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/main.html")
-                .build()
-                .toUriString();
+
+        // Extract base URL from existing redirect-uri configuration
+        // e.g., "https://echobloom.co.kr/auth/kakao/callback" → "https://echobloom.co.kr/main.html"
+        String redirectUri = authService.getRedirectUri();
+        String logoutRedirectUri;
+
+        // Parse the base URL (protocol + domain + port) from redirect-uri
+        int callbackIndex = redirectUri.indexOf("/auth/kakao/callback");
+        if (callbackIndex > 0) {
+            String baseUri = redirectUri.substring(0, callbackIndex);
+            logoutRedirectUri = baseUri + "/main.html";
+        } else {
+            // Fallback: use ServletUriComponentsBuilder
+            logoutRedirectUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/main.html")
+                    .build()
+                    .toUriString();
+        }
 
         return String.format("%s?client_id=%s&logout_redirect_uri=%s",
                 baseUrl,
