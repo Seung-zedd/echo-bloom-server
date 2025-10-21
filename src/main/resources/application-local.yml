@@ -28,8 +28,8 @@ spring:
       client:
         registration:
           kakao:
-            client-id: ${DEV_KAKAO_REST_API_KEY}
-            client-secret: ${DEV_KAKAO_CLIENT_SECRET}
+            client-id: ${LOCAL_KAKAO_REST_API_KEY}
+            client-secret: ${LOCAL_KAKAO_CLIENT_SECRET}
             redirect-uri: http://localhost:8080/auth/kakao/callback
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
@@ -42,12 +42,12 @@ jwt:
 
 # clova 설정
 clova:
-  api-key: ${DEV_CLOVA_API_KEY}
+  api-key: ${LOCAL_CLOVA_API_KEY}
 
   # clova speech recognition 설정
   speech-recognition:
-    client-id: ${DEV_CLOVA_CLIENT_ID}
-    client-secret: ${DEV_CLOVA_CLIENT_SECRET}
+    client-id: ${LOCAL_CLOVA_CLIENT_ID}
+    client-secret: ${LOCAL_CLOVA_CLIENT_SECRET}
 
 # Swagger 설정 (local에서만 활성화 – Apidog 동기화용)
 springdoc:
