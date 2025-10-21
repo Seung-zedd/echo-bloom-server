@@ -28,7 +28,7 @@
         if (!res.ok) throw new Error('탈퇴 요청 실패');
         
         // Redirect to goodbye page (cookies already cleared by backend)
-        location.href = './withdraw_done.html';
+        location.href = '/withdraw_done.html';
       } catch (err) {
         alert('잠시 후 다시 시도해 주세요.');
         console.error(err);
