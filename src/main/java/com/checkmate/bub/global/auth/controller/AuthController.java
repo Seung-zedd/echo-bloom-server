@@ -81,12 +81,6 @@ public class AuthController {
         return ResponseEntity.ok(kakaoLoginUrl);
     }
 
-    @GetMapping("/logout-url")
-    public ResponseEntity<String> getKakaoLogoutUrl() {
-        String kakaoLogoutUrl = buildKakaoLogoutUrl();
-        return ResponseEntity.ok(kakaoLogoutUrl);
-    }
-
     private String buildKakaoAuthUrl() {
         String baseUrl = "https://kauth.kakao.com/oauth/authorize";
         // AuthService에서 이미 주입받은 설정값 사용
@@ -97,32 +91,5 @@ public class AuthController {
                 authService.getClientId(),
                 authService.getRedirectUri(),
                 scope);
-    }
-
-    private String buildKakaoLogoutUrl() {
-        String baseUrl = "https://kauth.kakao.com/oauth/logout";
-
-        // Extract base URL from existing redirect-uri configuration
-        // e.g., "https://echobloom.co.kr/auth/kakao/callback" → "https://echobloom.co.kr/main.html"
-        String redirectUri = authService.getRedirectUri();
-        String logoutRedirectUri;
-
-        // Parse the base URL (protocol + domain + port) from redirect-uri
-        int callbackIndex = redirectUri.indexOf("/auth/kakao/callback");
-        if (callbackIndex > 0) {
-            String baseUri = redirectUri.substring(0, callbackIndex);
-            logoutRedirectUri = baseUri + "/main.html";
-        } else {
-            // Fallback: use ServletUriComponentsBuilder
-            logoutRedirectUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/main.html")
-                    .build()
-                    .toUriString();
-        }
-
-        return String.format("%s?client_id=%s&logout_redirect_uri=%s",
-                baseUrl,
-                authService.getClientId(),
-                logoutRedirectUri);
     }
 }

@@ -70,7 +70,6 @@ public class SecurityConfig {
                             // 카카오 로그인 처리 API 경로는 인증 없이 모두 허용
                             .requestMatchers("/auth/kakao/callback").permitAll()
                             .requestMatchers("/auth/kakao/login-url").permitAll()
-                            .requestMatchers("/auth/kakao/logout-url").permitAll()
                             .requestMatchers("/api/check-auth").permitAll();
 
                     // 테스트용 인증 API 허용 (local 환경에서만 공개)
