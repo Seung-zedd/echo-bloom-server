@@ -26,8 +26,12 @@
           credentials: 'include'
         });
         if (!res.ok) throw new Error('탈퇴 요청 실패');
-        
-        // Redirect to goodbye page (cookies already cleared by backend)
+
+        // Clear all frontend storage (affirmations, cached data, etc.)
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // Show goodbye page (withdraw_done.html will handle Kakao logout)
         location.href = '/withdraw_done.html';
       } catch (err) {
         alert('잠시 후 다시 시도해 주세요.');

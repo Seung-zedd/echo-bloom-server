@@ -169,17 +169,38 @@
   </section>
 
 <footer class="screen-footer">
-    <a href="./main.html" class="wd-btn" role="button">홈으로</a>
+    <button id="goHomeBtn" class="wd-btn" role="button">홈으로</button>
 </footer>
 
 </div>
 
 <script>
-  // Auto-redirect to main.html after 4 seconds
-  // User data is already deleted by backend, cookies cleared
-  setTimeout(() => {
-    window.location.href = './main.html';
-  }, 4000);
+  // Function to handle Kakao logout and redirect
+  async function handleKakaoLogout() {
+    try {
+      // Fetch Kakao logout URL from backend
+      const response = await fetch('/auth/kakao/logout-url');
+      if (response.ok) {
+        const kakaoLogoutUrl = await response.text();
+        // Redirect to Kakao logout (Kakao will then redirect to main.html)
+        window.location.href = kakaoLogoutUrl;
+      } else {
+        // Fallback: direct redirect to main.html
+        window.location.href = './main.html';
+      }
+    } catch (error) {
+      console.error('Failed to fetch Kakao logout URL:', error);
+      // Fallback: direct redirect to main.html
+      window.location.href = './main.html';
+    }
+  }
+
+  // Manual button click handler
+  document.getElementById('goHomeBtn').addEventListener('click', handleKakaoLogout);
+
+  // Auto-redirect to Kakao logout after 4 seconds
+  // This ensures complete logout from Kakao session, then redirects to main.html
+  setTimeout(handleKakaoLogout, 4000);
 </script>
 
 </body>

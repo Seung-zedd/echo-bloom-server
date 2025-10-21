@@ -80,16 +80,36 @@ public class AuthController {
         String kakaoLoginUrl = buildKakaoAuthUrl();
         return ResponseEntity.ok(kakaoLoginUrl);
     }
-    
+
+    @GetMapping("/logout-url")
+    public ResponseEntity<String> getKakaoLogoutUrl() {
+        String kakaoLogoutUrl = buildKakaoLogoutUrl();
+        return ResponseEntity.ok(kakaoLogoutUrl);
+    }
+
     private String buildKakaoAuthUrl() {
         String baseUrl = "https://kauth.kakao.com/oauth/authorize";
         // AuthService에서 이미 주입받은 설정값 사용
         String scope = "profile_nickname profile_image account_email";
-        
+
         return String.format("%s?client_id=%s&redirect_uri=%s&response_type=code&scope=%s",
-                baseUrl, 
-                authService.getClientId(), 
-                authService.getRedirectUri(), 
+                baseUrl,
+                authService.getClientId(),
+                authService.getRedirectUri(),
                 scope);
+    }
+
+    private String buildKakaoLogoutUrl() {
+        String baseUrl = "https://kauth.kakao.com/oauth/logout";
+        // Build the full base URL for the logout redirect (main.html)
+        String logoutRedirectUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/main.html")
+                .build()
+                .toUriString();
+
+        return String.format("%s?client_id=%s&logout_redirect_uri=%s",
+                baseUrl,
+                authService.getClientId(),
+                logoutRedirectUri);
     }
 }
